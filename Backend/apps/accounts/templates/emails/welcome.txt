@@ -1,0 +1,9 @@
+Bem-vindo ao Raven Universe, {{ display_name|default:"Herói" }}!
+
+Sua conta foi criada e verificada com sucesso.
+
+Acesse o portal e comece sua jornada: {{ site_url }}/play
+
+Se precisar de ajuda, entre em contato com o suporte.
+
+— Equipe Raven Universe
