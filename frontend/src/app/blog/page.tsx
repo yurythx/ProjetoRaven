@@ -183,7 +183,7 @@ export default async function BlogPage(props: {
                       <span className="rv-badge rv-badge-purple text-[8px]">{p.category_name}</span>
                     </div>
                   </Link>
-                  <div className="p-6 flex flex-col flex-1 gap-4">
+                  <div className="p-4 sm:p-6 flex flex-col flex-1 gap-4">
                     <div className="flex items-center justify-between rv-label text-[8px] text-[var(--rv-text-dim)]">
                       <span>{p.published_at ? new Date(p.published_at).toLocaleDateString() : "Rascunho"}</span>
                       <span>{p.read_time_minutes} min leitura</span>

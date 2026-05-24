@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -i 's/rv-display text-3xl sm:text-4xl md:text-5xl text-white/rv-display text-3xl sm:text-4xl md:text-5xl text-[var\\(--rv-text-primary\\)]/g; *)",
+      "Bash(sed -i 's/rv-display text-2xl sm:text-3xl text-white/rv-display text-2xl sm:text-3xl text-[var\\(--rv-text-primary\\)]/g; *)",
+      "Bash(sed -i 's/ text-white mb-4 sm:mb-6/ text-[var\\(--rv-text-primary\\)] mb-4 sm:mb-6/g; *)",
+      "Bash(sed -i 's/rv-display text-sm text-white.*Visualização/rv-display text-sm text-[var\\(--rv-text-primary\\)]>Visualização/g; *)",
+      "Bash(docker restart *)",
+      "Bash(Get-ChildItem \"c:\\\\Users\\\\yuri.menezes\\\\Desktop\\\\Projetos\\\\ProjetoRaven\\\\frontend\\\\public\")",
+      "Bash(xargs grep -l \"totp_enabled\\\\|is_2fa\\\\|totp\")"
+    ]
+  }
+}

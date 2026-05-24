@@ -98,7 +98,7 @@ export default function MePage() {
         <div className="rv-orb" style={{ width: "350px", height: "350px", bottom: "-5%", right: "-5%", background: "var(--rv-cyan)", opacity: 0.2, animationDelay: "2s" }} />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-5xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-5xl px-4 py-6 sm:py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <header className="mb-8 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
           <div className="flex items-center gap-4 sm:gap-5">
@@ -147,7 +147,7 @@ export default function MePage() {
           <form onSubmit={handleSaveProfile} className="rv-card p-6 space-y-4 md:col-span-2">
             <h3 className="rv-display text-xl text-[var(--rv-text-primary)] mb-2">Editar Perfil</h3>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs text-[var(--rv-text-dim)] uppercase tracking-wider mb-1">Nome de Exibição</label>
                 <input

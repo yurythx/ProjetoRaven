@@ -170,7 +170,7 @@ export default async function ForumTopicPage({
               {topic.category.name}
             </Link>
             <span>›</span>
-            <span className="text-[var(--rv-text-muted)] truncate max-w-[200px]">{topic.title}</span>
+            <span className="text-[var(--rv-text-muted)] truncate max-w-[140px] sm:max-w-[250px]">{topic.title}</span>
           </nav>
           <div className="flex items-center gap-3">
             <span className="rv-badge rv-badge-cyan text-[9px]">💬 {topic.reply_count} resp.</span>
