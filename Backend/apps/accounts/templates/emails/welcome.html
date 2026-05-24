@@ -1,0 +1,22 @@
+{% extends "emails/base.html" %}
+{% block subject %}Bem-vindo ao Raven Universe!{% endblock %}
+{% block content %}
+<h1>Sua jornada começa agora</h1>
+<p>Bem-vindo, <span class="highlight">{{ display_name|default:"Herói" }}</span>!</p>
+<p>Sua conta foi criada e verificada com sucesso. O mundo de Raven aguarda por você.</p>
+
+<div class="divider"></div>
+
+<p><strong style="color:#f0f0f8;">O que fazer agora?</strong></p>
+<p>
+  Acesse o portal, crie seu personagem, escolha sua facção e entre na batalha.
+  Cada decisão molda o destino das terras de Raven.
+</p>
+
+<div class="btn-wrap">
+  <a href="{{ site_url }}/play" class="btn">Entrar no Jogo</a>
+</div>
+
+<div class="divider"></div>
+<p style="font-size:13px;">Se você se cadastrou via login social (Google ou Discord), pode entrar diretamente sem precisar de senha.</p>
+{% endblock %}

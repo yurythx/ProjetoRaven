@@ -1,0 +1,151 @@
+# Production compose — use com:
+#   docker compose -f docker-compose.prod.yml up -d
+#
+# O Cloudflare Tunnel já roda no servidor como container separado.
+# Basta configurar as rotas no painel do Cloudflare apontando para:
+#
+#   yourdomain.com        →  http://localhost:3100   (Next.js frontend)
+#   yourdomain.com/api/   →  http://localhost:8100   (Django — opcional,
+#                                                      Next.js já proxia internamente)
+#
+# Portas configuráveis via Backend/.env.prod:
+#   FRONTEND_PORT=3100   (padrão — ajuste se já houver algo nessa porta)
+#   DJANGO_PORT=8100     (padrão — ajuste se já houver algo nessa porta)
+#
+# Nenhum outro serviço expõe porta no host (postgres, redis ficam isolados).
+# O nome "projetoraven" isola containers, redes e volumes do app existente.
+#
+# Requisitos antes do primeiro deploy:
+#   1. cp Backend/.env.prod.example  Backend/.env.prod  (preencher todos os valores)
+#   2. cp frontend/.env.prod.example frontend/.env.prod
+
+name: projetoraven
+
+services:
+  # ── Data layer (somente rede interna) ────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    env_file: ./Backend/.env.prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-projeto_raven}
+      POSTGRES_USER: ${POSTGRES_USER:-raven}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-raven}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-changeme}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-changeme}", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ── Backend ───────────────────────────────────────────────────────────────────
+  django:
+    build:
+      context: ./Backend
+      target: production
+    restart: unless-stopped
+    env_file: ./Backend/.env.prod
+    environment:
+      USE_SQLITE: "False"
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/1
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/2
+      CHANNEL_LAYER_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/3
+    volumes:
+      - media_files:/app/mediafiles
+      - static_files:/app/staticfiles
+    ports:
+      # Exposto apenas para o cloudflared rotear /api/ diretamente (opcional)
+      - "127.0.0.1:${DJANGO_PORT:-8100}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py seed_prod &&
+             python manage.py collectstatic --noinput &&
+             daphne -b 0.0.0.0 -p 8000 core.asgi:application"
+
+  celery:
+    build:
+      context: ./Backend
+      target: production
+    restart: unless-stopped
+    env_file: ./Backend/.env.prod
+    environment:
+      USE_SQLITE: "False"
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/1
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/2
+      CHANNEL_LAYER_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/3
+    volumes:
+      - media_files:/app/mediafiles
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A core worker -l warning --concurrency 2
+
+  celery-beat:
+    build:
+      context: ./Backend
+      target: production
+    restart: unless-stopped
+    env_file: ./Backend/.env.prod
+    environment:
+      USE_SQLITE: "False"
+      POSTGRES_HOST: postgres
+      REDIS_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/1
+      CELERY_BROKER_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/2
+      CHANNEL_LAYER_URL: redis://:${REDIS_PASSWORD:-changeme}@redis:6379/3
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A core beat -l warning --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
+  # ── Frontend (exposto ao cloudflared via host) ────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      target: runner
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+    restart: unless-stopped
+    env_file: ./frontend/.env.prod
+    environment:
+      NODE_ENV: production
+      INTERNAL_API_BASE_URL: http://django:8000
+    ports:
+      # O cloudflared roteia yourdomain.com → http://localhost:3100
+      - "127.0.0.1:${FRONTEND_PORT:-3100}:3000"
+    depends_on:
+      - django
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_files:
+  static_files:

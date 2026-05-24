@@ -1,0 +1,502 @@
+@import "tailwindcss";
+
+/* ===================================================================
+   PROJETO RAVEN — DESIGN SYSTEM
+   Dark-first, Django-inspired green palette
+=================================================================== */
+
+/* ── Dark theme (default) — black + green glass ─────────────────── */
+:root,
+html[data-theme="dark"] {
+  /* Core Palette — pure black base */
+  --rv-black:         #000000;
+  --rv-dark:          #060606;      /* page background: near-pure black */
+  --rv-surface:       #080e0b;      /* glass card fallback (no backdrop-filter support) */
+  --rv-surface-2:     #0f150d;      /* nested surface fallback */
+  --rv-border:        rgba(68, 183, 139, 0.20);
+  --rv-border-hover:  rgba(68, 183, 139, 0.45);
+
+  /* Accent — Django green */
+  --rv-accent:        #44b78b;
+  --rv-accent-2:      #2ba977;
+  --rv-accent-glow:   rgba(68, 183, 139, 0.28);
+
+  /* Secondary */
+  --rv-cyan:          #5ecfa5;
+  --rv-cyan-glow:     rgba(94, 207, 165, 0.20);
+
+  /* Danger */
+  --rv-red:           #ef4444;
+  --rv-red-glow:      rgba(239, 68, 68, 0.20);
+
+  /* Gold */
+  --rv-gold:          #f59e0b;
+  --rv-gold-glow:     rgba(245, 158, 11, 0.20);
+
+  /* Text */
+  --rv-text-primary:  #edfff6;
+  --rv-text-muted:    rgba(200, 255, 230, 0.62);
+  --rv-text-dim:      rgba(200, 255, 230, 0.32);
+
+  /* Semantic tokens (Tailwind compat) */
+  --background: var(--rv-dark);
+  --foreground: var(--rv-text-primary);
+
+  /* Fonts */
+  --font-display:  'Exo 2', sans-serif;
+  --font-body:     'Inter', sans-serif;
+  --font-mono:     'JetBrains Mono', monospace;
+}
+
+/* ── Light theme ────────────────────────────────────────────────── */
+html[data-theme="light"] {
+  /* Core Palette — esmeralda suave */
+  --rv-black:         #0a2e1d;
+  --rv-dark:          #dff0e8;   /* page bg — verde esmeralda visível */
+  --rv-surface:       #f4fbf7;   /* cards — branco com tint verde */
+  --rv-surface-2:     #e4ede9;   /* nested surfaces — claramente mais escuro */
+  --rv-border:        rgba(9, 46, 32, 0.20);   /* mais visível */
+  --rv-border-hover:  rgba(9, 46, 32, 0.45);
+
+  /* Accent — same Django green */
+  --rv-accent:        #44b78b;
+  --rv-accent-2:      #2ba977;
+  --rv-accent-glow:   rgba(68, 183, 139, 0.20);
+
+  /* Secondary — teal escuro para contraste */
+  --rv-cyan:          #0a6645;
+  --rv-cyan-glow:     rgba(10, 102, 69, 0.14);
+
+  /* Danger */
+  --rv-red:           #b91c1c;
+  --rv-red-glow:      rgba(185, 28, 28, 0.12);
+
+  /* Gold */
+  --rv-gold:          #92400e;
+  --rv-gold-glow:     rgba(146, 64, 14, 0.12);
+
+  /* Text — mais escuro para maior contraste */
+  --rv-text-primary:  #082016;
+  --rv-text-muted:    rgba(8, 32, 22, 0.70);
+  --rv-text-dim:      rgba(8, 32, 22, 0.45);
+
+  /* Semantic tokens */
+  --background: var(--rv-dark);
+  --foreground: var(--rv-text-primary);
+
+  /* Sombra para profundidade no modo claro */
+  --rv-shadow-sm:  0 1px 3px rgba(9, 46, 32, 0.12), 0 1px 2px rgba(9, 46, 32, 0.08);
+  --rv-shadow-md:  0 4px 12px rgba(9, 46, 32, 0.14), 0 2px 4px rgba(9, 46, 32, 0.08);
+}
+
+/* ── System preference fallback (no-JS / pre-hydration) ─────────── */
+@media (prefers-color-scheme: light) {
+  html:not([data-theme]) {
+    --rv-black:         #0a2e1d;
+    --rv-dark:          #dff0e8;
+    --rv-surface:       #f4fbf7;
+    --rv-surface-2:     #e4ede9;
+    --rv-border:        rgba(9, 46, 32, 0.20);
+    --rv-border-hover:  rgba(9, 46, 32, 0.45);
+    --rv-accent:        #44b78b;
+    --rv-accent-2:      #2ba977;
+    --rv-accent-glow:   rgba(68, 183, 139, 0.20);
+    --rv-cyan:          #0a6645;
+    --rv-cyan-glow:     rgba(10, 102, 69, 0.14);
+    --rv-red:           #b91c1c;
+    --rv-red-glow:      rgba(185, 28, 28, 0.12);
+    --rv-gold:          #92400e;
+    --rv-gold-glow:     rgba(146, 64, 14, 0.12);
+    --rv-text-primary:  #082016;
+    --rv-text-muted:    rgba(8, 32, 22, 0.70);
+    --rv-text-dim:      rgba(8, 32, 22, 0.45);
+    --background: var(--rv-dark);
+    --foreground: var(--rv-text-primary);
+    --rv-shadow-sm:  0 1px 3px rgba(9, 46, 32, 0.12), 0 1px 2px rgba(9, 46, 32, 0.08);
+    --rv-shadow-md:  0 4px 12px rgba(9, 46, 32, 0.14), 0 2px 4px rgba(9, 46, 32, 0.08);
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--rv-surface);
+  --color-card-foreground: var(--rv-text-primary);
+  --color-popover: var(--rv-surface-2);
+  --color-popover-foreground: var(--rv-text-primary);
+  --color-primary: var(--rv-accent);
+  --color-primary-foreground: var(--rv-text-primary);
+  --color-secondary: var(--rv-surface-2);
+  --color-secondary-foreground: var(--rv-text-primary);
+  --color-muted: var(--rv-surface);
+  --color-muted-foreground: var(--rv-text-muted);
+  --color-accent: var(--rv-surface-2);
+  --color-accent-foreground: var(--rv-text-primary);
+  --color-destructive: var(--rv-red);
+  --color-destructive-foreground: var(--rv-text-primary);
+  --color-border: var(--rv-border);
+  --color-input: var(--rv-border);
+  --color-ring: var(--rv-accent);
+  --font-sans: var(--font-display);
+  --font-mono: var(--font-mono);
+}
+
+/* ===================================================================
+   GLOBAL RESET & BASE
+=================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--rv-text-primary);
+  font-family: var(--font-display);
+  min-height: 100dvh;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ===================================================================
+   NOISE & SCANLINE TEXTURE (subtle depth effect)
+=================================================================== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+}
+
+html[data-theme="light"] body::before {
+  opacity: 0.2;
+}
+
+/* ===================================================================
+   SCROLLBAR
+=================================================================== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--rv-black); }
+::-webkit-scrollbar-thumb { background: var(--rv-accent); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--rv-accent-2); }
+
+html[data-theme="light"] ::-webkit-scrollbar-track { background: #c8ddd4; }
+html[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: var(--rv-accent-2); }
+
+/* ===================================================================
+   SELECTION
+=================================================================== */
+::selection {
+  background: rgba(68, 183, 139, 0.35);
+  color: #fff;
+}
+
+html[data-theme="light"] ::selection {
+  background: rgba(68, 183, 139, 0.25);
+  color: var(--rv-black);
+}
+
+/* ===================================================================
+   TYPOGRAPHY SCALE
+=================================================================== */
+.rv-display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 0.9;
+}
+
+.rv-label {
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+}
+
+/* ===================================================================
+   CARD / SURFACE SYSTEM
+=================================================================== */
+.rv-card {
+  background: var(--rv-surface);
+  border: 1px solid var(--rv-border);
+  border-radius: 1.5rem;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.rv-card:hover {
+  border-color: var(--rv-border-hover);
+  box-shadow: 0 0 24px var(--rv-accent-glow);
+}
+
+/* ── Glassmorphism — dark mode only ── */
+html[data-theme="dark"] .rv-card {
+  background: rgba(5, 14, 9, 0.48);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.50),
+    inset 0 1px 0 rgba(68, 183, 139, 0.08);
+}
+
+html[data-theme="dark"] .rv-card:hover {
+  background: rgba(5, 18, 11, 0.62);
+  border-color: rgba(68, 183, 139, 0.38);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.60),
+    0 0 24px rgba(68, 183, 139, 0.12),
+    inset 0 1px 0 rgba(68, 183, 139, 0.12);
+}
+
+.rv-card-glass {
+  background: rgba(5, 14, 9, 0.55);
+  border: 1px solid var(--rv-border);
+  border-radius: 1.5rem;
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(68, 183, 139, 0.08);
+}
+
+html[data-theme="light"] .rv-card-glass {
+  background: rgba(244, 251, 247, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Profundidade via sombra no modo claro */
+html[data-theme="light"] .rv-card {
+  box-shadow: var(--rv-shadow-sm, 0 1px 3px rgba(9,46,32,0.12));
+}
+
+html[data-theme="light"] .rv-card:hover {
+  box-shadow: var(--rv-shadow-md, 0 4px 12px rgba(9,46,32,0.14));
+}
+
+/* ===================================================================
+   BUTTONS
+=================================================================== */
+.rv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  border-radius: 0.75rem;
+  padding: 0 1.75rem;
+  height: 3rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.rv-btn-primary {
+  background: linear-gradient(135deg, var(--rv-accent), var(--rv-accent-2));
+  color: #fff;
+  border: 1px solid rgba(68, 183, 139, 0.4);
+  box-shadow: 0 0 20px var(--rv-accent-glow);
+}
+
+.rv-btn-primary:hover {
+  box-shadow: 0 0 36px var(--rv-accent-glow), 0 0 8px var(--rv-accent-glow);
+  transform: translateY(-1px);
+}
+
+.rv-btn-ghost {
+  background: rgba(68, 183, 139, 0.07);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--rv-text-primary);
+  border: 1px solid var(--rv-border);
+}
+
+.rv-btn-ghost:hover {
+  background: rgba(68, 183, 139, 0.16);
+  border-color: var(--rv-border-hover);
+}
+
+.rv-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ===================================================================
+   FORM INPUTS
+=================================================================== */
+.rv-input {
+  width: 100%;
+  height: 3rem;
+  background: rgba(5, 14, 9, 0.50);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--rv-border);
+  border-radius: 0.75rem;
+  padding: 0 1rem;
+  color: var(--rv-text-primary);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+html[data-theme="light"] .rv-input {
+  background: rgba(244, 251, 247, 0.90);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.rv-input::placeholder {
+  color: var(--rv-text-dim);
+}
+
+.rv-input:focus {
+  border-color: var(--rv-accent);
+  box-shadow: 0 0 0 3px var(--rv-accent-glow);
+}
+
+.rv-label-field {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rv-text-muted);
+  margin-bottom: 0.4rem;
+  display: block;
+}
+
+/* ===================================================================
+   GLOW ACCENTS
+=================================================================== */
+.rv-glow-purple { box-shadow: 0 0 40px var(--rv-accent-glow); }
+.rv-glow-cyan   { box-shadow: 0 0 40px var(--rv-cyan-glow);   }
+.rv-glow-gold   { box-shadow: 0 0 40px var(--rv-gold-glow);   }
+.rv-glow-red    { box-shadow: 0 0 40px var(--rv-red-glow);    }
+
+.rv-text-gradient {
+  background: linear-gradient(135deg, var(--rv-accent) 0%, var(--rv-cyan) 50%, var(--rv-accent-2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.rv-text-accent {
+  background: linear-gradient(135deg, var(--rv-accent), var(--rv-cyan));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===================================================================
+   DIVIDERS
+=================================================================== */
+.rv-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--rv-border), transparent);
+}
+
+/* ===================================================================
+   BADGE / PILL
+=================================================================== */
+.rv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.rv-badge-purple { background: rgba(68, 183, 139, 0.15); color: var(--rv-accent); border: 1px solid rgba(68, 183, 139, 0.25); }
+.rv-badge-cyan   { background: var(--rv-cyan-glow);      color: var(--rv-cyan);   border: 1px solid rgba(10, 102, 69, 0.20); }
+.rv-badge-gold   { background: var(--rv-gold-glow);      color: var(--rv-gold);   border: 1px solid rgba(245, 158, 11, 0.20); }
+.rv-badge-red    { background: var(--rv-red-glow);       color: var(--rv-red);    border: 1px solid rgba(239, 68, 68, 0.20); }
+
+/* ===================================================================
+   AMBIENT ORBS (decorative bg elements)
+=================================================================== */
+.rv-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(110px);
+  opacity: 0.42;
+  transition: opacity 0.4s ease;
+}
+
+html[data-theme="light"] .rv-orb {
+  opacity: 0.10;
+}
+
+/* ===================================================================
+   ANIMATIONS
+=================================================================== */
+@keyframes rv-pulse-glow {
+  0%, 100% { opacity: 0.42; }
+  50%       { opacity: 0.72; }
+}
+
+@keyframes rv-float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+@keyframes rv-scanline {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+.rv-animate-pulse-glow { animation: rv-pulse-glow 3s ease-in-out infinite; }
+.rv-animate-float      { animation: rv-float 4s ease-in-out infinite; }
+
+/* ===================================================================
+   LIGHT MODE — overrides de branco hardcoded
+   Converte padrões white/glass para equivalentes legíveis no claro
+=================================================================== */
+
+/* hover:text-white → text-primary */
+html[data-theme="light"] .hover\:text-white:hover { color: var(--rv-text-primary); }
+
+/* hover:bg-white/* → surface tint escuro */
+html[data-theme="light"] .hover\:bg-white\/5:hover   { background-color: rgba(8, 32, 22, 0.06); }
+html[data-theme="light"] .hover\:bg-white\/10:hover  { background-color: rgba(8, 32, 22, 0.09); }
+
+/* bg-white/opacity backgrounds (glass cards e containers) */
+html[data-theme="light"] .bg-white\/5             { background-color: rgba(8, 32, 22, 0.05); }
+html[data-theme="light"] .bg-white\/10            { background-color: rgba(8, 32, 22, 0.08); }
+html[data-theme="light"] .bg-white\/\[0\.03\]     { background-color: rgba(8, 32, 22, 0.03); }
+html[data-theme="light"] .bg-white\/\[0\.02\]     { background-color: rgba(8, 32, 22, 0.025); }
+html[data-theme="light"] .bg-white\/\[0\.01\]     { background-color: rgba(8, 32, 22, 0.01); }
+html[data-theme="light"] .bg-white\/\[0\.015\]    { background-color: rgba(8, 32, 22, 0.015); }
+
+/* border-white/opacity (glass borders) */
+html[data-theme="light"] .border-white\/5  { border-color: rgba(8, 32, 22, 0.08); }
+html[data-theme="light"] .border-white\/10 { border-color: rgba(8, 32, 22, 0.12); }
+html[data-theme="light"] .border-white\/20 { border-color: rgba(8, 32, 22, 0.18); }
+
+/* hover:border-white/* */
+html[data-theme="light"] .hover\:border-white\/20:hover { border-color: rgba(8, 32, 22, 0.25); }
+
+/* Prose (blog/fórum) — headings e strong no modo claro */
+html[data-theme="light"] .prose :where(h1,h2,h3,h4,h5,h6):not(:where([class~=not-prose] *)) {
+  color: var(--rv-text-primary);
+}
+html[data-theme="light"] .prose :where(strong):not(:where([class~=not-prose] *)) {
+  color: var(--rv-text-primary);
+}

@@ -1,0 +1,3 @@
+Seu código de verificação é: {{ code }}
+
+Este código expira em {{ expires_minutes }} minutos.

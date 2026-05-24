@@ -1,0 +1,14 @@
+{% extends "emails/base.html" %}
+{% block subject %}Confirme seu e-mail — Raven Universe{% endblock %}
+{% block content %}
+<h1>Confirme seu e-mail</h1>
+<p>Olá, <span class="highlight">{{ display_name|default:"Herói" }}</span>!</p>
+<p>Use o código abaixo para verificar seu e-mail e ativar sua conta no Raven Universe:</p>
+
+<div class="code-box">
+  <div class="code">{{ code }}</div>
+  <div class="code-hint">Expira em {{ expires_minutes }} minutos</div>
+</div>
+
+<p>Se você não criou uma conta no Raven Universe, ignore este e-mail.</p>
+{% endblock %}
