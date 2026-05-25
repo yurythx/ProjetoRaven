@@ -41,6 +41,6 @@ freezegun>=1.4.0
 requests>=2.31.0
 tinycss2>=1.5.1
 pyotp>=2.9.0
-qrcode>=7.4.2
+qrcode>=8.2
 pywebpush>=2.0.0
 nplusone>=1.0.0
