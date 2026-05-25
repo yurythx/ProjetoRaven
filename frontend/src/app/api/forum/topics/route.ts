@@ -7,7 +7,7 @@ import { getAccessToken } from "@/lib/auth-cookies";
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const qs = url.searchParams.toString();
-  const target = `/api/forum/public/topics/${qs ? `?${qs}` : ""}`;
+  const target = `/api/v1/forum/public/topics/${qs ? `?${qs}` : ""}`;
 
   const result = await backendFetch(target, {
     method: "GET",
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   }
 
   const payload = await req.json();
-  const result = await backendFetch("/api/forum/topics/", {
+  const result = await backendFetch("/api/v1/forum/topics/", {
     method: "POST",
     json: payload,
     accessToken: access,

@@ -9,7 +9,7 @@ from apps.common.models import UUIDModel
 
 
 class User(AbstractUser):
-    """Custom User model with UUID primary key and game-specific fields."""
+    """Custom User model with UUID primary key."""
 
     class Gender(models.TextChoices):
         MALE = "male", "Male"
@@ -34,12 +34,6 @@ class User(AbstractUser):
 
     bio = models.TextField(blank=True, default="")
     website = models.URLField(max_length=200, blank=True, default="")
-
-    hwid = models.CharField(
-        max_length=255,
-        blank=True,
-        verbose_name="Hardware ID",
-    )
 
     is_banned = models.BooleanField(default=False, db_index=True)
     ban_reason = models.TextField(blank=True)
@@ -106,8 +100,8 @@ class User(AbstractUser):
         return self.is_active and not self.is_banned
 
     @cached_property
-    def is_player(self):
-        return self.groups.filter(name="players").exists()
+    def is_member(self):
+        return self.groups.filter(name="members").exists()
 
     @cached_property
     def is_blog_editor(self):
@@ -183,7 +177,6 @@ class AdminAuditEvent(models.Model):
         RESET_PASSWORD = "reset_password", "Reset Password"
         CHANGE_GROUPS = "change_groups", "Change Groups"
         UPDATE_USER = "update_user", "Update User"
-        UNITY_TOKEN_ISSUED = "unity_token_issued", "Unity Token Issued"
         ADMIN_VERIFIED = "admin_verified", "Admin Verified"
         ADMIN_UNVERIFIED = "admin_unverified", "Admin Unverified"
 

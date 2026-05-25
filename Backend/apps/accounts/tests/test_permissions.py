@@ -11,15 +11,15 @@ def api_client():
 
 @pytest.fixture
 def setup_groups(db):
-    players, _ = Group.objects.get_or_create(name="players")
+    players, _ = Group.objects.get_or_create(name="members")
     editors, _ = Group.objects.get_or_create(name="blog_editors")
     moderators, _ = Group.objects.get_or_create(name="forum_moderators")
-    return {"players": players, "editors": editors, "moderators": moderators}
+    return {"members": players, "editors": editors, "moderators": moderators}
 
 @pytest.fixture
 def player_user(db, setup_groups):
     user = User.objects.create_user(username="player", email="player@test.com", password="password123")
-    user.groups.add(setup_groups["players"])
+    user.groups.add(setup_groups["members"])
     return user
 
 @pytest.fixture

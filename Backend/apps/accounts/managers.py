@@ -42,8 +42,8 @@ class UserManager(BaseUserManager):
     def get_active(self):
         return self.filter(is_active=True)
 
-    def get_players(self):
-        return self.filter(groups__name="players")
+    def get_members(self):
+        return self.filter(groups__name="members")
 
     def get_admins(self):
         return self.filter(is_staff=True)

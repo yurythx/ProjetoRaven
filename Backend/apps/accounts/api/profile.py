@@ -27,7 +27,7 @@ class MeView(APIView):
             profile["is_admin"] = bool(getattr(request.user, "is_admin", False))
             profile["is_staff"] = bool(getattr(request.user, "is_staff", False))
             profile["is_superuser"] = bool(getattr(request.user, "is_superuser", False))
-            profile["is_player"] = bool(getattr(request.user, "is_player", False))
+            profile["is_member"] = bool(getattr(request.user, "is_member", False))
             profile["is_blog_editor"] = bool(getattr(request.user, "is_blog_editor", False))
             profile["is_forum_moderator"] = bool(getattr(request.user, "is_forum_moderator", False))
             
@@ -53,22 +53,6 @@ class ProfileView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(UserProfileSerializer(user).data)
-
-
-class UnityTokenView(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsNotBanned]
-
-    def post(self, request):
-        client_id = (request.data.get("client_id") or "").strip()
-        ip_address, user_agent = get_ip_and_ua(request)
-
-        try:
-            result = ProfileService().generate_unity_token(
-                request.user, client_id, ip_address, user_agent
-            )
-            return Response(result, status=status.HTTP_200_OK)
-        except ValueError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class DeleteAccountView(APIView):
@@ -206,6 +190,7 @@ class PublicProfileView(APIView):
             "is_verified":   bool(getattr(user, "is_verified", False)),
             "avatar":        request.build_absolute_uri(user.avatar.url) if getattr(user, "avatar", None) else None,
             "bio":           getattr(user, "bio", None) or None,
+            "website":       getattr(user, "website", None) or None,
             "stats": {
                 "forum_topics":  topics_qs.count(),
                 "forum_replies": Reply.objects.filter(author=user).count(),

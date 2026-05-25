@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth-provider";
@@ -37,6 +38,12 @@ export default function BlogEditarPage() {
     enabled: Boolean(slug) && canEdit,
   });
 
+  React.useEffect(() => {
+    if (!isAuthLoading && !canEdit) {
+      router.replace("/blog");
+    }
+  }, [isAuthLoading, canEdit, router]);
+
   if (isAuthLoading || (canEdit && isArticleLoading)) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -45,10 +52,7 @@ export default function BlogEditarPage() {
     );
   }
 
-  if (!canEdit) {
-    router.replace("/blog");
-    return null;
-  }
+  if (!canEdit) return null;
 
   if (isError || !article) {
     return (

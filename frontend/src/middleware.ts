@@ -89,7 +89,7 @@ export async function middleware(req: NextRequest) {
 
   const needsAdmin = path.startsWith("/dashboard");
   const needsStrictAdmin = path.startsWith("/dashboard/usuarios");
-  const needsAuth = needsAdmin || path.startsWith("/game-data") || path.startsWith("/forum/new") || path === "/play" || path === "/me";
+  const needsAuth = needsAdmin || path.startsWith("/forum/new") || path === "/me";
   if (!needsAuth) return NextResponse.next();
 
   const access = req.cookies.get("raven_access")?.value ?? null;
@@ -159,5 +159,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/me", "/blog/novo", "/blog/comentarios", "/blog/:slug/editar", "/dashboard/:path*", "/game-data/:path*", "/forum/new/:path*", "/play"],
+  matcher: ["/me", "/blog/novo", "/blog/comentarios", "/blog/:slug/editar", "/dashboard/:path*", "/forum/new/:path*"],
 };

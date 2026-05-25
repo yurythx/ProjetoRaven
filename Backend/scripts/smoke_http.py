@@ -125,19 +125,6 @@ def main():
     if status != 200:
         sys.exit(4)
 
-    talents_url = f"{base}/api/v1/game-data/talents/"
-    status, payload = request_json(talents_url, headers=auth_headers)
-    if isinstance(payload, dict):
-        results = payload.get("results")
-        count = len(results) if isinstance(results, list) else payload.get("count", payload)
-    elif isinstance(payload, list):
-        count = len(payload)
-    else:
-        count = payload
-    print(f"[game-data:talents] {status} count={count}")
-    if status != 200:
-        sys.exit(5)
-
     print("OK")
 
 

@@ -37,7 +37,7 @@ function nextPath(nextUrl: string | null): string | null {
 
 async function fetchAllBlogPosts(): Promise<BlogPostListItem[]> {
   const all: BlogPostListItem[] = [];
-  let path: string | null = "/api/blog/public/posts/?page=1&page_size=100&ordering=-published_at";
+  let path: string | null = "/api/v1/blog/public/posts/?page=1&page_size=100&ordering=-published_at";
   for (let i = 0; i < 200 && path; i++) {
     const res = await backendFetch<Paginated<BlogPostListItem>>(path, {
       method: "GET",
@@ -53,7 +53,7 @@ async function fetchAllBlogPosts(): Promise<BlogPostListItem[]> {
 
 async function fetchAllForumCategories(): Promise<ForumCategoryListItem[]> {
   const all: ForumCategoryListItem[] = [];
-  let path: string | null = "/api/forum/public/categories/?page=1&page_size=100";
+  let path: string | null = "/api/v1/forum/public/categories/?page=1&page_size=100";
   for (let i = 0; i < 50 && path; i++) {
     const res = await backendFetch<Paginated<ForumCategoryListItem>>(path, {
       method: "GET",
@@ -69,7 +69,7 @@ async function fetchAllForumCategories(): Promise<ForumCategoryListItem[]> {
 
 async function fetchAllForumTopics(): Promise<ForumTopicListItem[]> {
   const all: ForumTopicListItem[] = [];
-  let path: string | null = "/api/forum/public/topics/?page=1&page_size=100";
+  let path: string | null = "/api/v1/forum/public/topics/?page=1&page_size=100";
   for (let i = 0; i < 200 && path; i++) {
     const res = await backendFetch<Paginated<ForumTopicListItem>>(path, {
       method: "GET",

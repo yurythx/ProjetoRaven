@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 import { BlogComments } from "@/components/blog-comments";
 import { BlogPostActions } from "@/app/blog/[slug]/blog-post-actions";
 import { JsonLd } from "@/components/json-ld";
+import { AboutAuthor } from "@/components/articles/about-author";
 import { backendFetch } from "@/lib/backend";
 import { getSiteBaseUrl } from "@/lib/env";
 import { sanitizeRichTextHtml } from "@/lib/sanitize-html";
@@ -21,6 +22,7 @@ type BlogPostListItem = {
 type BlogPostDetail = {
   id: string; title: string; slug: string; excerpt: string;
   content: string; author_name: string; author_username?: string | null; author_id?: string | null;
+  author_bio?: string | null; author_avatar_url?: string | null;
   status?: string; is_featured: boolean;
   published_at: string | null; created_at: string; updated_at: string;
   view_count: number; read_time_minutes: number;
@@ -32,7 +34,7 @@ type BlogPostDetail = {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const res = await backendFetch<BlogPostDetail>(`/api/blog/public/posts/${encodeURIComponent(slug)}/`, {
+  const res = await backendFetch<BlogPostDetail>(`/api/v1/blog/public/posts/${encodeURIComponent(slug)}/`, {
     method: "GET", cache: "force-cache", next: { revalidate: 60, tags: [`blog:post:${slug}`] },
   });
   if (!res.ok) return { title: "Post | RAVEN Blog" };
@@ -50,7 +52,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const res = await backendFetch<BlogPostDetail>(`/api/blog/public/posts/${encodeURIComponent(slug)}/`, {
+  const res = await backendFetch<BlogPostDetail>(`/api/v1/blog/public/posts/${encodeURIComponent(slug)}/`, {
     method: "GET", cache: "force-cache", next: { revalidate: 60, tags: [`blog:post:${slug}`] },
   });
 
@@ -147,8 +149,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         {/* ── Author + meta ── */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] flex items-center justify-center text-white font-black text-sm flex-shrink-0">
-              {post.author_name[0].toUpperCase()}
+            <div className="relative h-10 w-10 rounded-full flex-shrink-0 overflow-hidden bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)]">
+              {post.author_avatar_url ? (
+                <Image
+                  src={fixImageUrl(post.author_avatar_url) ?? ""}
+                  alt={post.author_name}
+                  fill
+                  sizes="40px"
+                  className="object-cover"
+                  unoptimized
+                />
+              ) : (
+                <span className="absolute inset-0 flex items-center justify-center text-white font-black text-sm">
+                  {post.author_name[0].toUpperCase()}
+                </span>
+              )}
             </div>
             <div>
               <div className="rv-label text-[10px] text-[var(--rv-text-dim)]">Autor</div>
@@ -158,6 +173,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 </Link>
               ) : (
                 <div className="text-sm font-semibold text-[var(--rv-text-primary)]">{post.author_name}</div>
+              )}
+              {post.author_bio && (
+                <p className="text-[11px] text-[var(--rv-text-dim)] mt-0.5 line-clamp-1 max-w-xs">
+                  {post.author_bio}
+                </p>
               )}
             </div>
           </div>
@@ -220,6 +240,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           />
         </article>
 
+        {/* ── Author card ── */}
+        {post.author_username && (
+          <AboutAuthor author={{
+            id: post.author_id ?? undefined,
+            username: post.author_username,
+            full_name: post.author_name,
+            avatar_url: post.author_avatar_url,
+            bio: post.author_bio,
+          }} />
+        )}
+
         {/* ── Author/Editor actions ── */}
         <BlogPostActions slug={post.slug} status={post.status} authorId={post.author_id ?? null} />
 
@@ -252,8 +283,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   className="rv-card group flex flex-col gap-3 p-4 hover:scale-[1.02] transition-all duration-200"
                 >
                   {r.image && (
-                    <div className="h-32 rounded-lg overflow-hidden">
-                      <Image src={fixImageUrl(r.image) ?? ""} alt={r.title} width={400} height={128} unoptimized className="w-full h-full object-cover" />
+                    <div className="relative h-32 rounded-lg overflow-hidden">
+                      <Image src={fixImageUrl(r.image) ?? ""} alt={r.title} fill sizes="(max-width: 640px) 100vw, 33vw" unoptimized className="object-cover" />
                     </div>
                   )}
                   <div className="flex-1">

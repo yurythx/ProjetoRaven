@@ -1,11 +1,16 @@
 """
-Production seed — creates only structural data (categories, tags).
+Production seed — creates only structural data (categories, tags) and optionally
+an initial admin user from environment variables.
 Safe to run multiple times (fully idempotent).
-Does NOT create users, fake posts, or topics with random data.
 
 Usage:
     python manage.py seed_prod
+
+Admin user vars (all three required to create the user):
+    DJANGO_ADMIN_EMAIL, DJANGO_ADMIN_USERNAME, DJANGO_ADMIN_PASSWORD
 """
+import os
+
 from django.core.management.base import BaseCommand
 
 
@@ -17,6 +22,7 @@ class Command(BaseCommand):
         self._seed_blog_categories()
         self._seed_blog_tags()
         self._seed_forum_categories()
+        self._ensure_admin_user()
         self.stdout.write(self.style.SUCCESS("=== Seed concluído com sucesso ==="))
 
     # ── Blog ──────────────────────────────────────────────────────────────────
@@ -130,3 +136,44 @@ class Command(BaseCommand):
                 created += 1
 
         self.stdout.write(f"  Forum categories: {created} criadas, {len(categories) - created} já existiam.")
+
+    # ── Admin user ────────────────────────────────────────────────────────────
+
+    def _ensure_admin_user(self):
+        email = os.environ.get("DJANGO_ADMIN_EMAIL", "").strip()
+        username = os.environ.get("DJANGO_ADMIN_USERNAME", "").strip()
+        password = os.environ.get("DJANGO_ADMIN_PASSWORD", "").strip()
+
+        if not (email and username and password):
+            self.stdout.write("  Admin user: DJANGO_ADMIN_* não configurado, pulando.")
+            return
+
+        from django.contrib.auth import get_user_model
+        from django.contrib.auth.models import Group
+
+        User = get_user_model()
+
+        user, created = User.objects.get_or_create(
+            email=email,
+            defaults={"username": username},
+        )
+
+        if created:
+            user.set_password(password)
+        elif not user.check_password(password):
+            user.set_password(password)
+
+        user.is_staff = True
+        user.is_superuser = True
+        user.is_active = True
+        user.is_verified = True
+        user.is_admin_verified = True
+        user.is_banned = False
+        user.save()
+
+        for group_name in ["members", "blog_editors", "forum_moderators"]:
+            group, _ = Group.objects.get_or_create(name=group_name)
+            user.groups.add(group)
+
+        action = "criado" if created else "atualizado"
+        self.stdout.write(f"  Admin user: {username} ({email}) {action}.")

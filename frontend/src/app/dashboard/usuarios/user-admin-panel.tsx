@@ -51,6 +51,13 @@ function fmtDateTime(v: string | null): string {
   return new Date(v).toLocaleString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
+const GROUP_LABELS: Record<string, string> = {
+  members: "Membros",
+  blog_editors: "Editores de Blog",
+  forum_moderators: "Moderadores",
+  admins: "Administradores",
+};
+
 const AUDIT_LABELS: Record<string, string> = {
   create_user: "Criar usuário", register_user: "Cadastro", email_verify_sent: "E-mail verificação",
   email_verified: "E-mail verificado", password_reset_sent: "Reset enviado",
@@ -245,7 +252,7 @@ function PermissoesTab({ user, groupList, groupsDraft, setGroupsDraft, adminDraf
                     type="checkbox" className="sr-only" checked={checked} disabled={locked}
                     onChange={() => !locked && toggleGroup(g)}
                   />
-                  <span className="text-xs text-[var(--rv-text-primary)]">{g}</span>
+                  <span className="text-xs text-[var(--rv-text-primary)]">{GROUP_LABELS[g] ?? g}</span>
                 </label>
               );
             })}
@@ -697,7 +704,7 @@ function CreateModal({ isOpen, onClose, groupList, isSuperuser, onRefresh }: {
                       </div>
                       <input type="checkbox" className="sr-only" checked={checked} disabled={locked}
                         onChange={() => { if (locked) return; setGroups((p) => checked ? p.filter((x) => x !== g) : [...p, g]); }} />
-                      <span className="text-xs text-[var(--rv-text-primary)]">{g}</span>
+                      <span className="text-xs text-[var(--rv-text-primary)]">{GROUP_LABELS[g] ?? g}</span>
                     </label>
                   );
                 })}
@@ -938,7 +945,7 @@ export function UserAdminPanel() {
                           {row.is_superuser && <span className="rv-badge rv-badge-gold text-[8px]">superuser</span>}
                           {row.is_staff && !row.is_superuser && <span className="rv-badge rv-badge-purple text-[8px]">staff</span>}
                           {(row.groups ?? []).map((g) => (
-                            <span key={g} className="rv-badge text-[8px]">{g}</span>
+                            <span key={g} className="rv-badge text-[8px]">{GROUP_LABELS[g] ?? g}</span>
                           ))}
                           {!row.is_superuser && !row.is_staff && (row.groups ?? []).length === 0 && (
                             <span className="text-[10px] text-[var(--rv-text-dim)]">—</span>

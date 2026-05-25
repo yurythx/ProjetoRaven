@@ -66,8 +66,8 @@ Backend/
 │   ├── accounts/       # usuários, JWT, OTP, auditoria, SMTP
 │   ├── blog/           # posts, categorias, comentários
 │   ├── forum/          # tópicos, replies, reações, moderação
-│   ├── game_data/      # templates públicos (itens, skills, mapas)
-│   └── game_logic/     # inventário, stats, quests, leaderboard, sessões
+│   ├── media/          # upload e gerenciamento de arquivos de mídia
+│   └── notifications/  # notificações push e in-app
 ├── keys/               # RSA private.pem + public.pem
 ├── requirements.txt
 ├── Dockerfile
@@ -87,5 +87,4 @@ Arquivo: `Backend/.env`
 | `DJANGO_SECRET_KEY` | `dev-local-change-me` | Segredo Django |
 | `POSTGRES_HOST` | `postgres` | Use `localhost` para dev local |
 | `REDIS_URL` | `redis://redis:6379/1` | Vazio desativa Redis |
-| `DJANGO_WEBHOOK_SECRET` | `CHANGE_ME` | HMAC para webhook do GameServer (deve ser forte e igual ao gameserver) |
 | `EMAIL_SETTINGS_ENCRYPTION_SALT` | `dev-local-email-salt` | Salt para criptografar credenciais SMTP |

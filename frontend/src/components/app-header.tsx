@@ -1,18 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
 const STATIC_LINKS = [
-  { href: "/blog",  label: "Blog",  icon: "✦", authOnly: false },
-  { href: "/forum", label: "Fórum", icon: "◈", authOnly: false },
+  { href: "/blog",  label: "Blog",  icon: "✦" },
+  { href: "/forum", label: "Fórum", icon: "◈" },
 ];
 
 // ── Main header ───────────────────────────────────────────────────────────────
@@ -21,23 +20,20 @@ export function AppHeader() {
   const { user, isLoading, logout } = useAuth();
   const { resolvedTheme } = useTheme();
   const pathname = usePathname();
-  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
   const u = (user ?? null) as Record<string, unknown> | null;
   const isLoggedIn = Boolean(user) && !isLoading;
-
-  const unreadCount = 0;
-
   const isAdmin = Boolean(u?.is_admin);
   const isEditor = Boolean(u?.is_blog_editor);
   const isMod = Boolean(u?.is_forum_moderator);
   const canSeeDashboard = (isAdmin || isEditor || isMod) && !isLoading;
   const heroName = String(u?.display_name || u?.username || "Usuário");
 
-  // Header transparente sobre fundo claro → trocar branco por preto
-  const lightTransparent = resolvedTheme === "light" && !scrolled && !menuOpen;
+  // True whenever the header renders over a dark background:
+  // dark theme (always), or light theme when scrolled/menu-open (forced dark bg).
+  const headerDark = resolvedTheme === "dark" || scrolled || menuOpen;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -47,14 +43,20 @@ export function AppHeader() {
 
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
-  // Cores adaptativas por contexto
-  const logoText    = lightTransparent ? "text-[var(--rv-black)]"        : "text-white";
-  const navInactive = lightTransparent
-    ? "text-[var(--rv-text-muted)] hover:text-[var(--rv-black)] hover:bg-black/5 border border-transparent"
-    : "text-[var(--rv-text-muted)] hover:text-white hover:bg-white/5 border border-transparent";
-  const mobileNavInactive = lightTransparent
-    ? "text-[var(--rv-text-muted)] hover:text-[var(--rv-black)] hover:bg-black/5 border border-transparent"
-    : "text-[var(--rv-text-muted)] hover:text-white hover:bg-white/5 border border-transparent";
+  // ── Adaptive color tokens ─────────────────────────────────────────────────
+
+  const logoText = headerDark ? "text-white" : "text-[var(--rv-black)]";
+  const logoSub  = headerDark ? "text-white/35" : "text-[var(--rv-text-dim)]";
+
+  const navLinkInactive = headerDark
+    ? "text-white/65 hover:text-white hover:bg-white/8 border border-transparent"
+    : "text-[var(--rv-text-muted)] hover:text-[var(--rv-black)] hover:bg-black/5 border border-transparent";
+
+  const iconBtnBase = headerDark
+    ? "border-white/20 bg-transparent hover:border-white/35 hover:bg-white/8"
+    : "border-[var(--rv-border)] bg-[var(--rv-surface)] hover:border-[var(--rv-border-hover)]";
+
+  const hamburgerLine = headerDark ? "bg-white/70" : "bg-[var(--rv-text-muted)]";
 
   return (
     <>
@@ -70,7 +72,7 @@ export function AppHeader() {
 
         <div className="mx-auto flex h-16 sm:h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-          {/* Logo */}
+          {/* ── Logo ── */}
           <Link href="/" className="group flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <div className="relative h-8 w-8 sm:h-9 sm:w-9">
               <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] opacity-80 group-hover:opacity-100 transition-opacity rv-glow-purple" />
@@ -79,12 +81,16 @@ export function AppHeader() {
               </div>
             </div>
             <div className="flex flex-col">
-              <span className={`rv-display text-base sm:text-lg leading-none tracking-wider transition-colors duration-300 ${logoText}`}>RAVEN</span>
-              <span className="rv-label text-[7px] sm:text-[9px] text-[var(--rv-text-dim)] tracking-[0.35em]">PORTAL</span>
+              <span className={`rv-display text-base sm:text-lg leading-none tracking-wider transition-colors duration-300 ${logoText}`}>
+                RAVEN
+              </span>
+              <span className={`rv-label text-[7px] sm:text-[9px] tracking-[0.35em] transition-colors duration-300 ${logoSub}`}>
+                PORTAL
+              </span>
             </div>
           </Link>
 
-          {/* Desktop nav */}
+          {/* ── Desktop nav ── */}
           <nav className="hidden md:flex items-center gap-1">
             {STATIC_LINKS.map((link) => {
               const active = pathname.startsWith(link.href);
@@ -95,10 +101,14 @@ export function AppHeader() {
                   className={`group flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 rv-label text-xs ${
                     active
                       ? "bg-[var(--rv-accent-glow)] text-[var(--rv-accent)] border border-[var(--rv-border-hover)]"
-                      : navInactive
+                      : navLinkInactive
                   }`}
                 >
-                  <span className={active ? "text-[var(--rv-accent)]" : "text-[var(--rv-text-dim)] group-hover:text-[var(--rv-accent)]"}>
+                  <span className={`transition-colors ${
+                    active
+                      ? "text-[var(--rv-accent)]"
+                      : `${headerDark ? "text-white/35" : "text-[var(--rv-text-dim)]"} group-hover:text-[var(--rv-accent)]`
+                  }`}>
                     {link.icon}
                   </span>
                   {link.label}
@@ -118,22 +128,24 @@ export function AppHeader() {
             )}
           </nav>
 
-          {/* Desktop auth */}
+          {/* ── Desktop auth ── */}
           <div className="hidden md:flex items-center gap-3">
-            <button
-              type="button"
-              aria-label="Buscar"
-              onClick={() => router.push("/search")}
-              className={`h-9 w-9 rounded-xl border border-[var(--rv-border)] flex items-center justify-center transition-all hover:border-[var(--rv-accent)]/40 hover:bg-[var(--rv-accent)]/10 ${pathname.startsWith("/search") ? "border-[var(--rv-accent)]/40 bg-[var(--rv-accent-glow)] text-[var(--rv-accent)]" : "text-[var(--rv-text-muted)]"}`}
-            >
-              <Search className="h-4 w-4" aria-hidden />
-            </button>
-            <ThemeToggle onDark={!lightTransparent} />
+
+            <ThemeToggle onDark={headerDark} />
+
             {isLoading ? (
               <div className="h-4 w-16 animate-pulse rounded-full bg-white/10" />
             ) : !user ? (
               <>
-                <Link href="/login" className="rv-btn rv-btn-ghost text-xs px-5 h-10">
+                {/* Entrar — explicit colors to stay visible on any bg */}
+                <Link
+                  href="/login"
+                  className={`rv-btn text-xs px-5 h-10 transition-all duration-200 ${
+                    headerDark
+                      ? "bg-transparent border border-white/25 text-white/90 hover:border-white/55 hover:bg-white/10 hover:text-white"
+                      : "bg-[var(--rv-accent)]/6 border border-[var(--rv-border)] text-[var(--rv-text-muted)] hover:border-[var(--rv-border-hover)] hover:text-[var(--rv-black)] hover:bg-[var(--rv-accent)]/12"
+                  }`}
+                >
                   Entrar
                 </Link>
                 <Link href="/register" className="rv-btn rv-btn-primary text-xs px-5 h-10">
@@ -142,28 +154,34 @@ export function AppHeader() {
               </>
             ) : (
               <div className="flex items-center gap-2">
+                {/* User pill */}
                 <Link
                   href="/me"
-                  className="rv-card flex items-center gap-2 px-3 py-1.5 hover:border-[var(--rv-border-hover)] transition-all"
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
+                    headerDark
+                      ? "bg-white/8 border-white/15 hover:border-white/30 hover:bg-white/12"
+                      : "bg-[var(--rv-surface)] border-[var(--rv-border)] hover:border-[var(--rv-border-hover)]"
+                  }`}
                 >
-                  <div className="relative h-6 w-6 flex-shrink-0">
-                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] flex items-center justify-center text-white font-black text-xs">
-                      {heroName[0].toUpperCase()}
-                    </div>
-                    {unreadCount > 0 && (
-                      <span className="absolute -top-1 -right-1 h-3.5 w-3.5 rounded-full bg-[var(--rv-red)] border border-[var(--rv-black)] flex items-center justify-center text-[8px] font-black text-white leading-none">
-                        {unreadCount > 9 ? "9+" : unreadCount}
-                      </span>
-                    )}
+                  <div className="h-6 w-6 rounded-full bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] flex items-center justify-center text-white font-black text-xs flex-shrink-0">
+                    {heroName[0].toUpperCase()}
                   </div>
-                  <span className="hidden lg:block text-sm font-semibold text-[var(--rv-text-primary)] max-w-[120px] truncate">
+                  <span className={`hidden lg:block text-sm font-semibold max-w-[120px] truncate transition-colors ${
+                    headerDark ? "text-white/90" : "text-[var(--rv-text-primary)]"
+                  }`}>
                     {heroName}
                   </span>
                 </Link>
+
+                {/* Logout */}
                 <button
                   type="button"
                   onClick={() => void logout()}
-                  className="h-9 w-9 rounded-xl border border-[var(--rv-border)] bg-[var(--rv-surface)] text-[var(--rv-text-muted)] hover:text-[var(--rv-red)] hover:border-[var(--rv-red)]/30 transition-all flex items-center justify-center"
+                  className={`h-9 w-9 rounded-xl border flex items-center justify-center transition-all hover:text-[var(--rv-red)] hover:border-[var(--rv-red)]/35 ${
+                    headerDark
+                      ? "border-white/20 bg-transparent text-white/55"
+                      : "border-[var(--rv-border)] bg-[var(--rv-surface)] text-[var(--rv-text-muted)]"
+                  }`}
                   title="Sair"
                 >
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -174,7 +192,7 @@ export function AppHeader() {
             )}
           </div>
 
-          {/* Mobile: right side */}
+          {/* ── Mobile: right side ── */}
           <div className="flex md:hidden items-center gap-2">
             {!isLoading && !user && (
               <Link href="/login" className="rv-btn rv-btn-primary text-xs px-4 h-9">
@@ -182,37 +200,35 @@ export function AppHeader() {
               </Link>
             )}
             {!isLoading && user && (
-              <Link href="/me" className="relative h-9 w-9 flex-shrink-0">
-                <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] flex items-center justify-center text-white font-black text-sm">
-                  {heroName[0].toUpperCase()}
-                </div>
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[var(--rv-red)] border border-[var(--rv-black)] flex items-center justify-center text-[8px] font-black text-white leading-none">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </Link>
+              <>
+                <Link href="/me" className="relative h-9 w-9 flex-shrink-0">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] flex items-center justify-center text-white font-black text-sm">
+                    {heroName[0].toUpperCase()}
+                  </div>
+                </Link>
+              </>
             )}
-            <ThemeToggle onDark={!lightTransparent} />
+            <ThemeToggle onDark={headerDark} />
+
             {/* Hamburger */}
             <button
               type="button"
               onClick={() => setMenuOpen((o) => !o)}
-              className="h-9 w-9 rounded-xl border border-[var(--rv-border)] bg-[var(--rv-surface)] flex items-center justify-center transition-all hover:border-[var(--rv-border-hover)]"
+              className={`h-9 w-9 rounded-xl border flex items-center justify-center transition-all ${iconBtnBase}`}
               aria-label={menuOpen ? "Fechar menu" : "Abrir menu"}
             >
               <div className="flex flex-col gap-1.5 w-4">
-                <span className={`h-[2px] bg-[var(--rv-text-muted)] rounded-full transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-[7px]" : ""}`} />
-                <span className={`h-[2px] bg-[var(--rv-text-muted)] rounded-full transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
-                <span className={`h-[2px] bg-[var(--rv-text-muted)] rounded-full transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-[7px]" : ""}`} />
+                <span className={`h-[2px] rounded-full transition-all duration-300 ${hamburgerLine} ${menuOpen ? "rotate-45 translate-y-[7px]" : ""}`} />
+                <span className={`h-[2px] rounded-full transition-all duration-300 ${hamburgerLine} ${menuOpen ? "opacity-0" : ""}`} />
+                <span className={`h-[2px] rounded-full transition-all duration-300 ${hamburgerLine} ${menuOpen ? "-rotate-45 -translate-y-[7px]" : ""}`} />
               </div>
             </button>
           </div>
         </div>
 
-        {/* Mobile dropdown menu */}
+        {/* ── Mobile dropdown — always on dark bg, so always white text ── */}
         <div className={`md:hidden overflow-hidden transition-all duration-300 ${menuOpen ? "max-h-[600px] opacity-100" : "max-h-0 opacity-0"}`}>
-          <nav className="border-t border-[var(--rv-border)] px-4 py-4 flex flex-col gap-1">
+          <nav className="border-t border-white/10 px-4 py-4 flex flex-col gap-1">
             {STATIC_LINKS.map((link) => {
               const active = pathname.startsWith(link.href);
               return (
@@ -222,25 +238,14 @@ export function AppHeader() {
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all rv-label text-xs ${
                     active
                       ? "bg-[var(--rv-accent-glow)] text-[var(--rv-accent)] border border-[var(--rv-border-hover)]"
-                      : mobileNavInactive
+                      : "text-white/65 hover:text-white hover:bg-white/8 border border-transparent"
                   }`}
                 >
-                  <span className={active ? "text-[var(--rv-accent)]" : "text-[var(--rv-text-dim)]"}>{link.icon}</span>
+                  <span className={active ? "text-[var(--rv-accent)]" : "text-white/35"}>{link.icon}</span>
                   {link.label}
                 </Link>
               );
             })}
-
-            <Link
-              href="/search"
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all rv-label text-xs ${
-                pathname.startsWith("/search")
-                  ? "bg-[var(--rv-accent-glow)] text-[var(--rv-accent)] border border-[var(--rv-border-hover)]"
-                  : mobileNavInactive
-              }`}
-            >
-              <Search className="h-4 w-4" aria-hidden /> Buscar
-            </Link>
 
             {canSeeDashboard && (
               <Link
@@ -261,6 +266,7 @@ export function AppHeader() {
                 <span>→</span> Sair
               </button>
             )}
+
             {!isLoading && !user && (
               <Link href="/register" className="rv-btn rv-btn-primary w-full h-11 mt-2 text-xs">
                 Criar Conta Grátis

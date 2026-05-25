@@ -15,7 +15,12 @@ export async function POST() {
   );
 
   if (!result.ok) {
-    return NextResponse.json(result.error.data, { status: result.error.status });
+    // backendFetch returns status 500 with a string message for network errors (ECONNREFUSED etc.)
+    // Use 503 in that case so clients can distinguish from a real Django 500.
+    const isNetworkError = result.error.status === 500 && typeof result.error.data === "string";
+    const httpStatus = isNetworkError ? 503 : result.error.status;
+    const body = isNetworkError ? { error: "Service unavailable" } : result.error.data;
+    return NextResponse.json(body, { status: httpStatus });
   }
 
   await setAuthCookies(result.data.access, result.data.refresh ?? refresh);

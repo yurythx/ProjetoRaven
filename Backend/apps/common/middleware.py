@@ -162,3 +162,33 @@ class StructuredLogger:
 def get_logger(name: str) -> StructuredLogger:
     """Factory para criar loggers estruturados."""
     return StructuredLogger(name)
+
+
+class AdminIPRestrictionMiddleware:
+    """Restringe acesso ao /admin/ e /api/schema/ por IP.
+
+    Ativo apenas quando ADMIN_ALLOWED_IPS está preenchido no settings.
+    Se vazio, não bloqueia nada (comportamento padrão).
+    """
+
+    _PROTECTED = ("/admin/", "/api/schema/")
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        allowed = getattr(settings, "ADMIN_ALLOWED_IPS", [])
+        if allowed:
+            for prefix in self._PROTECTED:
+                if request.path.startswith(prefix):
+                    if self._get_ip(request) not in allowed:
+                        from django.http import HttpResponseForbidden
+                        return HttpResponseForbidden("Access restricted.")
+                    break
+        return self.get_response(request)
+
+    def _get_ip(self, request) -> str:
+        xff = request.META.get("HTTP_X_FORWARDED_FOR", "")
+        if xff:
+            return xff.split(",")[0].strip()
+        return request.META.get("REMOTE_ADDR", "")

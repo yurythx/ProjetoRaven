@@ -21,7 +21,7 @@ export async function GET(req: Request) {
   const access = needsAuth ? await getAccessToken() : null;
   if (needsAuth && !access) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const target = needsAuth ? `/api/forum/replies/?${params.toString()}` : `/api/forum/public/replies/?${params.toString()}`;
+  const target = needsAuth ? `/api/v1/forum/replies/?${params.toString()}` : `/api/v1/forum/public/replies/?${params.toString()}`;
   const result = await backendFetch(target, {
     method: "GET",
     accessToken: access,
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
   }
 
   const payload = await req.json();
-  const result = await backendFetch("/api/forum/replies/", {
+  const result = await backendFetch("/api/v1/forum/replies/", {
     method: "POST",
     json: payload,
     accessToken: access,

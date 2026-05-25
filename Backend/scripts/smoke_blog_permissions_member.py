@@ -53,38 +53,38 @@ def main():
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@raven.gg")
     admin_pass = os.environ.get("ADMIN_PASS", "admin123")
 
-    player_email = os.environ.get("PLAYER_EMAIL", "player1@raven.gg")
-    player_pass = os.environ.get("PLAYER_PASS", "player123")
+    member_email = os.environ.get("MEMBER_EMAIL", "player@raven.gg")
+    member_pass = os.environ.get("MEMBER_PASS", "player123")
 
     admin_access = login(base, admin_email, admin_pass)
-    player_access = login(base, player_email, player_pass)
+    member_access = login(base, member_email, member_pass)
 
     admin_h = {"Authorization": f"Bearer {admin_access}"}
-    player_h = {"Authorization": f"Bearer {player_access}"}
+    member_h = {"Authorization": f"Bearer {member_access}"}
 
     status, _ = request_json(
         f"{base}/api/v1/blog/categories/",
         method="POST",
-        headers=player_h,
+        headers=member_h,
         body={"name": f"Nope {suffix}", "slug": f"nope-{suffix}"},
     )
-    assert_status("blog:player category write denied", status, (403, 401))
+    assert_status("blog:member category write denied", status, (403, 401))
 
     status, _ = request_json(
         f"{base}/api/v1/blog/tags/",
         method="POST",
-        headers=player_h,
+        headers=member_h,
         body={"name": f"Nope {suffix}", "slug": f"nope-{suffix}"},
     )
-    assert_status("blog:player tag write denied", status, (403, 401))
+    assert_status("blog:member tag write denied", status, (403, 401))
 
     status, _ = request_json(
         f"{base}/api/v1/blog/posts/",
         method="POST",
-        headers=player_h,
+        headers=member_h,
         body={"title": "Nope", "slug": f"nope-{suffix}", "excerpt": "x", "content": "<p>x</p>"},
     )
-    assert_status("blog:player post write denied", status, (403, 401))
+    assert_status("blog:member post write denied", status, (403, 401))
 
     status, public = request_json(f"{base}/api/v1/blog/public/posts/?page=1&page_size=5")
     assert_status("blog:public list", status, 200)
@@ -104,7 +104,7 @@ def main():
     if not isinstance(tag_results, list):
         raise RuntimeError("blog:public tags missing results")
 
-    # create a published post via admin, then ensure player can see it in public list
+    # create a published post via admin, then ensure member can see it in public list
     status, cats_admin = request_json(f"{base}/api/v1/blog/categories/", headers=admin_h)
     assert_status("blog:admin categories list", status, 200)
     category_id = (cats_admin[0] or {}).get("id") if isinstance(cats_admin, list) and cats_admin else None
@@ -135,13 +135,13 @@ def main():
     if not tag_id:
         raise RuntimeError("blog:missing tag id")
 
-    post_slug = f"player-can-read-{suffix}"
+    post_slug = f"member-can-read-{suffix}"
     status, _ = request_json(
         f"{base}/api/v1/blog/posts/",
         method="POST",
         headers=admin_h,
         body={
-            "title": f"Player can read {suffix}",
+            "title": f"Member can read {suffix}",
             "slug": post_slug,
             "excerpt": "e2e",
             "content": "<p>e2e</p>",
@@ -149,14 +149,14 @@ def main():
             "tags": [tag_id],
             "status": "draft",
             "is_featured": False,
-            "meta_title": f"Player can read {suffix}",
-            "meta_description": f"Player can read {suffix}",
+            "meta_title": f"Member can read {suffix}",
+            "meta_description": f"Member can read {suffix}",
             "meta_keywords": "e2e",
         },
     )
     assert_status("blog:admin post create", status, 201)
 
-    status, public = request_json(f"{base}/api/v1/blog/public/posts/?search=Player+can+read&page=1&page_size=5")
+    status, public = request_json(f"{base}/api/v1/blog/public/posts/?search=Member+can+read&page=1&page_size=5")
     assert_status("blog:public list no draft", status, 200)
     results = (public or {}).get("results") if isinstance(public, dict) else None
     if isinstance(results, list) and any(x.get("slug") == post_slug for x in results if isinstance(x, dict)):
@@ -165,29 +165,29 @@ def main():
     status, _ = request_json(f"{base}/api/v1/blog/posts/{post_slug}/publish/", method="POST", headers=admin_h)
     assert_status("blog:admin publish", status, 200)
 
-    status, public = request_json(f"{base}/api/v1/blog/public/posts/?search=Player+can+read&page=1&page_size=5")
+    status, public = request_json(f"{base}/api/v1/blog/public/posts/?search=Member+can+read&page=1&page_size=5")
     assert_status("blog:public list after publish", status, 200)
     results = (public or {}).get("results") if isinstance(public, dict) else None
     if not (isinstance(results, list) and any(x.get("slug") == post_slug for x in results if isinstance(x, dict))):
         raise RuntimeError("blog:public list missing published post")
 
-    # Player should be able to read via public detail
+    # Member should be able to read via public detail
     status, _ = request_json(f"{base}/api/v1/blog/public/posts/{post_slug}/")
     assert_status("blog:public detail", status, 200)
 
-    # Comment as player (auth) should be allowed, or rejected explicitly; accept 201/400 based on moderation rules
+    # Comment as member (auth) should be allowed, or rejected explicitly; accept 201/400 based on moderation rules
     status, _ = request_json(
         f"{base}/api/v1/blog/comments/",
         method="POST",
-        headers=player_h,
-        body={"post_slug": post_slug, "content": "comment from player", "name": "Player", "email": player_email},
+        headers=member_h,
+        body={"post_slug": post_slug, "content": "comment from member", "name": "Member", "email": member_email},
     )
-    assert_status("blog:player comment create", status, (201, 400))
+    assert_status("blog:member comment create", status, (201, 400))
 
     status, _ = request_json(f"{base}/api/v1/blog/posts/{post_slug}/archive/", method="POST", headers=admin_h)
     assert_status("blog:admin archive", status, 200)
 
-    status, public = request_json(f"{base}/api/v1/blog/public/posts/?search=Player+can+read&page=1&page_size=5")
+    status, public = request_json(f"{base}/api/v1/blog/public/posts/?search=Member+can+read&page=1&page_size=5")
     assert_status("blog:public list after archive", status, 200)
     results = (public or {}).get("results") if isinstance(public, dict) else None
     if isinstance(results, list) and any(x.get("slug") == post_slug for x in results if isinstance(x, dict)):
@@ -202,4 +202,3 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"FAIL: {e}")
         sys.exit(1)
-

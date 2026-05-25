@@ -1,9 +1,12 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BookOpen, MessageSquare, FileText, Calendar } from "lucide-react";
+import Image from "next/image";
+import { BookOpen, MessageSquare, FileText, Calendar, Globe } from "lucide-react";
+import { fixImageUrl } from "@/lib/utils";
 
 type RecentTopic = {
   slug: string;
@@ -27,6 +30,8 @@ type PublicProfile = {
   date_joined: string;
   is_verified: boolean;
   bio?: string;
+  website?: string | null;
+  avatar?: string | null;
   stats: {
     forum_topics: number;
     forum_replies: number;
@@ -53,6 +58,8 @@ export default function PublicProfilePage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = use(params);
+  const router = useRouter();
+  const [avatarError, setAvatarError] = useState(false);
 
   const { data: profile, isLoading, isError, error } = useQuery({
     queryKey: ["public-profile", username],
@@ -105,8 +112,20 @@ export default function PublicProfilePage({
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-10">
           <div className="relative h-20 w-20 flex-shrink-0">
             <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)]" />
-            <div className="absolute inset-[3px] rounded-[13px] bg-[var(--rv-surface)] flex items-center justify-center">
-              <span className="rv-display text-3xl text-[var(--rv-accent)]">{initial}</span>
+            <div className="absolute inset-[3px] rounded-[13px] bg-[var(--rv-surface)] overflow-hidden flex items-center justify-center">
+              {profile.avatar && !avatarError ? (
+                <Image
+                  src={fixImageUrl(profile.avatar) ?? ""}
+                  alt={profile.display_name}
+                  width={74}
+                  height={74}
+                  unoptimized
+                  className="w-full h-full object-cover"
+                  onError={() => setAvatarError(true)}
+                />
+              ) : (
+                <span className="rv-display text-3xl text-[var(--rv-accent)]">{initial}</span>
+              )}
             </div>
           </div>
 
@@ -135,6 +154,17 @@ export default function PublicProfilePage({
             {profile.bio && (
               <p className="text-sm text-[var(--rv-text-muted)] mt-2 max-w-lg">{profile.bio}</p>
             )}
+            {profile.website && (
+              <a
+                href={profile.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-[var(--rv-accent)] hover:underline mt-1"
+              >
+                <Globe className="h-3 w-3" />
+                {profile.website.replace(/^https?:\/\//, "")}
+              </a>
+            )}
           </div>
         </div>
 
@@ -162,10 +192,13 @@ export default function PublicProfilePage({
               </h2>
               <div className="space-y-2">
                 {profile.recent_topics.map((topic) => (
-                  <Link
+                  <div
                     key={topic.slug}
-                    href={`/forum/t/${topic.slug}`}
-                    className="rv-card p-4 flex items-start justify-between gap-4 hover:border-[var(--rv-border-hover)] transition-colors block"
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => router.push(`/forum/t/${topic.slug}`)}
+                    onKeyDown={(e) => e.key === "Enter" && router.push(`/forum/t/${topic.slug}`)}
+                    className="rv-card p-4 flex items-start justify-between gap-4 hover:border-[var(--rv-border-hover)] transition-colors cursor-pointer"
                   >
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-[var(--rv-text-primary)] truncate">{topic.title}</p>
@@ -185,7 +218,7 @@ export default function PublicProfilePage({
                       <MessageSquare className="h-3 w-3" />
                       {topic.reply_count}
                     </span>
-                  </Link>
+                  </div>
                 ))}
               </div>
             </section>

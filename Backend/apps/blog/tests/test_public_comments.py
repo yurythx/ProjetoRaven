@@ -22,7 +22,7 @@ class PublicCommentsTestCase(TestCase):
         )
 
     def test_public_comments_create_and_list(self):
-        players, _ = Group.objects.get_or_create(name="players")
+        players, _ = Group.objects.get_or_create(name="members")
         player = User.objects.create_user(email="player@example.com", password="Pass1234!", username="player")
         player.groups.add(players)
         player.is_verified = True
@@ -54,7 +54,7 @@ class PublicCommentsTestCase(TestCase):
             status=Post.Status.DRAFT,
             is_public=True,
         )
-        players, _ = Group.objects.get_or_create(name="players")
+        players, _ = Group.objects.get_or_create(name="members")
         player = User.objects.create_user(email="player2@example.com", password="Pass1234!", username="player2")
         player.groups.add(players)
         player.is_verified = True

@@ -63,7 +63,7 @@ class TopicServiceTestCase(TestCase):
     """Test cases for TopicService."""
 
     def setUp(self):
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
         self.user = User.objects.create_user(
             email="user@example.com",
             username="testuser",
@@ -236,7 +236,7 @@ class ReactionServiceTestCase(TestCase):
     """Test cases for ReactionService."""
 
     def setUp(self):
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
         self.user = User.objects.create_user(
             email="user@example.com",
             username="testuser",

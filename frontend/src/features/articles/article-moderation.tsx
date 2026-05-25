@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ConfirmDialog } from "@/components/rv-confirm-dialog"
-import { Check, Loader2, Search, X } from "lucide-react"
+import { Check, Loader2, Pencil, Search, X } from "lucide-react"
 import { toast } from "sonner"
 
 type ArticleLite = {
@@ -463,9 +463,14 @@ export function ArticleModeration() {
                       Autor: <span className="text-foreground/70">{a.author_name || "Desconhecido"}</span>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" asChild className="rounded-xl h-10 px-4 font-bold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/10">
-                    <Link href={`/dashboard/blog/${encodeURIComponent(a.slug)}/preview`}>Ver</Link>
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" asChild className="rounded-xl h-10 px-4 font-bold text-primary bg-primary/5 hover:bg-primary/10 border border-primary/10">
+                      <Link href={`/dashboard/blog/${encodeURIComponent(a.slug)}/preview`}>Ver</Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" asChild className="rounded-xl h-10 px-3 font-bold text-muted-foreground bg-white/5 hover:bg-white/10 border border-white/10">
+                      <Link href={`/blog/${encodeURIComponent(a.slug)}/editar`}><Pencil className="h-4 w-4" /></Link>
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="mt-6 flex gap-3">

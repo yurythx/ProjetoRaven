@@ -44,7 +44,7 @@ Interface web construída com **Next.js 15**, focada em performance, SEO e UX de
 
 | Rota | Descrição |
 |---|---|
-| `/me` | **Player Hub** — perfil, configurações 2FA, amigos |
+| `/me` | Perfil do usuário — configurações de conta, 2FA, amigos |
 
 ### Dashboard Admin
 

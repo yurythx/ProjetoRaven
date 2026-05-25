@@ -12,7 +12,7 @@ export async function GET(req: Request) {
   if (postSlug) params.set("post_slug", postSlug);
   if (post) params.set("post", post);
 
-  const result = await backendFetch(`/api/blog/public/comments/?${params.toString()}`, {
+  const result = await backendFetch(`/api/v1/blog/public/comments/?${params.toString()}`, {
     method: "GET",
     cache: "no-store",
   });
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
   if (!access) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   const payload = await req.json().catch(() => null);
 
-  const result = await backendFetch("/api/blog/public/comments/", {
+  const result = await backendFetch("/api/v1/blog/public/comments/", {
     method: "POST",
     json: payload ?? {},
     accessToken: access,

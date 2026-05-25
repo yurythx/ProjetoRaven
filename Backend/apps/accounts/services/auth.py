@@ -21,7 +21,7 @@ class AuthService:
     SRP: Handles authentication and registration operations.
     """
 
-    DEFAULT_GROUP = "players"
+    DEFAULT_GROUP = "members"
 
     def __init__(self, repository: UserRepository = None):
         self.repository = repository or DjangoUserRepository()
@@ -37,7 +37,6 @@ class AuthService:
         gender: Optional[str] = None,
         registration_ip: Optional[str] = None,
         user_agent: Optional[str] = None,
-        hwid: Optional[str] = None,
     ) -> User:
         from django.core.exceptions import ValidationError as DjangoValidationError
 
@@ -60,9 +59,6 @@ class AuthService:
             except DjangoValidationError as e:
                 raise ValueError(str(e))
 
-        if hwid:
-            hwid = CustomValidators.validate_hwid(hwid)
-
         user = User(
             email=email,
             username=username,
@@ -70,7 +66,6 @@ class AuthService:
             birth_date=birth_date,
             gender=gender or User.Gender.NOT_SPECIFIED,
             registration_ip=registration_ip or "",
-            hwid=hwid or "",
             verification_token=secrets.token_urlsafe(32),
             verification_token_created_at=timezone.now(),
             is_active=False,
@@ -111,7 +106,6 @@ class AuthService:
         self,
         email: str,
         password: str,
-        hwid: Optional[str] = None,
         ip_address: Optional[str] = None,
     ) -> Optional[User]:
         user = self.repository.get_by_email_case_insensitive(email)
@@ -124,22 +118,13 @@ class AuthService:
 
         if not user.is_active_and_not_banned:
             return None
-            
+
         if not (user.is_verified or user.is_admin_verified) and not user.is_staff and not user.is_superuser:
             return None
 
-        if hwid and user.hwid and user.hwid != hwid:
-            return None
-
-        update_fields = ["last_login", "last_login_ip"]
         user.last_login = timezone.now()
         user.last_login_ip = ip_address
-
-        if hwid and not user.hwid:
-            user.hwid = hwid
-            update_fields.append("hwid")
-
-        user.save(update_fields=update_fields)
+        user.save(update_fields=["last_login", "last_login_ip"])
         return user
 
     def send_verification_email(

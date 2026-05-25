@@ -22,12 +22,11 @@ class HealthReadyView(APIView):
             "db": self._check_database(),
             "cache": self._check_cache(),
             "redis": self._check_redis(),
-            "celery": self._check_celery(),
         }
-        
+
         all_ok = all(checks.values())
         status_code = 200 if all_ok else 503
-        
+
         return Response(
             {
                 "status": "ok" if all_ok else "degraded",
@@ -36,7 +35,7 @@ class HealthReadyView(APIView):
             },
             status=status_code,
         )
-    
+
     def _check_database(self) -> bool:
         try:
             conn = connections["default"]
@@ -44,7 +43,7 @@ class HealthReadyView(APIView):
             return True
         except Exception:
             return False
-    
+
     def _check_cache(self) -> bool:
         try:
             cache = caches["default"]
@@ -53,22 +52,13 @@ class HealthReadyView(APIView):
             return v == "1"
         except Exception:
             return False
-    
+
     def _check_redis(self) -> bool:
         try:
             from django_redis import get_redis_connection
             r = get_redis_connection("default")
             r.ping()
             return True
-        except Exception:
-            return False
-    
-    def _check_celery(self) -> bool:
-        try:
-            from celery import current_app
-            inspect = current_app.control.inspect()
-            stats = inspect.stats()
-            return stats is not None and len(stats) > 0
         except Exception:
             return False
 
@@ -84,7 +74,6 @@ class HealthDetailedView(APIView):
             "db": self._check_database(),
             "cache": self._check_cache(),
             "redis": self._check_redis(),
-            "celery": self._check_celery(),
             "smtp": self._check_smtp(),
         }
         
@@ -130,15 +119,6 @@ class HealthDetailedView(APIView):
             r = get_redis_connection("default")
             r.ping()
             return True
-        except Exception:
-            return False
-    
-    def _check_celery(self) -> bool:
-        try:
-            from celery import current_app
-            inspect = current_app.control.inspect()
-            stats = inspect.stats()
-            return stats is not None and len(stats) > 0
         except Exception:
             return False
     

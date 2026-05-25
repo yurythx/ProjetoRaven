@@ -32,21 +32,26 @@ class Command(BaseCommand):
             admin.is_verified = True
             admin.is_staff = True
             admin.is_superuser = True
+            admin.is_active = True
             admin.set_password('admin123')
-            admin.save(update_fields=['is_verified', 'is_staff', 'is_superuser', 'password'])
+            admin.save(update_fields=['is_verified', 'is_staff', 'is_superuser', 'is_active', 'password'])
             self.stdout.write(self.style.SUCCESS('Admin updated: admin@raven.gg / admin123'))
 
+        # Clear login lockout for admin (accumulated from E2E test failures)
+        from django.core.cache import cache
+        cache.delete('login_failures:admin@raven.gg')
+
         # Ensure groups exist (used across permissions/UI flags)
-        for name in ["players", "blog_editors", "forum_moderators"]:
+        for name in ["members", "blog_editors", "forum_moderators"]:
             Group.objects.get_or_create(name=name)
 
         # 2. Create Player user (E2E tests depend on this account)
-        players_group = Group.objects.get(name="players")
+        members_group = Group.objects.get(name="members")
         player, created = User.objects.get_or_create(
             email='player@raven.gg',
             defaults={
                 'username': 'player',
-                'display_name': 'Aventureiro',
+                'display_name': 'Membro',
                 'is_staff': False,
                 'is_superuser': False,
                 'is_verified': True,
@@ -56,21 +61,24 @@ class Command(BaseCommand):
         if created:
             player.set_password('player123')
             player.save()
-            player.groups.add(players_group)
+            player.groups.add(members_group)
             self.stdout.write(self.style.SUCCESS('Player created: player@raven.gg / player123'))
         else:
             player.is_verified = True
+            player.is_active = True
             player.set_password('player123')
-            player.save(update_fields=['is_verified', 'password'])
+            player.save(update_fields=['is_verified', 'is_active', 'password'])
             if not player.groups.filter(name='players').exists():
-                player.groups.add(players_group)
+                player.groups.add(members_group)
             self.stdout.write(self.style.SUCCESS('Player updated: player@raven.gg / player123'))
+
+        cache.delete('login_failures:player@raven.gg')
 
         # 2. Create Blog Categories
         blog_cats_data = [
-            ('Patch Notes', 'Notas de atualização e mudanças de balanceamento.'),
-            ('Lore', 'Histórias e contos do universo de Raven.'),
-            ('Eventos', 'Fique por dentro dos eventos temporários.'),
+            ('Notícias', 'Novidades e atualizações da plataforma.'),
+            ('Tutoriais', 'Guias e artigos educativos da comunidade.'),
+            ('Eventos', 'Fique por dentro dos eventos e iniciativas.'),
         ]
         blog_categories = []
         for name, desc in blog_cats_data:
@@ -84,10 +92,10 @@ class Command(BaseCommand):
         if BlogPost.objects.count() < 5:
             for i in range(1, 6):
                 post = BlogPost.objects.create(
-                    title=f'Atualização do Servidor v1.{i}',
-                    slug=f'patch-notes-v1-{i}',
-                    excerpt=f'Resumo das principais mudanças da versão 1.{i}. Novos itens e balanceamento de classes.',
-                    content=f'<h1>O que há de novo?</h1><p>Nesta atualização, focamos em melhorar a estabilidade e adicionar novos desafios.</p><ul><li>Novo boss: Dragão das Sombras</li><li>Ajuste de dano para Arqueiros</li><li>Correção de bugs na interface do fórum</li></ul>',
+                    title=f'Bem-vindo à Comunidade Raven #{i}',
+                    slug=f'bem-vindo-comunidade-{i}',
+                    excerpt=f'Post de exemplo número {i} da plataforma. Explore o blog e o fórum.',
+                    content=f'<h1>Olá, comunidade!</h1><p>Este é um post de exemplo para popular o ambiente de desenvolvimento.</p><ul><li>Blog com categorias e tags</li><li>Fórum com tópicos e respostas</li><li>Sistema de moderação</li></ul>',
                     author=admin,
                     category=random.choice(blog_categories),
                     status=BlogPost.Status.PUBLISHED,
@@ -98,9 +106,9 @@ class Command(BaseCommand):
 
         # 4. Create Forum Categories
         forum_cats_data = [
-            ('Estratégia', 'estrategia', 'Discussões sobre builds e guias.', '⚔'),
-            ('Bug Report', 'bug-report', 'Relate erros encontrados no jogo.', '🐛'),
             ('Geral', 'geral', 'Bate-papo livre sobre qualquer assunto.', '💬'),
+            ('Suporte', 'suporte', 'Dúvidas e problemas com a plataforma.', '🛠'),
+            ('Apresentações', 'apresentacoes', 'Apresente-se para a comunidade.', '👋'),
         ]
         forum_categories = []
         for name, slug, desc, icon in forum_cats_data:
@@ -114,15 +122,15 @@ class Command(BaseCommand):
         if Topic.objects.count() < 5:
             for i in range(1, 6):
                 topic = Topic.objects.create(
-                    title=f'Guia Completo para Iniciantes #{i}',
-                    slug=f'guia-iniciantes-{i}',
-                    content='Este é um guia básico para quem está começando sua jornada em Raven.',
+                    title=f'Tópico de Exemplo #{i}',
+                    slug=f'topico-exemplo-{i}',
+                    content='Este é um tópico de exemplo para popular o ambiente de desenvolvimento.',
                     author=admin,
                     category=random.choice(forum_categories),
                     last_reply_at=timezone.now()
                 )
                 Reply.objects.create(
-                    content='Muito obrigado pelo guia, ajudou bastante!',
+                    content='Obrigado por compartilhar! Muito útil.',
                     author=admin,
                     topic=topic
                 )

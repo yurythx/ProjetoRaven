@@ -10,7 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { Users, Sword, BookOpen, Trophy, Store, Shield } from "lucide-react";
+import { Users, BookOpen } from "lucide-react";
 
 type AnalyticsData = {
   users: {
@@ -22,22 +22,11 @@ type AnalyticsData = {
     banned: number;
     online_today: number;
   };
-  game: {
-    total_characters: number;
-    active_sessions: number;
-    sessions_today: number;
-    total_guilds: number;
-    total_guild_members: number;
-    marketplace_active: number;
-    marketplace_sold: number;
-    daily_claims_today: number;
-  };
   content: {
     blog_published: number;
     forum_topics: number;
     forum_replies_today: number;
   };
-  top_players: { character_name: string; score: number }[];
   registrations_chart: { date: string; users: number }[];
   generated_at: string;
 };
@@ -177,35 +166,6 @@ export default function AnalyticsPage() {
             </ResponsiveContainer>
           </section>
 
-          {/* Game stats */}
-          {data.game && (
-            <section>
-              <h2 className="text-xs uppercase tracking-widest text-[var(--rv-text-muted)] mb-4 flex items-center gap-2">
-                <Sword className="h-3 w-3" /> Jogo
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard label="Personagens"     value={data.game.total_characters}   icon={Sword} />
-                <StatCard label="Sessões ativas"  value={data.game.active_sessions}    icon={Sword} accent="var(--rv-cyan)" sub={`${data.game.sessions_today} hoje`} />
-                <StatCard label="Guildas"         value={data.game.total_guilds}        icon={Shield} sub={`${data.game.total_guild_members} membros`} />
-                <StatCard label="Rewards hoje"    value={data.game.daily_claims_today} icon={Trophy} accent="var(--rv-gold)" sub="recompensas diárias" />
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mt-4">
-                <StatCard
-                  label="Marketplace ativo"
-                  value={data.game.marketplace_active}
-                  icon={Store}
-                  sub={`${data.game.marketplace_sold} vendas totais`}
-                />
-                <StatCard
-                  label="Verificação"
-                  value={`${Math.round((data.users.verified / Math.max(data.users.total, 1)) * 100)}%`}
-                  icon={Shield}
-                  sub="e-mails verificados"
-                />
-              </div>
-            </section>
-          )}
-
           {/* Content stats */}
           {data.content && (
             <section>
@@ -220,32 +180,6 @@ export default function AnalyticsPage() {
             </section>
           )}
 
-          {/* Top players */}
-          {data.top_players.length > 0 && (
-            <section className="rv-card p-6">
-              <h2 className="text-xs uppercase tracking-widest text-[var(--rv-text-muted)] mb-5 flex items-center gap-2">
-                <Trophy className="h-3 w-3" /> Top Jogadores (Leaderboard)
-              </h2>
-              <ol className="space-y-2">
-                {data.top_players.map((p, i) => (
-                  <li key={p.character_name} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-3">
-                      <span
-                        className="rv-display text-lg w-6 text-center"
-                        style={{
-                          color: i === 0 ? "var(--rv-gold)" : i === 1 ? "#aaa" : i === 2 ? "#cd7f32" : "var(--rv-text-dim)",
-                        }}
-                      >
-                        {i + 1}
-                      </span>
-                      <span className="text-[var(--rv-text-primary)]">{p.character_name}</span>
-                    </div>
-                    <span className="text-[var(--rv-text-muted)] text-xs">{p.score.toLocaleString()} pts</span>
-                  </li>
-                ))}
-              </ol>
-            </section>
-          )}
         </div>
       )}
     </div>

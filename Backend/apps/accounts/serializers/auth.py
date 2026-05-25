@@ -81,8 +81,6 @@ class UserLoginSerializer(serializers.Serializer):
         write_only=True,
         style={"input_type": "password"},
     )
-    hwid = serializers.CharField(required=False, allow_blank=True, write_only=True)
-
     def validate(self, attrs):
         from apps.accounts.services import AuthService
         from ..utils.lockout import is_locked_out, record_failure, clear_failures
@@ -107,7 +105,6 @@ class UserLoginSerializer(serializers.Serializer):
         user = AuthService().authenticate(
             email=raw_email,
             password=raw_password,
-            hwid=attrs.get("hwid"),
             ip_address=self.context.get("ip_address"),
         )
 

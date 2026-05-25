@@ -42,13 +42,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     })();
   }, [refreshSession]);
 
-  // Proactively renew the access token every 25 min (token expires in 30 min)
+  // Proactively renew the access token every 25 min (token expires in 30 min).
+  // Skip when not logged in; ignore 503 (backend temporarily unavailable) silently.
   useEffect(() => {
     const id = setInterval(async () => {
-      await fetch("/api/auth/refresh", { method: "POST" });
+      if (!user) return;
+      try {
+        const res = await fetch("/api/auth/refresh", { method: "POST" });
+        if (res.status === 401) setUser(null);
+      } catch {
+        // Network error — will retry next interval
+      }
     }, 25 * 60 * 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [user]);
 
   const login = useCallback(async (payload: Record<string, unknown>): Promise<LoginResult> => {
     const result = await jsonFetch<{ user?: AuthUser; totp_required?: true; totp_token?: string } | null>(

@@ -42,10 +42,6 @@ class UserAdmin(BaseUserAdmin):
             {"fields": ("email", "display_name", "birth_date", "gender")},
         ),
         (
-            "Game Info",
-            {"fields": ("hwid",)},
-        ),
-        (
             "Status",
             {"fields": ("is_active", "is_banned", "is_verified")},
         ),

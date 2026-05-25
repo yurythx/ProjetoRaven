@@ -46,7 +46,6 @@ def _configure():
 
     # Auto-instrumentations
     _instrument_django()
-    _instrument_celery()
     _instrument_psycopg2()
     _instrument_redis()
 
@@ -60,14 +59,6 @@ def _instrument_django():
     try:
         from opentelemetry.instrumentation.django import DjangoInstrumentor
         DjangoInstrumentor().instrument()
-    except ImportError:
-        pass
-
-
-def _instrument_celery():
-    try:
-        from opentelemetry.instrumentation.celery import CeleryInstrumentor
-        CeleryInstrumentor().instrument()
     except ImportError:
         pass
 

@@ -2,11 +2,10 @@
 
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import { fixImageUrl } from '@/lib/utils';
 
 export interface AuthorInfo {
-    id: number;
+    id?: string | number;
     username: string;
     full_name: string;
     avatar_url?: string | null;
@@ -15,10 +14,9 @@ export interface AuthorInfo {
 
 interface AboutAuthorProps {
     author: AuthorInfo | null | undefined;
-    companySlug?: string | null;
 }
 
-export function AboutAuthor({ author, companySlug }: AboutAuthorProps) {
+export function AboutAuthor({ author }: AboutAuthorProps) {
     if (!author) return null;
 
     const initials = (author.full_name || author.username || '')
@@ -27,11 +25,6 @@ export function AboutAuthor({ author, companySlug }: AboutAuthorProps) {
         .slice(0, 2)
         .map((s) => s[0]?.toUpperCase())
         .join('');
-
-    const qs = new URLSearchParams();
-    qs.set('author', author.username);
-    if (companySlug) qs.set('company_slug', companySlug);
-    const href = `/blog?${qs.toString()}`;
 
     const bio = (author.bio || '').trim();
 
@@ -45,16 +38,14 @@ export function AboutAuthor({ author, companySlug }: AboutAuthorProps) {
                     </Avatar>
 
                     <div className="flex-1 min-w-0 space-y-2">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <div className="min-w-0">
-                                <h2 className="text-lg font-bold leading-tight truncate">Sobre o Autor</h2>
-                                <p className="text-base font-semibold text-foreground truncate">{author.full_name || author.username}</p>
-                            </div>
-                            <Button asChild variant="outline" className="rounded-xl">
-                                <Link href={href} aria-label={`Ver perfil e artigos de ${author.full_name || author.username}`}>
-                                    Ver perfil
-                                </Link>
-                            </Button>
+                        <div className="min-w-0">
+                            <h2 className="text-lg font-bold leading-tight truncate">Sobre o Autor</h2>
+                            <Link
+                                href={`/u/${author.username}`}
+                                className="text-base font-semibold text-foreground hover:text-primary transition-colors truncate"
+                            >
+                                {author.full_name || author.username}
+                            </Link>
                         </div>
 
                         <p className="text-sm text-muted-foreground leading-relaxed">

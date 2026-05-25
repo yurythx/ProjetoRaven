@@ -11,7 +11,6 @@ O backend é o **Single Source of Truth** do projeto: persiste estado, serve a A
 | Framework | Django 5 + Django REST Framework |
 | Banco de dados | PostgreSQL 16 |
 | Cache | Redis 7 (django-redis) |
-| Filas assíncronas | Celery 5 + Celery Beat (agendamento) |
 | WebSocket | Django Channels + channels-redis |
 | Autenticação | JWT RS256 (simplejwt) + blacklist |
 | Documentação da API | drf-spectacular (OpenAPI 3) |
@@ -23,24 +22,24 @@ O backend é o **Single Source of Truth** do projeto: persiste estado, serve a A
 ```
 Backend/
 ├── core/
-│   ├── settings.py     # Configuração (DB, Cache, JWT, Celery, CORS)
+│   ├── settings.py     # Configuração (DB, Cache, JWT, CORS)
 │   ├── urls.py         # Roteamento global sob /api/v1/
-│   ├── celery.py       # Instância e descoberta de tarefas
-│   ├── asgi.py         # Entry point ASGI (WebSocket via Channels)
-│   └── wsgi.py         # Entry point WSGI (produção sem WebSocket)
+│   ├── asgi.py         # Entry point ASGI (HTTP + WebSocket via Channels)
+│   └── wsgi.py         # Entry point WSGI (fallback sem WebSocket)
 ├── apps/
 │   ├── common/         # UUIDModel base, utilitários compartilhados
 │   ├── accounts/       # Usuários, JWT, OTP, auditoria, SMTP
 │   ├── blog/           # Posts, categorias, tags, comentários
 │   ├── forum/          # Tópicos, replies, reações, moderação
-│   └── media/          # Upload e gerenciamento de arquivos de mídia
-├── keys/               # RSA private.pem + public.pem (gerados no boot)
+│   ├── media/          # Upload e gerenciamento de arquivos de mídia
+│   └── notifications/  # Notificações push e in-app
+├── keys/               # RSA private.pem + public.pem (gerados pelo deploy.sh)
 ├── requirements.txt
 ├── Dockerfile
 └── .env.example
 ```
 
-> Para orquestrar o stack completo (postgres + redis + django + celery + frontend), use o `docker-compose.yml` na raiz do projeto.
+> Para orquestrar o stack completo (postgres + redis + django + frontend), use o `docker-compose.yml` (dev) ou `docker-compose.prod.yml` (produção) na raiz do projeto.
 
 ---
 
@@ -89,26 +88,6 @@ Backend/
 - Health checks: `/api/health/live/`, `/api/health/ready/`, `/api/health/version/`
 - Feature flags, paginação, throttling customizado, métricas Prometheus
 - Comando de seed: `python manage.py seed`
-
----
-
-## Tarefas Assíncronas (Celery)
-
-### Tarefas sob demanda
-
-| Tarefa | Descrição |
-|---|---|
-| `accounts.tasks.send_email_task` | Envio assíncrono de e-mails com retry (3x) |
-
-### Agenda periódica (`CELERY_BEAT_SCHEDULE`)
-
-| Tarefa | Intervalo | Descrição |
-|---|---|---|
-| `cleanup_expired_otps` | 6h | Remove códigos OTP expirados |
-| `publish_scheduled_posts` | 5min | Publica posts com `status=scheduled` e `published_at <= now` |
-| `prune_post_views` | Diário 03:00 UTC | Deleta registros `PostView` com mais de 90 dias |
-
-> O agendamento via **DatabaseScheduler** (django-celery-beat) permite sobrescrever os intervalos pelo Django Admin sem reiniciar o container.
 
 ---
 
@@ -253,13 +232,13 @@ python manage.py seed
 # Popula o banco em produção de forma idempotente (categorias, superusuário, sem dados fictícios)
 python manage.py seed_prod
 
-# Remove OTPs expirados (também executado automaticamente pelo Celery)
+# Remove OTPs expirados
 python manage.py cleanup_otps --days 7
 
 # Garante slugs únicos de tópicos no fórum
 python manage.py ensure_unique_topic_slugs
 
-# Poda PostViews com mais de 90 dias (também via Celery)
+# Poda PostViews com mais de 90 dias
 python manage.py prune_post_views
 ```
 

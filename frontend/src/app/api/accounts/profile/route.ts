@@ -11,7 +11,7 @@ export async function PUT(request: NextRequest) {
   const result = await backendFetch("/api/v1/accounts/profile/", {
     method: "PUT",
     accessToken: access,
-    body,
+    json: body,
   });
 
   if (!result.ok) return NextResponse.json(result.error.data, { status: result.error.status });

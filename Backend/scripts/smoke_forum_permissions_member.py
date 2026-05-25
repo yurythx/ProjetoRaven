@@ -53,14 +53,14 @@ def main():
     admin_email = os.environ.get("ADMIN_EMAIL", "admin@raven.gg")
     admin_pass = os.environ.get("ADMIN_PASS", "admin123")
 
-    player_email = os.environ.get("PLAYER_EMAIL", "player1@raven.gg")
-    player_pass = os.environ.get("PLAYER_PASS", "player123")
+    member_email = os.environ.get("MEMBER_EMAIL", "player@raven.gg")
+    member_pass = os.environ.get("MEMBER_PASS", "player123")
 
     admin_access = login(base, admin_email, admin_pass)
-    player_access = login(base, player_email, player_pass)
+    member_access = login(base, member_email, member_pass)
 
     admin_h = {"Authorization": f"Bearer {admin_access}"}
-    player_h = {"Authorization": f"Bearer {player_access}"}
+    member_h = {"Authorization": f"Bearer {member_access}"}
 
     status, cats = request_json(f"{base}/api/v1/forum/public/categories/?page=1&page_size=50")
     assert_status("forum:public categories", status, 200)
@@ -78,53 +78,53 @@ def main():
     )
     assert_status("forum:admin topic create", status, 201)
 
-    player_topic_slug = f"player-topic-{suffix}"
+    member_topic_slug = f"member-topic-{suffix}"
     status, _ = request_json(
         f"{base}/api/v1/forum/topics/",
         method="POST",
-        headers=player_h,
-        body={"title": f"Player Topic {suffix}", "slug": player_topic_slug, "content": "player", "category": category_id},
+        headers=member_h,
+        body={"title": f"Member Topic {suffix}", "slug": member_topic_slug, "content": "member", "category": category_id},
     )
-    assert_status("forum:player topic create", status, 201)
+    assert_status("forum:member topic create", status, 201)
 
     status, _ = request_json(
-        f"{base}/api/v1/forum/topics/{player_topic_slug}/",
+        f"{base}/api/v1/forum/topics/{member_topic_slug}/",
         method="PATCH",
-        headers=player_h,
-        body={"title": f"Player Topic EDIT {suffix}"},
+        headers=member_h,
+        body={"title": f"Member Topic EDIT {suffix}"},
     )
-    assert_status("forum:player edit own topic", status, (200, 202))
+    assert_status("forum:member edit own topic", status, (200, 202))
 
     status, _ = request_json(
         f"{base}/api/v1/forum/topics/{admin_topic_slug}/",
         method="PATCH",
-        headers=player_h,
+        headers=member_h,
         body={"title": "HACK"},
     )
-    assert_status("forum:player edit admin topic denied", status, (403, 404))
+    assert_status("forum:member edit admin topic denied", status, (403, 404))
 
     status, _ = request_json(
-        f"{base}/api/v1/forum/topics/{player_topic_slug}/pin/",
+        f"{base}/api/v1/forum/topics/{member_topic_slug}/pin/",
         method="POST",
-        headers=player_h,
+        headers=member_h,
     )
-    assert_status("forum:player pin denied", status, (403, 404))
+    assert_status("forum:member pin denied", status, (403, 404))
 
     status, _ = request_json(
-        f"{base}/api/v1/forum/topics/{player_topic_slug}/pin/",
+        f"{base}/api/v1/forum/topics/{member_topic_slug}/pin/",
         method="POST",
         headers=admin_h,
     )
     assert_status("forum:admin pin", status, 200)
 
     status, _ = request_json(
-        f"{base}/api/v1/forum/topics/{player_topic_slug}/close/",
+        f"{base}/api/v1/forum/topics/{member_topic_slug}/close/",
         method="POST",
         headers=admin_h,
     )
     assert_status("forum:admin close", status, 200)
 
-    status, topic = request_json(f"{base}/api/v1/forum/public/topics/{player_topic_slug}/")
+    status, topic = request_json(f"{base}/api/v1/forum/public/topics/{member_topic_slug}/")
     assert_status("forum:public topic detail", status, 200)
     topic_id = (topic or {}).get("id") if isinstance(topic, dict) else None
     if not topic_id:
@@ -133,28 +133,28 @@ def main():
     status, _ = request_json(
         f"{base}/api/v1/forum/replies/",
         method="POST",
-        headers=player_h,
+        headers=member_h,
         body={"topic": topic_id, "content": "reply closed"},
     )
     assert_status("forum:reply closed denied", status, 400)
 
     status, _ = request_json(
-        f"{base}/api/v1/forum/topics/{player_topic_slug}/open/",
+        f"{base}/api/v1/forum/topics/{member_topic_slug}/open/",
         method="POST",
         headers=admin_h,
     )
     assert_status("forum:admin open", status, 200)
 
-    status, player_reply = request_json(
+    status, member_reply = request_json(
         f"{base}/api/v1/forum/replies/",
         method="POST",
-        headers=player_h,
+        headers=member_h,
         body={"topic": topic_id, "content": "reply ok"},
     )
-    assert_status("forum:player reply create", status, 201)
-    player_reply_id = (player_reply or {}).get("id") if isinstance(player_reply, dict) else None
-    if not player_reply_id:
-        raise RuntimeError("forum:player reply missing id")
+    assert_status("forum:member reply create", status, 201)
+    member_reply_id = (member_reply or {}).get("id") if isinstance(member_reply, dict) else None
+    if not member_reply_id:
+        raise RuntimeError("forum:member reply missing id")
 
     status, admin_reply = request_json(
         f"{base}/api/v1/forum/replies/",
@@ -170,16 +170,16 @@ def main():
     status, _ = request_json(
         f"{base}/api/v1/forum/replies/{admin_reply_id}/",
         method="DELETE",
-        headers=player_h,
+        headers=member_h,
     )
-    assert_status("forum:player delete admin reply denied", status, (403, 404))
+    assert_status("forum:member delete admin reply denied", status, (403, 404))
 
     status, _ = request_json(
-        f"{base}/api/v1/forum/replies/{player_reply_id}/",
+        f"{base}/api/v1/forum/replies/{member_reply_id}/",
         method="DELETE",
-        headers=player_h,
+        headers=member_h,
     )
-    assert_status("forum:player delete own reply", status, (200, 202, 204))
+    assert_status("forum:member delete own reply", status, (200, 202, 204))
 
     print("OK")
 
@@ -190,4 +190,3 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"FAIL: {e}")
         sys.exit(1)
-

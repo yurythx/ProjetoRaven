@@ -12,7 +12,7 @@ from apps.blog.models import Category, Comment, Post, Tag
 
 
 def make_user(email="u@test.com", username="testuser", is_staff=False, **kwargs):
-    Group.objects.get_or_create(name="players")
+    Group.objects.get_or_create(name="members")
     Group.objects.get_or_create(name="blog_editors")
     user = User.objects.create_user(
         email=email, username=username, password="Pass123!",

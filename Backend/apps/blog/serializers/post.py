@@ -149,8 +149,11 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 
 class PublicPostDetailSerializer(serializers.ModelSerializer):
+    author_id = serializers.CharField(source="author.id", read_only=True)
     author_name = serializers.CharField(source="author.display_name", read_only=True)
     author_username = serializers.CharField(source="author.username", read_only=True)
+    author_bio = serializers.CharField(source="author.bio", read_only=True)
+    author_avatar_url = serializers.SerializerMethodField()
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     image = serializers.SerializerMethodField()
@@ -163,8 +166,11 @@ class PublicPostDetailSerializer(serializers.ModelSerializer):
             "slug",
             "excerpt",
             "content",
+            "author_id",
             "author_name",
             "author_username",
+            "author_bio",
+            "author_avatar_url",
             "category",
             "tags",
             "is_featured",
@@ -179,6 +185,13 @@ class PublicPostDetailSerializer(serializers.ModelSerializer):
             "meta_keywords",
         ]
 
+    def get_author_avatar_url(self, obj):
+        if not obj.author.avatar:
+            return None
+        from django.conf import settings
+        from apps.common.utils import build_media_url
+        relative = f"{settings.MEDIA_URL}{obj.author.avatar.name}"
+        return build_media_url(relative, self.context.get("request"))
 
     def get_image(self, obj):
         if not obj.image:

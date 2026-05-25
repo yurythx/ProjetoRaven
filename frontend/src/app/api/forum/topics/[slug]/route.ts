@@ -8,7 +8,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const url = new URL(req.url);
   const qs = url.searchParams.toString();
-  const target = `/api/forum/public/topics/${encodeURIComponent(slug)}/${qs ? `?${qs}` : ""}`;
+  const target = `/api/v1/forum/public/topics/${encodeURIComponent(slug)}/${qs ? `?${qs}` : ""}`;
 
   const result = await backendFetch(target, {
     method: "GET",
@@ -26,7 +26,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ slug: 
   const { slug } = await params;
   const payload = await req.json().catch(() => ({}));
 
-  const result = await backendFetch(`/api/forum/topics/${encodeURIComponent(slug)}/`, {
+  const result = await backendFetch(`/api/v1/forum/topics/${encodeURIComponent(slug)}/`, {
     method: "PATCH",
     json: payload,
     accessToken: access,
@@ -43,7 +43,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ slug
 
   const { slug } = await params;
 
-  const result = await backendFetch(`/api/forum/topics/${encodeURIComponent(slug)}/`, {
+  const result = await backendFetch(`/api/v1/forum/topics/${encodeURIComponent(slug)}/`, {
     method: "DELETE",
     accessToken: access,
   });

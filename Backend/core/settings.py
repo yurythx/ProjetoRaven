@@ -16,7 +16,7 @@ APP_BUILD_TIME = os.environ.get("APP_BUILD_TIME", "")
 DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 METRICS_ENABLED = os.environ.get("METRICS_ENABLED", "False").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,web,gameserver").split(",")
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,web").split(",")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -33,19 +33,19 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "channels",
-    "django_celery_beat",
-    "django_celery_results",
     # Local apps
     "apps.common",
     "apps.accounts",
     "apps.blog",
     "apps.forum",
     "apps.media",
+    "apps.notifications",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "apps.common.middleware.AdminIPRestrictionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -335,11 +335,6 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
-        "celery": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
     },
 }
 
@@ -370,30 +365,6 @@ ACCOUNTS_LOGIN_MAX_FAILURES = int(os.environ.get("ACCOUNTS_LOGIN_MAX_FAILURES", 
 ACCOUNTS_LOGIN_LOCKOUT_SECONDS = int(os.environ.get("ACCOUNTS_LOGIN_LOCKOUT_SECONDS", "900"))
 
 # ---------------------------------------------------------------------------
-# Celery
-# ---------------------------------------------------------------------------
-_CELERY_BROKER = REDIS_URL or "redis://localhost:6379/2"
-CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", _CELERY_BROKER)
-CELERY_RESULT_BACKEND = "django-db"
-CELERY_CACHE_BACKEND = "default"
-CELERY_TIMEZONE = TIME_ZONE
-CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 300
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-
-from kombu import Queue
-
-CELERY_TASK_DEFAULT_QUEUE = os.environ.get("CELERY_TASK_DEFAULT_QUEUE", "default")
-CELERY_TASK_QUEUES = (
-    Queue("default", routing_key="default"),
-    Queue("emails", routing_key="emails"),
-)
-CELERY_TASK_ROUTES = {
-    "apps.accounts.tasks.send_email_task": {"queue": "emails", "routing_key": "emails"},
-}
-
-# ---------------------------------------------------------------------------
 # Django Channels (WebSocket / ASGI)
 # ---------------------------------------------------------------------------
 ASGI_APPLICATION = "core.asgi.application"
@@ -412,8 +383,6 @@ SENTRY_DSN = os.environ.get("SENTRY_DSN", "")
 if SENTRY_DSN:
     import sentry_sdk
     from sentry_sdk.integrations.django import DjangoIntegration
-    from sentry_sdk.integrations.celery import CeleryIntegration
-
     def _sentry_traces_sampler(sampling_context):
         base_rate = float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
         low_rate = float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE_LOW", "0.01"))
@@ -427,7 +396,7 @@ if SENTRY_DSN:
 
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(), CeleryIntegration()],
+        integrations=[DjangoIntegration()],
         traces_sampler=_sentry_traces_sampler,
         send_default_pii=False,
         environment="development" if DEBUG else "production",
@@ -443,26 +412,18 @@ VAPID_PUBLIC_KEY = os.environ.get("VAPID_PUBLIC_KEY", "")
 VAPID_ADMIN_EMAIL = os.environ.get("VAPID_ADMIN_EMAIL", "admin@projetoraven.com")
 
 # ---------------------------------------------------------------------------
-# Celery Beat — periodic tasks (static schedule; database entries win on conflict)
+# Admin / Schema access control
 # ---------------------------------------------------------------------------
-from celery.schedules import crontab  # noqa: E402
+# Lista de IPs com acesso ao /admin/ e /api/schema/.
+# Vazia = sem restrição (qualquer IP pode acessar — proteja por autenticação).
+# Ex: ADMIN_ALLOWED_IPS=1.2.3.4,5.6.7.8
+ADMIN_ALLOWED_IPS = [
+    ip.strip()
+    for ip in os.environ.get("ADMIN_ALLOWED_IPS", "").split(",")
+    if ip.strip()
+]
 
-CELERY_BEAT_SCHEDULE = {
-    "cleanup-expired-otps": {
-        "task": "apps.accounts.tasks.cleanup_expired_otps",
-        "schedule": crontab(minute=0, hour="*/6"),  # every 6 hours
-    },
-    "publish-scheduled-posts": {
-        "task": "apps.blog.tasks.publish_scheduled_posts",
-        "schedule": crontab(minute="*/5"),  # every 5 minutes
-    },
-    "prune-post-views": {
-        "task": "apps.blog.tasks.prune_post_views",
-        "schedule": crontab(minute=0, hour=3),  # daily at 03:00 UTC
-    },
-}
+# Habilita endpoints /api/schema/, /swagger-ui/ e /redoc/.
+# Padrão: True em DEBUG, False em produção (defina SCHEMA_ENABLED=True para re-habilitar).
+SCHEMA_ENABLED = os.environ.get("SCHEMA_ENABLED", str(DEBUG)).lower() == "true"
 
-import sys
-if "test" in sys.argv or "pytest" in sys.modules:
-    CELERY_TASK_ALWAYS_EAGER = True
-    CELERY_TASK_STORE_EAGER_RESULT = True

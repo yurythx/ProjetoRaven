@@ -99,22 +99,6 @@ class CustomValidators:
         return birth_date
 
     @staticmethod
-    def validate_hwid(hwid: str) -> str:
-        if not hwid:
-            return ""
-
-        if len(hwid) < 8:
-            raise ValidationError("Invalid Hardware ID format.")
-
-        if len(hwid) > 255:
-            raise ValidationError("Hardware ID is too long.")
-
-        if not re.match(r"^[a-zA-Z0-9-]+$", hwid):
-            raise ValidationError("Hardware ID contains invalid characters.")
-
-        return hwid.upper()
-
-    @staticmethod
     def validate_ban_reason(reason: str) -> str:
         if not reason or len(reason.strip()) < 10:
             raise ValidationError(
