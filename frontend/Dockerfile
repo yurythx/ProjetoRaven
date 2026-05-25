@@ -28,15 +28,20 @@ ENV NEXT_PUBLIC_WS_BASE_URL=${NEXT_PUBLIC_WS_BASE_URL}
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:22 AS runner
+# Standalone runner — usa apenas os arquivos gerados pelo Next.js (sem node_modules completo)
+FROM node:22-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV NEXT_DISABLE_FILE_SYSTEM_CACHE=1
-COPY --from=builder --chown=node:node /app/.next ./.next
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# standalone/ contém server.js + node_modules mínimo (só prod deps)
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+# static/ e public/ ficam fora do standalone e devem ser copiados separadamente
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
 COPY --from=builder --chown=node:node /app/public ./public
-COPY --from=builder --chown=node:node /app/package.json ./package.json
-COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+
 USER node
 EXPOSE 3000
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

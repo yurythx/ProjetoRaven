@@ -9,7 +9,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ slug: str
   if (!access) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   const { slug } = await params;
-  const result = await backendFetch(`/api/forum/topics/${encodeURIComponent(slug)}/open/`, {
+  const result = await backendFetch(`/api/v1/forum/topics/${encodeURIComponent(slug)}/open/`, {
     method: "POST",
     accessToken: access,
   });

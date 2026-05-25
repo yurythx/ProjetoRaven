@@ -7,10 +7,7 @@ class PermissionInitializer:
     """Initialize default groups and permissions."""
 
     GROUPS = {
-        "players": [
-            "can_play",
-            "can_trade",
-        ],
+        "members": [],
         "blog_editors": [
             "can_create_post",
             "can_edit_own_post",

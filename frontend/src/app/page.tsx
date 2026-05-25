@@ -1,8 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { HeroCta } from "@/components/hero-cta";
 import { JsonLd } from "@/components/json-ld";
 import { getSiteBaseUrl } from "@/lib/env";
+import { backendFetch } from "@/lib/backend";
+import { fixImageUrl } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Projeto Raven — Blog & Fórum",
@@ -19,6 +22,32 @@ export const metadata: Metadata = {
     description: "Artigos, fórum e comunidade.",
   },
 };
+
+type BlogPostListItem = {
+  id: string; title: string; slug: string; excerpt: string | null;
+  author_name: string; category_name: string;
+  published_at: string | null; created_at: string;
+  read_time_minutes: number; image: string | null;
+};
+
+type TopicListItem = {
+  id: string; title: string; slug: string;
+  author: { username: string; display_name?: string };
+  category_name: string; reply_count: number; view_count: number;
+  last_reply_at: string | null;
+};
+
+type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] };
+
+function extractList<T>(data: unknown): T[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data as T[];
+  if (typeof data === "object") {
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.results)) return obj.results as T[];
+  }
+  return [];
+}
 
 const features = [
   {
@@ -55,8 +84,30 @@ const features = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
   const base = getSiteBaseUrl();
+
+  const [postsRes, topicsRes] = await Promise.allSettled([
+    backendFetch<Paginated<BlogPostListItem>>(
+      "/api/v1/blog/public/posts/?page=1&page_size=3&ordering=-published_at",
+      { method: "GET", next: { revalidate: 120 } }
+    ),
+    backendFetch<Paginated<TopicListItem>>(
+      "/api/v1/forum/public/topics/?page=1&page_size=5&ordering=-last_reply_at",
+      { method: "GET", next: { revalidate: 60 } }
+    ),
+  ]);
+
+  const posts: BlogPostListItem[] =
+    postsRes.status === "fulfilled" && postsRes.value.ok
+      ? extractList(postsRes.value.data)
+      : [];
+
+  const topics: TopicListItem[] =
+    topicsRes.status === "fulfilled" && topicsRes.value.ok
+      ? extractList(topicsRes.value.data)
+      : [];
+
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -89,7 +140,6 @@ export default function Home() {
 
       {/* ── Hero Section ── */}
       <section className="relative flex min-h-[100dvh] flex-col items-center justify-center px-4 text-center">
-        {/* Hex grid decorative element */}
         <div className="pointer-events-none absolute inset-0 opacity-5"
           style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V18L28 2l28 16v32L28 66zm0-2l26-15V19L28 4 2 19v30l26 15z' fill='none' stroke='%238b5cf6' stroke-width='1'/%3E%3C/svg%3E\")" }}
         />
@@ -179,6 +229,105 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Latest articles ── */}
+      {posts.length > 0 && (
+        <section className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:pb-24 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8 sm:mb-12">
+            <div>
+              <span className="rv-badge rv-badge-purple mb-3 inline-flex">✦ Blog</span>
+              <h2 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Últimos Artigos</h2>
+            </div>
+            <Link href="/blog" className="rv-btn rv-btn-ghost text-xs px-5 h-9">
+              Ver todos →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {posts.map((post) => {
+              const imgSrc = post.image ? fixImageUrl(post.image) : null;
+              return (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="rv-card group flex flex-col overflow-hidden hover:scale-[1.01] transition-transform duration-200"
+                >
+                  {imgSrc ? (
+                    <div className="relative h-40 w-full overflow-hidden">
+                      <Image src={imgSrc} alt={post.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                    </div>
+                  ) : (
+                    <div className="h-40 w-full bg-gradient-to-br from-[var(--rv-surface-2)] to-[var(--rv-surface)] flex items-center justify-center text-4xl opacity-30">✦</div>
+                  )}
+                  <div className="flex flex-col gap-2 p-5 flex-1">
+                    {post.category_name && (
+                      <span className="rv-badge rv-badge-purple text-[8px]">{post.category_name}</span>
+                    )}
+                    <h3 className="rv-display text-base text-[var(--rv-text-primary)] line-clamp-2 group-hover:text-[var(--rv-accent)] transition-colors">
+                      {post.title}
+                    </h3>
+                    {post.excerpt && (
+                      <p className="text-xs text-[var(--rv-text-muted)] line-clamp-2 leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+                        {post.excerpt}
+                      </p>
+                    )}
+                    <div className="mt-auto flex items-center justify-between pt-3 border-t border-[var(--rv-border)]">
+                      <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">{post.author_name}</span>
+                      <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">{post.read_time_minutes} min</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ── Active topics ── */}
+      {topics.length > 0 && (
+        <section className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:pb-24 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8 sm:mb-12">
+            <div>
+              <span className="rv-badge rv-badge-cyan mb-3 inline-flex">◈ Fórum</span>
+              <h2 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Tópicos Ativos</h2>
+            </div>
+            <Link href="/forum" className="rv-btn rv-btn-ghost text-xs px-5 h-9">
+              Ver todos →
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {topics.map((topic) => (
+              <Link
+                key={topic.id}
+                href={`/forum/t/${topic.slug}`}
+                className="rv-card group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-3 hover:scale-[1.005] transition-all duration-200"
+              >
+                <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                  <span className="rv-badge rv-badge-cyan text-[8px] self-start">{topic.category_name}</span>
+                  <h3 className="rv-display text-sm sm:text-base text-[var(--rv-text-primary)] group-hover:text-[var(--rv-accent)] transition-colors line-clamp-1">
+                    {topic.title}
+                  </h3>
+                  <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">
+                    por {topic.author?.display_name || topic.author?.username || "Desconhecido"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 sm:gap-6 flex-shrink-0">
+                  <div className="text-center">
+                    <div className="rv-display text-sm text-[var(--rv-text-primary)]">{topic.reply_count}</div>
+                    <div className="rv-label text-[8px] text-[var(--rv-text-dim)]">Resp.</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="rv-display text-sm text-[var(--rv-text-primary)]">{topic.view_count}</div>
+                    <div className="rv-label text-[8px] text-[var(--rv-text-dim)]">Views</div>
+                  </div>
+                  <span className="text-[var(--rv-accent)] group-hover:translate-x-1 transition-transform inline-block text-sm">→</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* ── CTA Footer ── */}
       <section className="relative z-10 border-t border-[var(--rv-border)] bg-[var(--rv-surface)]/30">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
@@ -201,24 +350,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="relative z-10 border-t border-[var(--rv-border)] py-12">
-        <div className="mx-auto max-w-7xl px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)]" />
-            <span className="rv-display tracking-wider text-[var(--rv-text-primary)]">PROJETO RAVEN</span>
-          </div>
-          <div className="flex gap-8 rv-label text-[10px] text-[var(--rv-text-dim)]">
-            <Link href="/forum" className="hover:text-[var(--rv-accent)] transition-colors">Fórum</Link>
-            <Link href="/blog" className="hover:text-[var(--rv-accent)] transition-colors">Blog</Link>
-            <Link href="/termos" className="hover:text-[var(--rv-accent)] transition-colors">Termos</Link>
-            <Link href="/privacidade" className="hover:text-[var(--rv-accent)] transition-colors">Privacidade</Link>
-          </div>
-          <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">
-            © 2026 Projeto Raven — All Rights Reserved
-          </span>
-        </div>
-      </footer>
     </div>
   );
 }

@@ -65,15 +65,15 @@ class UserModelTestCase(TestCase):
         )
         self.assertEqual(str(user), "testuser")
 
-    def test_is_player_property(self):
+    def test_is_member_property(self):
         user = User.objects.create_user(**self.user_data)
-        self.assertFalse(user.is_player)
+        self.assertFalse(user.is_member)
 
         from django.contrib.auth.models import Group
-        player_group = Group.objects.create(name="players")
-        user.groups.add(player_group)
-        del user.__dict__["is_player"]  # clear cached_property
-        self.assertTrue(user.is_player)
+        members_group = Group.objects.create(name="members")
+        user.groups.add(members_group)
+        del user.__dict__["is_member"]  # clear cached_property
+        self.assertTrue(user.is_member)
 
     def test_ban_user(self):
         user = User.objects.create_user(**self.user_data)

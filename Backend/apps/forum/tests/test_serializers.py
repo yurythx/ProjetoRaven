@@ -22,7 +22,7 @@ from apps.forum.serializers.reply import (
 def make_user(**kwargs):
     defaults = {"email": "u@test.com", "username": "testuser", "password": "Pass123!"}
     defaults.update(kwargs)
-    Group.objects.get_or_create(name="players")
+    Group.objects.get_or_create(name="members")
     return User.objects.create_user(**defaults)
 
 

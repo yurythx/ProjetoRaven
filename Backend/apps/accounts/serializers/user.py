@@ -11,7 +11,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     groups = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()
-    is_player = serializers.SerializerMethodField()
+    is_member = serializers.SerializerMethodField()
     is_admin = serializers.SerializerMethodField()
     is_blog_editor = serializers.SerializerMethodField()
     is_forum_moderator = serializers.SerializerMethodField()
@@ -35,7 +35,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "is_banned",
             "is_staff",
             "is_superuser",
-            "is_player",
+            "is_member",
             "is_admin",
             "is_blog_editor",
             "is_forum_moderator",
@@ -62,8 +62,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_permissions(self, obj):
         return list(obj.get_all_permissions())
 
-    def get_is_player(self, obj):
-        return obj.is_player
+    def get_is_member(self, obj):
+        return obj.is_member
 
     def get_is_admin(self, obj):
         return obj.is_admin

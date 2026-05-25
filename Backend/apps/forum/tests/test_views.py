@@ -23,7 +23,7 @@ class ForumViewsTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        self.players_group, _ = Group.objects.get_or_create(name="players")
+        self.members_group, _ = Group.objects.get_or_create(name="members")
         self.mods_group, _ = Group.objects.get_or_create(name="forum_moderators")
 
         self.player = User.objects.create_user(
@@ -33,7 +33,7 @@ class ForumViewsTestCase(TestCase):
         )
         self.player.is_verified = True
         self.player.save(update_fields=["is_verified"])
-        self.player.groups.add(self.players_group)
+        self.player.groups.add(self.members_group)
 
         self.regular_user = User.objects.create_user(
             email="regular@example.com",

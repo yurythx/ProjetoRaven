@@ -21,6 +21,15 @@ def _notify_topic_author(topic: Topic, reply: Reply) -> None:
         pass
 
 
+def _notify_in_app(topic: Topic, reply: Reply) -> None:
+    """Create an in-app notification for the topic author."""
+    try:
+        from apps.notifications.signals import notify_forum_reply
+        notify_forum_reply(topic, reply)
+    except Exception:
+        pass
+
+
 def _broadcast_new_reply(topic_slug: str, reply: Reply) -> None:
     """Send a WebSocket message to all topic subscribers after DB commit."""
     try:
@@ -85,6 +94,7 @@ class ReplyService:
         _reply_snapshot = reply
         transaction.on_commit(lambda: _broadcast_new_reply(slug, _reply_snapshot))
         transaction.on_commit(lambda: _notify_topic_author(_topic_snapshot, _reply_snapshot))
+        transaction.on_commit(lambda: _notify_in_app(_topic_snapshot, _reply_snapshot))
 
         return reply
 

@@ -6,7 +6,7 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const qs = url.searchParams.toString();
 
-  const result = await backendFetch(`/api/blog/public/tags/${qs ? `?${qs}` : ""}`, {
+  const result = await backendFetch(`/api/v1/blog/public/tags/${qs ? `?${qs}` : ""}`, {
     method: "GET",
     cache: "no-store",
   });

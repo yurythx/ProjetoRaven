@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   if (!access) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   const payload = await req.json();
-  const result = await backendFetch("/api/forum/topic-reactions/", {
+  const result = await backendFetch("/api/v1/forum/topic-reactions/", {
     method: "POST",
     json: payload,
     accessToken: access,

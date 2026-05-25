@@ -60,13 +60,13 @@ function buildCsp(): string {
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline'${extraScript}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob:${extraImg}`,
+    `img-src 'self' data: blob: ${INTERNAL_MEDIA_ORIGIN}${extraImg}`,
     "font-src 'self'",
     "connect-src 'self'",
     "media-src 'self'",
     "object-src 'none'",
-    "frame-src 'none'",
-    "frame-ancestors 'none'",
+    "frame-src 'self'",
+    "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",
     ...(!isDev ? ["upgrade-insecure-requests"] : []),
@@ -78,8 +78,8 @@ function buildCsp(): string {
 const securityHeaders = [
   // Prevent MIME-type sniffing
   { key: "X-Content-Type-Options", value: "nosniff" },
-  // Disallow embedding this site in iframes (reinforced by CSP frame-ancestors)
-  { key: "X-Frame-Options", value: "DENY" },
+  // Allow same-origin embedding (needed for blog preview dialog) — CSP frame-ancestors 'self' handles modern browsers
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
   // Disable legacy XSS filter — modern browsers use CSP instead
   { key: "X-XSS-Protection", value: "0" },
   // Referrer: send origin only on same-origin, bare origin on cross-origin HTTPS

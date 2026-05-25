@@ -52,7 +52,7 @@ class CanCreateTopic(permissions.BasePermission):
         return (
             request.user.is_active_and_not_banned
             and (request.user.is_verified or request.user.is_admin_verified)
-            and (request.user.is_player or request.user.is_forum_moderator or request.user.is_admin)
+            and (request.user.is_member or request.user.is_forum_moderator or request.user.is_admin)
         )
 
 
@@ -65,5 +65,5 @@ class CanCreateReply(permissions.BasePermission):
         return (
             request.user.is_active_and_not_banned
             and (request.user.is_verified or request.user.is_admin_verified)
-            and (request.user.is_player or request.user.is_forum_moderator or request.user.is_admin)
+            and (request.user.is_member or request.user.is_forum_moderator or request.user.is_admin)
         )

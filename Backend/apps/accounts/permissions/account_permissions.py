@@ -13,11 +13,11 @@ def _fully_verified(user):
     return user.is_verified or user.is_admin_verified
 
 
-class IsPlayer(permissions.BasePermission):
-    """Allows access only to active, non-banned players."""
+class IsMember(permissions.BasePermission):
+    """Allows access only to active community members."""
 
     def has_permission(self, request, view):
-        return _authenticated_and_active(request) and request.user.is_player
+        return _authenticated_and_active(request) and request.user.is_member
 
 
 class IsBlogEditor(permissions.BasePermission):
@@ -131,17 +131,6 @@ class IsFullyVerified(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return _authenticated_and_active(request) and _fully_verified(request.user)
-
-
-class IsGameUser(permissions.BasePermission):
-    """Allows access to players who are verified (Email or Admin)."""
-
-    def has_permission(self, request, view):
-        return (
-            _authenticated_and_active(request)
-            and _fully_verified(request.user)
-            and request.user.is_player
-        )
 
 
 class AllowAnyForRegistration(permissions.BasePermission):

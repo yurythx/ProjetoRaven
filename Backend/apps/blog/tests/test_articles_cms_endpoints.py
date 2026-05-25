@@ -99,7 +99,7 @@ class ArticlesCmsEndpointsTestCase(TestCase):
             is_public=True,
         )
 
-        players, _ = Group.objects.get_or_create(name="players")
+        players, _ = Group.objects.get_or_create(name="members")
         player = User.objects.create_user(email="player@example.com", password="Pass1234!", username="player")
         player.groups.add(players)
         player.is_verified = True

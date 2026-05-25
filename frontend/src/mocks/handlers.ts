@@ -105,31 +105,6 @@ export const handlers = [
     })
   ),
 
-  // ─── Game Logic ───────────────────────────────────────────────────────
-  http.get(`${BASE}/game-logic/stats/leaderboard/`, () =>
-    HttpResponse.json({
-      results: [
-        { character_name: "HeroRaven", level: 50, experience: 999999, character_class: "knight" },
-        { character_name: "MageDev", level: 45, experience: 850000, character_class: "mage" },
-      ],
-    })
-  ),
-
-  http.get(`${BASE}/game-logic/stats/my_stats/`, () =>
-    HttpResponse.json({
-      level: 10,
-      experience: 5000,
-      health: 100,
-      max_health: 100,
-      mana: 50,
-      max_mana: 50,
-      strength: 15,
-      agility: 12,
-      intelligence: 10,
-      vitality: 14,
-    })
-  ),
-
   // ─── Health ───────────────────────────────────────────────────────────
   http.get(`${BASE.replace("/v1", "")}/health/live/`, () =>
     HttpResponse.json({ status: "ok" })

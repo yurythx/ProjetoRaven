@@ -9,7 +9,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const payload = await req.json().catch(() => ({}));
   const { id } = await params;
-  const result = await backendFetch(`/api/forum/replies/${encodeURIComponent(id)}/hide/`, {
+  const result = await backendFetch(`/api/v1/forum/replies/${encodeURIComponent(id)}/hide/`, {
     method: "POST",
     json: payload,
     accessToken: access,

@@ -13,7 +13,7 @@ from django.core.management.base import BaseCommand, CommandError
 
 User = get_user_model()
 
-ALL_GROUPS = ["players", "blog_editors", "forum_moderators"]
+ALL_GROUPS = ["members", "blog_editors", "forum_moderators"]
 
 
 class Command(BaseCommand):

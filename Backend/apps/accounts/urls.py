@@ -15,7 +15,6 @@ from .api.auth import (
 from .api.profile import (
     MeView,
     ProfileView,
-    UnityTokenView,
     PublicProfileView,
     DeleteAccountView,
     ChangeUsernameView,
@@ -75,7 +74,6 @@ urlpatterns = [
     path("admin/diagnostics/", AdminDiagnosticsView.as_view(), name="admin_diagnostics"),
     path("password-reset/", PasswordResetRequestView.as_view(), name="password_reset_request"),
     path("password-reset/confirm/", PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
-    path("unity-token/", UnityTokenView.as_view(), name="unity_token"),
     path("friends/", FriendshipView.as_view(), name="friendships"),
     path("friends/<uuid:friendship_id>/", FriendshipActionView.as_view(), name="friendship-action"),
     path("2fa/setup/", TOTP2FASetupView.as_view(), name="2fa_setup"),

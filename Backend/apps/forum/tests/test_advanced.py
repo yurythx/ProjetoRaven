@@ -17,8 +17,8 @@ def _make_user(email, username, verified=True):
     if verified:
         u.is_verified = True
         u.save(update_fields=["is_verified"])
-    players_group, _ = Group.objects.get_or_create(name="players")
-    u.groups.add(players_group)
+    members_group, _ = Group.objects.get_or_create(name="members")
+    u.groups.add(members_group)
     return u
 
 
@@ -27,7 +27,7 @@ class TopicUpdateTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
         self.mods_group, _ = Group.objects.get_or_create(name="forum_moderators")
 
         self.author = _make_user("author@test.com", "author")
@@ -97,7 +97,7 @@ class ReplyUpdateTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
         self.mods_group, _ = Group.objects.get_or_create(name="forum_moderators")
 
         self.author = _make_user("rep_author@test.com", "rep_author")
@@ -151,7 +151,7 @@ class TopicCloseOpenViaViewTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
         self.mods_group, _ = Group.objects.get_or_create(name="forum_moderators")
 
         self.player = _make_user("player_co@test.com", "player_co")
@@ -201,7 +201,7 @@ class ReplyCreationToLockedTopicViaViewTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
         self.mods_group, _ = Group.objects.get_or_create(name="forum_moderators")
 
         self.player = _make_user("p_lock@test.com", "p_lock")
@@ -236,7 +236,7 @@ class TopicPopularEndpointTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
 
         self.player = _make_user("pop_player@test.com", "pop_player")
         self.category = ForumCategory.objects.create(name="Popular", slug="popular", is_active=True)
@@ -267,7 +267,7 @@ class TopicWithRepliesEndpointTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
 
         self.player = _make_user("wr_player@test.com", "wr_player")
         self.category = ForumCategory.objects.create(name="WR", slug="wr", is_active=True)
@@ -310,7 +310,7 @@ class ReplyReactEndpointTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
 
         self.player = _make_user("react_player@test.com", "react_player")
         self.category = ForumCategory.objects.create(name="React", slug="react", is_active=True)
@@ -407,7 +407,7 @@ class ReplyListFilterTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
 
         self.player = _make_user("filter_player@test.com", "filter_player")
         self.category = ForumCategory.objects.create(name="Filter", slug="filter", is_active=True)
@@ -441,7 +441,7 @@ class TopicSearchFilterTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
 
         self.player = _make_user("search_player@test.com", "search_player")
         self.cat_a = ForumCategory.objects.create(name="CatA", slug="cat-a", is_active=True)
@@ -495,7 +495,7 @@ class SerializerSanitizationTestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
         self.player = _make_user("san_player@test.com", "san_player")
         self.category = ForumCategory.objects.create(name="Sanitize", slug="sanitize", is_active=True)
 

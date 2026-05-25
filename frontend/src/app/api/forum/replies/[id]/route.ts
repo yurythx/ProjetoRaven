@@ -11,7 +11,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { id } = await params;
   const payload = await req.json().catch(() => ({}));
 
-  const result = await backendFetch(`/api/forum/replies/${encodeURIComponent(id)}/`, {
+  const result = await backendFetch(`/api/v1/forum/replies/${encodeURIComponent(id)}/`, {
     method: "PATCH",
     json: payload,
     accessToken: access,
@@ -28,7 +28,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
 
-  const result = await backendFetch(`/api/forum/replies/${encodeURIComponent(id)}/`, {
+  const result = await backendFetch(`/api/v1/forum/replies/${encodeURIComponent(id)}/`, {
     method: "DELETE",
     accessToken: access,
   });

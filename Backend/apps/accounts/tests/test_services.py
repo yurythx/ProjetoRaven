@@ -15,7 +15,7 @@ class UserRegistrationServiceTestCase(TestCase):
     """Test cases for AuthService (Registration)."""
 
     def setUp(self):
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
         self.service = AuthService()
         self.user_data = {
             "email": "test@example.com",
@@ -30,7 +30,7 @@ class UserRegistrationServiceTestCase(TestCase):
         self.assertIsNotNone(user)
         self.assertEqual(user.email, "test@example.com")
         self.assertEqual(user.username, "testuser")
-        self.assertTrue(user.is_player)
+        self.assertTrue(user.is_member)
         self.assertTrue(AdminAuditEvent.objects.filter(action="register_user", target=user).exists())
 
     def test_register_user_records_ip_and_user_agent(self):
@@ -74,7 +74,7 @@ class UserManagementServiceTestCase(TestCase):
     """Test cases for UserManagementService."""
 
     def setUp(self):
-        Group.objects.get_or_create(name="players")
+        Group.objects.get_or_create(name="members")
         Group.objects.get_or_create(name="blog_editors")
         Group.objects.get_or_create(name="forum_moderators")
         Group.objects.get_or_create(name="admins")
@@ -150,10 +150,10 @@ class UserManagementServiceTestCase(TestCase):
     def test_change_groups_admin_allowed(self):
         updated = self.service.change_user_groups(
             user=self.user,
-            group_names=["players", "blog_editors"],
+            group_names=["members", "blog_editors"],
             modified_by=self.admin,
         )
-        self.assertEqual(sorted([g.name for g in updated.groups.all()]), ["blog_editors", "players"])
+        self.assertEqual(sorted([g.name for g in updated.groups.all()]), ["blog_editors", "members"])
 
 class ProfileServiceTestCase(TestCase):
     """Test cases for ProfileService."""

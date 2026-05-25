@@ -1068,6 +1068,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/blog/articles/{slug}/schedule/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Unified ViewSet for Posts.
+         *     Following SRP (Delegates logic to PostService).
+         */
+        post: operations["v1_blog_articles_schedule_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/blog/articles/{slug}/submit/": {
         parameters: {
             query?: never;
@@ -1128,6 +1148,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/blog/articles/bulk/publish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Unified ViewSet for Posts.
+         *     Following SRP (Delegates logic to PostService).
+         */
+        post: operations["v1_blog_articles_bulk_publish_create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/articles/bulk/reject/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Unified ViewSet for Posts.
+         *     Following SRP (Delegates logic to PostService).
+         */
+        post: operations["v1_blog_articles_bulk_reject_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/blog/categories/": {
         parameters: {
             query?: never;
@@ -1167,16 +1227,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         get: operations["v1_blog_comments_retrieve"];
         put?: never;
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         post: operations["v1_blog_comments_create"];
         delete?: never;
         options?: never;
@@ -1194,10 +1248,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         delete: operations["v1_blog_comments_destroy"];
         options?: never;
         head?: never;
@@ -1213,11 +1264,144 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         post: operations["v1_blog_comments_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/comments/{id}/approve_thread/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_comments_approve_thread_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/comments/{id}/delete_thread/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_comments_delete_thread_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/comments/{id}/disapprove/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_comments_disapprove_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/comments/{id}/disapprove_thread/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_comments_disapprove_thread_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/comments/{id}/replies/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        get: operations["v1_blog_comments_replies_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/comments/bulk_approve/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_comments_bulk_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/comments/bulk_delete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_comments_bulk_delete_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/comments/bulk_disapprove/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_comments_bulk_disapprove_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1231,10 +1415,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         get: operations["v1_blog_comments_pending_retrieve"];
         put?: never;
         post?: never;
@@ -1251,10 +1432,20 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Mantido para compatibilidade de URL. Delegado ao app media. */
+        /**
+         * @description Endpoint de imagens do blog. Delega para apps/media/MediaFile.
+         *     Rota: /api/v1/blog/media/images/
+         *     Aceita upload multipart (POST) e listagem (GET).
+         *     Exclusão via apps/media/ diretamente.
+         */
         get: operations["v1_blog_media_images_list"];
         put?: never;
-        /** @description Mantido para compatibilidade de URL. Delegado ao app media. */
+        /**
+         * @description Endpoint de imagens do blog. Delega para apps/media/MediaFile.
+         *     Rota: /api/v1/blog/media/images/
+         *     Aceita upload multipart (POST) e listagem (GET).
+         *     Exclusão via apps/media/ diretamente.
+         */
         post: operations["v1_blog_media_images_create"];
         delete?: never;
         options?: never;
@@ -1269,7 +1460,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Mantido para compatibilidade de URL. Delegado ao app media. */
+        /**
+         * @description Endpoint de imagens do blog. Delega para apps/media/MediaFile.
+         *     Rota: /api/v1/blog/media/images/
+         *     Aceita upload multipart (POST) e listagem (GET).
+         *     Exclusão via apps/media/ diretamente.
+         */
         get: operations["v1_blog_media_images_retrieve"];
         put?: never;
         post?: never;
@@ -1435,6 +1631,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/blog/posts/{slug}/schedule/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Unified ViewSet for Posts.
+         *     Following SRP (Delegates logic to PostService).
+         */
+        post: operations["v1_blog_posts_schedule_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/blog/posts/{slug}/submit/": {
         parameters: {
             query?: never;
@@ -1489,6 +1705,46 @@ export interface paths {
          *     Following SRP (Delegates logic to PostService).
          */
         post: operations["v1_blog_posts_bulk_publish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/posts/bulk/publish/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Unified ViewSet for Posts.
+         *     Following SRP (Delegates logic to PostService).
+         */
+        post: operations["v1_blog_posts_bulk_publish_create_2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/posts/bulk/reject/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Unified ViewSet for Posts.
+         *     Following SRP (Delegates logic to PostService).
+         */
+        post: operations["v1_blog_posts_bulk_reject_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1568,16 +1824,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         get: operations["v1_blog_public_comments_retrieve"];
         put?: never;
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         post: operations["v1_blog_public_comments_create"];
         delete?: never;
         options?: never;
@@ -1595,10 +1845,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         delete: operations["v1_blog_public_comments_destroy"];
         options?: never;
         head?: never;
@@ -1614,11 +1861,144 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         post: operations["v1_blog_public_comments_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/public/comments/{id}/approve_thread/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_public_comments_approve_thread_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/public/comments/{id}/delete_thread/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_public_comments_delete_thread_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/public/comments/{id}/disapprove/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_public_comments_disapprove_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/public/comments/{id}/disapprove_thread/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_public_comments_disapprove_thread_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/public/comments/{id}/replies/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        get: operations["v1_blog_public_comments_replies_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/public/comments/bulk_approve/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_public_comments_bulk_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/public/comments/bulk_delete/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_public_comments_bulk_delete_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/blog/public/comments/bulk_disapprove/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
+        post: operations["v1_blog_public_comments_bulk_disapprove_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1632,10 +2012,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * @description ViewSet thin para gerenciamento de comentários.
-         *     Delegando lógica de negócio para o CommentService.
-         */
+        /** @description ViewSet for comment management — business logic delegated to CommentService. */
         get: operations["v1_blog_public_comments_pending_retrieve"];
         put?: never;
         post?: never;
@@ -2528,1229 +2905,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/game-data/bootstrap/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_bootstrap_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/items/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_items_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/items/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_items_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/manifest/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_manifest_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/maps/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_maps_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/maps/{map_key}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_maps_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/maps/{map_key}/npc_spawns/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Retorna todos os spawn points de NPCs do mapa, com perfil de combate embutido.
-         *
-         *     Consumido pelo GameServer C# no startup via DjangoBridge.FetchNpcSpawnsAsync().
-         */
-        get: operations["v1_game_data_maps_npc_spawns_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/npcs/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_npcs_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/npcs/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_npcs_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/skills/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_skills_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/skills/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_skills_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/talents/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_talents_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-data/talents/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_data_talents_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/achievements/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description List all active achievements with unlock status for the authenticated character. */
-        get: operations["v1_game_logic_achievements_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/achievements/check/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @description Trigger achievement evaluation for the authenticated character.
-         *
-         *     Returns any newly granted achievements.
-         */
-        post: operations["v1_game_logic_achievements_check_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/achievements/my/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description List achievements already unlocked by the authenticated character. */
-        get: operations["v1_game_logic_achievements_my_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/character/create/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for character management. */
-        post: operations["v1_game_logic_character_create_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/characters/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description ViewSet for character management. */
-        get: operations["v1_game_logic_characters_list"];
-        put?: never;
-        /** @description ViewSet for character management. */
-        post: operations["v1_game_logic_characters_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/characters/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description ViewSet for character management. */
-        get: operations["v1_game_logic_characters_retrieve"];
-        /** @description ViewSet for character management. */
-        put: operations["v1_game_logic_characters_update"];
-        post?: never;
-        /** @description ViewSet for character management. */
-        delete: operations["v1_game_logic_characters_destroy"];
-        options?: never;
-        head?: never;
-        /** @description ViewSet for character management. */
-        patch: operations["v1_game_logic_characters_partial_update"];
-        trace?: never;
-    };
-    "/api/v1/game-logic/characters/{id}/activate/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for character management. */
-        post: operations["v1_game_logic_characters_activate_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/daily-reward/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description GET  /api/v1/game-logic/daily-reward/  — status da recompensa do dia
-         *     POST /api/v1/game-logic/daily-reward/  — resgata a recompensa do dia
-         */
-        get: operations["v1_game_logic_daily_reward_retrieve"];
-        put?: never;
-        /**
-         * @description GET  /api/v1/game-logic/daily-reward/  — status da recompensa do dia
-         *     POST /api/v1/game-logic/daily-reward/  — resgata a recompensa do dia
-         */
-        post: operations["v1_game_logic_daily_reward_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/events/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Webhook for GameServer events. */
-        post: operations["v1_game_logic_events_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/game-state/{player_id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description Server-to-server HMAC-authenticated GET for full character state.
-         *     Called by the GameServer during handshake to restore session data.
-         *     Returns the complete payload expected by DjangoBridge.FetchPlayerStateAsync().
-         */
-        get: operations["v1_game_logic_game_state_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/guilds/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description GET /guilds/ — list all active guilds sorted by total XP. */
-        get: operations["v1_game_logic_guilds_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/guilds/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description GET /guilds/<id>/ — guild detail with full member list. */
-        get: operations["v1_game_logic_guilds_retrieve_2"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/guilds/{id}/invite/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description POST /guilds/<id>/invite/ — invite a character to the guild. */
-        post: operations["v1_game_logic_guilds_invite_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/guilds/{id}/kick/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description POST /guilds/<id>/kick/ — kick a member from the guild. */
-        post: operations["v1_game_logic_guilds_kick_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/guilds/{id}/promote/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description POST /guilds/<id>/promote/ — change a member's rank. */
-        post: operations["v1_game_logic_guilds_promote_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/guilds/create_guild/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description POST /guilds/create_guild/ — create a new guild. */
-        post: operations["v1_game_logic_guilds_create_guild_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/guilds/leave/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description POST /guilds/leave/ — leave the current guild. */
-        post: operations["v1_game_logic_guilds_leave_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/guilds/my_guild/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description GET /guilds/my_guild/ — get the current player's guild membership. */
-        get: operations["v1_game_logic_guilds_my_guild_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/inventory/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description ViewSet for character inventory. */
-        get: operations["v1_game_logic_inventory_retrieve"];
-        put?: never;
-        /** @description ViewSet for character inventory. */
-        post: operations["v1_game_logic_inventory_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/inventory/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** @description ViewSet for character inventory. */
-        delete: operations["v1_game_logic_inventory_destroy"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/inventory/{id}/remove_item/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** @description Remove item by slot index (pk). */
-        delete: operations["v1_game_logic_inventory_remove_item_destroy"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/inventory/add_item/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for character inventory. */
-        post: operations["v1_game_logic_inventory_add_item_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/inventory/equip/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for character inventory. */
-        post: operations["v1_game_logic_inventory_equip_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/inventory/my_inventory/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description ViewSet for character inventory. */
-        get: operations["v1_game_logic_inventory_my_inventory_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/inventory/unequip/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for character inventory. */
-        post: operations["v1_game_logic_inventory_unequip_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/leaderboard/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description ViewSet for character statistics. */
-        get: operations["v1_game_logic_leaderboard_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/marketplace/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description GET /marketplace/ — list active listings, optional ?item_template_id=<uuid> */
-        get: operations["v1_game_logic_marketplace_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/marketplace/{id}/cancel/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description POST /marketplace/<id>/cancel/ — cancel own listing and reclaim item. */
-        post: operations["v1_game_logic_marketplace_cancel_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/marketplace/buy/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description POST /marketplace/buy/ — buy a listing. */
-        post: operations["v1_game_logic_marketplace_buy_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/marketplace/create_listing/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description POST /marketplace/create_listing/ — put an item up for sale. */
-        post: operations["v1_game_logic_marketplace_create_listing_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/marketplace/my_listings/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description GET /marketplace/my_listings/ — listings belonging to the current player's character. */
-        get: operations["v1_game_logic_marketplace_my_listings_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/party/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_logic_party_list"];
-        put?: never;
-        post: operations["v1_game_logic_party_create"];
-        delete: operations["v1_game_logic_party_destroy"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/party/{id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        delete: operations["v1_game_logic_party_destroy_2"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/party/invite/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_game_logic_party_invite_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/quest-templates/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_logic_quest_templates_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/quests/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_logic_quests_list"];
-        put?: never;
-        post: operations["v1_game_logic_quests_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/quests/start/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_game_logic_quests_start_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/quests/templates/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_logic_quests_templates_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/servers/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * @description GET /servers/ — public server discovery for Unity clients and the portal.
-         *
-         *     Returns only instances that are currently online (last heartbeat within 60 s).
-         *     Optionally filter by ?map_key=plains.
-         */
-        get: operations["v1_game_logic_servers_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/servers/{map_key}/heartbeat/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @description POST /servers/{map_key}/heartbeat/ — periodic liveness signal from GameServer.
-         *
-         *     Updates last_heartbeat and player_count.
-         *     Protected by HMAC (GameServerIPPermission + X-Webhook-Secret header).
-         */
-        post: operations["v1_game_logic_servers_heartbeat_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/servers/register/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @description POST /servers/register/ — called by the C# GameServer on startup.
-         *
-         *     Creates or updates the instance record for this map_key.
-         *     Protected by HMAC (GameServerIPPermission + X-Webhook-Secret header).
-         */
-        post: operations["v1_game_logic_servers_register_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/session/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for game sessions. */
-        post: operations["v1_game_logic_session_create"];
-        /** @description ViewSet for game sessions. */
-        delete: operations["v1_game_logic_session_destroy"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/session/heartbeat/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for game sessions. */
-        post: operations["v1_game_logic_session_heartbeat_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/sessions/end/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for game sessions. */
-        post: operations["v1_game_logic_sessions_end_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/sessions/heartbeat/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for game sessions. */
-        post: operations["v1_game_logic_sessions_heartbeat_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/sessions/start/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for game sessions. */
-        post: operations["v1_game_logic_sessions_start_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/skills/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_logic_skills_list"];
-        put?: never;
-        post: operations["v1_game_logic_skills_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/skills/{id}/equip/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_game_logic_skills_equip_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/skills/{id}/unequip/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_game_logic_skills_unequip_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/skills/{id}/upgrade/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_game_logic_skills_upgrade_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/stats/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description ViewSet for character statistics. */
-        get: operations["v1_game_logic_stats_retrieve"];
-        put?: never;
-        /** @description ViewSet for character statistics. */
-        post: operations["v1_game_logic_stats_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/stats/allocate/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for character statistics. */
-        post: operations["v1_game_logic_stats_allocate_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/stats/gain-xp/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for character statistics. */
-        post: operations["v1_game_logic_stats_gain_xp_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/stats/gain_xp/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description ViewSet for character statistics. */
-        post: operations["v1_game_logic_stats_gain_xp_create_2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/stats/leaderboard/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description ViewSet for character statistics. */
-        get: operations["v1_game_logic_stats_leaderboard_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/stats/my_stats/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** @description ViewSet for character statistics. */
-        get: operations["v1_game_logic_stats_my_stats_retrieve"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/talents/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["v1_game_logic_talents_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/game-logic/talents/learn/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["v1_game_logic_talents_learn_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/media/files/": {
         parameters: {
             query?: never;
@@ -3778,6 +2932,92 @@ export interface paths {
         put?: never;
         post?: never;
         delete: operations["v1_media_files_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["v1_notifications_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/{id}/read/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["v1_notifications_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/mark-all-read/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["v1_notifications_mark_all_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/unread-count/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["v1_notifications_unread_count_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/search/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description GET /api/v1/search/?q=<query>&limit=10
+         *
+         *     Returns up to `limit` results per type (blog posts + forum topics),
+         *     sorted by relevance (simple icontains fallback; full-text on Postgres).
+         */
+        get: operations["v1_search_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3819,23 +3059,14 @@ export interface components {
             readonly ip_address: string | null;
             readonly user_agent: string;
         };
-        /**
-         * @description * `` - None / Not Armor
-         *     * `light` - Light Armor
-         *     * `medium` - Medium Armor
-         *     * `heavy` - Heavy Armor
-         * @enum {string}
-         */
-        ArmorTypeEnum: "light" | "medium" | "heavy";
         /** @description Minimal author serializer for nested use. */
         Author: {
             /** Format: uuid */
             readonly id: string;
             readonly username: string;
             readonly display_name: string;
+            readonly avatar_url: string;
         };
-        /** @enum {unknown} */
-        BlankEnum: "";
         /** @description Serializer for categories. */
         Category: {
             /** Format: uuid */
@@ -3847,103 +3078,6 @@ export interface components {
             is_active?: boolean;
             readonly post_count: string;
         };
-        /**
-         * @description * `paladino` - Paladino
-         *     * `mage` - Mage
-         *     * `archer` - Archer
-         *     * `eldari` - Eldari
-         *     * `cavaleiro_dragao` - Cavaleiro Dragão
-         *     * `ignis` - Ignis
-         *     * `shadow` - Shadow
-         *     * `necromante` - Necromante
-         * @enum {string}
-         */
-        CharacterClass311Enum: "paladino" | "mage" | "archer" | "eldari" | "cavaleiro_dragao" | "ignis" | "shadow" | "necromante";
-        /** @description Serializer for character creation. */
-        CharacterCreate: {
-            name?: string;
-            character_class: components["schemas"]["CharacterCreateCharacterClassEnum"];
-            race: components["schemas"]["CharacterCreateRaceEnum"];
-            faction: components["schemas"]["CharacterCreateFactionEnum"];
-        };
-        /**
-         * @description * `paladino` - paladino
-         *     * `mage` - mage
-         *     * `archer` - archer
-         *     * `eldari` - eldari
-         *     * `cavaleiro_dragao` - cavaleiro_dragao
-         *     * `ignis` - ignis
-         *     * `shadow` - shadow
-         *     * `necromante` - necromante
-         * @enum {string}
-         */
-        CharacterCreateCharacterClassEnum: "paladino" | "mage" | "archer" | "eldari" | "cavaleiro_dragao" | "ignis" | "shadow" | "necromante";
-        /**
-         * @description * `vanguarda` - vanguarda
-         *     * `legiao` - legiao
-         * @enum {string}
-         */
-        CharacterCreateFactionEnum: "vanguarda" | "legiao";
-        /**
-         * @description * `humano` - humano
-         *     * `elfo` - elfo
-         *     * `draconato` - draconato
-         *     * `morto_vivo` - morto_vivo
-         * @enum {string}
-         */
-        CharacterCreateRaceEnum: "humano" | "elfo" | "draconato" | "morto_vivo";
-        /** @description Serializer for detailed character info. */
-        CharacterDetail: {
-            /** Format: uuid */
-            readonly id: string;
-            name: string;
-            character_class: components["schemas"]["CharacterClass311Enum"];
-            race: components["schemas"]["Race913Enum"];
-            faction: components["schemas"]["Faction2c4Enum"];
-            readonly stats: components["schemas"]["PlayerStats"];
-            /** Format: date-time */
-            readonly created_at: string;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
-        /** @description Serializer for basic character info. */
-        CharacterList: {
-            /** Format: uuid */
-            readonly id: string;
-            name: string;
-            character_class: components["schemas"]["CharacterClass311Enum"];
-            race: components["schemas"]["Race913Enum"];
-            faction: components["schemas"]["Faction2c4Enum"];
-            /** Format: date-time */
-            readonly created_at: string;
-        };
-        CharacterTalent: {
-            /** Format: uuid */
-            readonly id: string;
-            /** Format: uuid */
-            talent_template: string;
-            readonly talent_name: string;
-            /** Format: date-time */
-            readonly learned_at: string;
-        };
-        /**
-         * @description * `weapon` - Weapon (Main Hand)
-         *     * `offhand` - Off-Hand (Shield / Dual Wield)
-         *     * `helmet` - Helmet
-         *     * `chest` - Chest
-         *     * `gloves` - Gloves
-         *     * `boots` - Boots
-         *     * `ring` - Ring
-         *     * `amulet` - Amulet
-         * @enum {string}
-         */
-        EquipSlotEnum: "weapon" | "offhand" | "helmet" | "chest" | "gloves" | "boots" | "ring" | "amulet";
-        /**
-         * @description * `vanguarda` - Vanguarda da Alvorada
-         *     * `legiao` - Legião do Eclipse
-         * @enum {string}
-         */
-        Faction2c4Enum: "vanguarda" | "legiao";
         /** @description Serializer for creating forum category. */
         ForumCategoryCreate: {
             name: string;
@@ -3991,85 +3125,6 @@ export interface components {
          * @enum {string}
          */
         GenderEnum: "male" | "female" | "other" | "not_specified";
-        /** @description Detailed serializer for item templates. */
-        ItemTemplate: {
-            /** Format: uuid */
-            readonly id: string;
-            name: string;
-            description?: string;
-            item_type: string;
-            rarity?: string;
-            base_phys_damage?: number;
-            base_mag_damage?: number;
-            base_phys_defense?: number;
-            base_mag_defense?: number;
-            base_health?: number;
-            base_mana?: number;
-            /** Format: double */
-            base_attack_speed?: number;
-            base_speed?: number;
-            equip_slot?: components["schemas"]["EquipSlotEnum"] | components["schemas"]["BlankEnum"];
-            /**
-             * @description Only set for weapons/shields. Drives class restriction validation.
-             *
-             *     * `` - None / Not a Weapon
-             *     * `staff` - Staff
-             *     * `wand` - Wand
-             *     * `sword` - Sword
-             *     * `dagger` - Dagger
-             *     * `bow` - Bow
-             *     * `mace` - Mace
-             *     * `hammer` - Hammer
-             *     * `lance` - Lance
-             *     * `shield` - Shield
-             */
-            weapon_type?: components["schemas"]["WeaponTypeEnum"] | components["schemas"]["BlankEnum"];
-            /**
-             * @description Only set for armor pieces. Drives class restriction validation.
-             *
-             *     * `` - None / Not Armor
-             *     * `light` - Light Armor
-             *     * `medium` - Medium Armor
-             *     * `heavy` - Heavy Armor
-             */
-            armor_type?: components["schemas"]["ArmorTypeEnum"] | components["schemas"]["BlankEnum"];
-            /** @description True = occupies both weapon + offhand slots. Equipping blocks/clears the offhand slot. Examples: staff, bow, lance, hammer, 2H mace. */
-            is_two_handed?: boolean;
-            icon_path?: string;
-            model_path?: string;
-            stack_size?: number;
-            is_droppable?: boolean;
-            is_tradable?: boolean;
-            price?: number;
-            level_required?: number;
-            /** Format: date-time */
-            readonly created_at: string;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
-        MapData: {
-            /** Format: uuid */
-            readonly id: string;
-            name: string;
-            map_key: string;
-            description?: string;
-            min_level?: number;
-            max_level?: number;
-            max_players?: number;
-            environment?: string;
-            spawn_points?: unknown;
-            npcs?: unknown;
-            monsters?: unknown;
-            resources?: unknown;
-            is_pvp_enabled?: boolean;
-            is_enabled?: boolean;
-            /** @description Flat boolean array (0=blocked, 1=walkable), row-major, 100cm cells. Length must be cols×rows (default 100×100=10000). Empty list means entire map is walkable. */
-            walkability_map?: unknown;
-            /** Format: date-time */
-            readonly created_at: string;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
         MediaFile: {
             /** Format: uuid */
             readonly id: string;
@@ -4081,40 +3136,6 @@ export interface components {
             readonly uploaded_by_name: string;
             /** Format: date-time */
             readonly created_at: string;
-        };
-        NpcTemplate: {
-            /** Format: uuid */
-            readonly id: string;
-            name: string;
-            /** @description Slug único (ex: "wolf", "bandit_captain"). Deve coincidir com o nome registrado no C# NpcManager. */
-            npc_type: string;
-            description?: string;
-            is_boss?: boolean;
-            base_hp?: number;
-            base_damage?: number;
-            /** @description Raio de ataque em centímetros. */
-            attack_range_cm?: number;
-            /**
-             * Format: double
-             * @description Intervalo entre ataques em segundos.
-             */
-            attack_cooldown_sec?: number;
-            /** @description Raio de detecção de jogadores em centímetros. */
-            aggro_range_cm?: number;
-            /** @description Velocidade de movimento em cm/s. */
-            movement_speed_cms?: number;
-            xp_reward?: number;
-            /** @description Tempo em ms até o NPC reaparecer após morrer. */
-            respawn_delay_ms?: number;
-            /** @description Raio do ataque em área. 0 = sem AoE. */
-            aoe_radius_cm?: number;
-            /** Format: double */
-            aoe_cooldown_sec?: number;
-            aoe_damage?: number;
-            /** Format: date-time */
-            readonly created_at: string;
-            /** Format: date-time */
-            readonly updated_at: string;
         };
         PaginatedAdminAuditEventList: {
             /** @example 123 */
@@ -4146,36 +3167,6 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["Category"][];
         };
-        PaginatedCharacterListList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["CharacterList"][];
-        };
-        PaginatedCharacterTalentList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["CharacterTalent"][];
-        };
         PaginatedForumCategoryListList: {
             /** @example 123 */
             count: number;
@@ -4190,36 +3181,6 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["ForumCategoryList"][];
-        };
-        PaginatedItemTemplateList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["ItemTemplate"][];
-        };
-        PaginatedMapDataList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["MapData"][];
         };
         PaginatedMediaFileList: {
             /** @example 123 */
@@ -4236,36 +3197,6 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["MediaFile"][];
         };
-        PaginatedPartyList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["Party"][];
-        };
-        PaginatedPlayerSkillList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["PlayerSkill"][];
-        };
         PaginatedPostListList: {
             /** @example 123 */
             count: number;
@@ -4280,21 +3211,6 @@ export interface components {
              */
             previous?: string | null;
             results: components["schemas"]["PostList"][];
-        };
-        PaginatedQuestProgressList: {
-            /** @example 123 */
-            count: number;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=4
-             */
-            next?: string | null;
-            /**
-             * Format: uri
-             * @example http://api.example.org/accounts/?page=2
-             */
-            previous?: string | null;
-            results: components["schemas"]["QuestProgress"][];
         };
         PaginatedReplyListList: {
             /** @example 123 */
@@ -4356,25 +3272,6 @@ export interface components {
             previous?: string | null;
             results: components["schemas"]["UserList"][];
         };
-        Party: {
-            /** Format: uuid */
-            readonly id: string;
-            /** Format: uuid */
-            readonly leader_id: string;
-            readonly members: components["schemas"]["PartyMember"][];
-            readonly member_count: number;
-            is_active?: boolean;
-            /** Format: date-time */
-            readonly created_at: string;
-        };
-        PartyMember: {
-            /** Format: uuid */
-            readonly user_id: string;
-            readonly username: string;
-            readonly display_name: string;
-            /** Format: date-time */
-            readonly joined_at: string;
-        };
         /** @description Serializer for categories. */
         PatchedCategory: {
             /** Format: uuid */
@@ -4385,20 +3282,6 @@ export interface components {
             display_order?: number;
             is_active?: boolean;
             readonly post_count?: string;
-        };
-        /** @description Serializer for detailed character info. */
-        PatchedCharacterDetail: {
-            /** Format: uuid */
-            readonly id?: string;
-            name?: string;
-            character_class?: components["schemas"]["CharacterClass311Enum"];
-            race?: components["schemas"]["Race913Enum"];
-            faction?: components["schemas"]["Faction2c4Enum"];
-            readonly stats?: components["schemas"]["PlayerStats"];
-            /** Format: date-time */
-            readonly created_at?: string;
-            /** Format: date-time */
-            readonly updated_at?: string;
         };
         /** @description Serializer for creating forum category. */
         PatchedForumCategoryCreate: {
@@ -4486,42 +3369,11 @@ export interface components {
             /** Format: date-time */
             readonly last_login?: string | null;
         };
-        PlayerSkill: {
-            /** Format: uuid */
-            readonly id: string;
-            readonly name: string;
-            readonly description: string;
-            readonly skill_type: string;
-            current_level?: number;
-            is_equipped?: boolean;
-            slot_index?: number | null;
-            /** Format: date-time */
-            readonly learned_at: string;
-        };
-        /** @description Serializer for player stats. */
-        PlayerStats: {
-            /** Format: uuid */
-            readonly id: string;
-            level?: number;
-            experience?: number;
-            health?: number;
-            max_health?: number;
-            mana?: number;
-            max_mana?: number;
-            strength?: number;
-            agility?: number;
-            intelligence?: number;
-            vitality?: number;
-            points_remaining?: number;
-            /** @description Available points for the talent tree. */
-            talent_points?: number;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
         /** @description Serializer for creating posts. */
         PostCreate: {
             title: string;
             slug?: string;
+            /** @default  */
             excerpt: string;
             content: string;
             /** Format: uuid */
@@ -4626,10 +3478,14 @@ export interface components {
             slug: string;
             excerpt: string;
             content: string;
+            readonly author_id: string;
             readonly author_name: string;
             readonly author_username: string;
+            readonly author_bio: string;
+            readonly author_avatar_url: string;
             readonly category: components["schemas"]["Category"];
             readonly tags: components["schemas"]["Tag"][];
+            status?: components["schemas"]["Status9aaEnum"];
             is_featured?: boolean;
             /** Format: date-time */
             published_at?: string | null;
@@ -4644,37 +3500,6 @@ export interface components {
             meta_description?: string;
             meta_keywords?: string;
         };
-        /** @description Serializer for quest progress. */
-        QuestProgress: {
-            /** Format: uuid */
-            readonly id: string;
-            /** Format: uuid */
-            readonly quest_id: string;
-            /** Format: uuid */
-            quest_template?: string | null;
-            status?: components["schemas"]["QuestProgressStatusEnum"];
-            current_objectives?: unknown;
-            /** Format: date-time */
-            started_at?: string | null;
-            /** Format: date-time */
-            completed_at?: string | null;
-        };
-        /**
-         * @description * `not_started` - Not Started
-         *     * `in_progress` - In Progress
-         *     * `completed` - Completed
-         *     * `failed` - Failed
-         * @enum {string}
-         */
-        QuestProgressStatusEnum: "not_started" | "in_progress" | "completed" | "failed";
-        /**
-         * @description * `humano` - Humano
-         *     * `elfo` - Elfo
-         *     * `draconato` - Draconato
-         *     * `morto_vivo` - Morto-Vivo
-         * @enum {string}
-         */
-        Race913Enum: "humano" | "elfo" | "draconato" | "morto_vivo";
         /**
          * @description * `like` - Like
          *     * `dislike` - Dislike
@@ -4742,65 +3567,6 @@ export interface components {
         ReplyUpdate: {
             content: string;
         };
-        SkillTemplate: {
-            /** Format: uuid */
-            readonly id: string;
-            name: string;
-            description?: string;
-            skill_type: string;
-            damage?: number;
-            healing?: number;
-            mana_cost?: number;
-            /** Format: double */
-            cooldown?: number;
-            /** Format: double */
-            range?: number;
-            /** Format: double */
-            cast_time?: number;
-            icon_path?: string;
-            animation_path?: string;
-            level_required?: number;
-            /** @description Empty = available to all. E.g. 'paladino', 'mage'. */
-            class_restriction?: string;
-            is_passive?: boolean;
-            is_racial_passive?: boolean;
-            /** @description Matches the uint skill ID in the C# SkillRegistry. Null = not server-side. */
-            server_id?: number | null;
-            /** @description [{"damage": 20, "mana_cost": 10}, ...] — index 0 = level 1 */
-            level_scaling?: unknown;
-            /**
-             * @description How the skill selects its target(s).
-             *
-             *     * `single_enemy` - Single Enemy
-             *     * `single_ally` - Single Ally
-             *     * `self` - Self
-             *     * `aoe` - Area of Effect
-             *     * `ranged` - Ranged Projectile
-             */
-            targeting?: components["schemas"]["TargetingEnum"];
-            /**
-             * Format: double
-             * @description Multiplier applied to the caster's AttackDamage.
-             */
-            damage_multiplier?: number;
-            /** @description AoE radius in centimetres. 0 = single-target. */
-            aoe_radius_cm?: number;
-            /** @description Override range in centimetres. 0 = use player's AttackRange. */
-            range_cm?: number;
-            /** @description C# EffectType enum value, e.g. 'DamageBoostPct'. Empty = no buff. */
-            buff_effect_type?: string;
-            /** @description Percentage magnitude of the buff (e.g. 30 = +30%). */
-            buff_value?: number;
-            /**
-             * Format: double
-             * @description Duration of the buff in seconds.
-             */
-            buff_duration_sec?: number;
-            /** Format: date-time */
-            readonly created_at: string;
-            /** Format: date-time */
-            readonly updated_at: string;
-        };
         /**
          * @description * `open` - Open
          *     * `closed` - Closed
@@ -4825,30 +3591,6 @@ export interface components {
             name: string;
             slug: string;
         };
-        TalentTemplate: {
-            /** Format: uuid */
-            readonly id: string;
-            name: string;
-            description?: string;
-            icon_path?: string;
-            /** @description Empty = available to all. E.g. 'paladino'. */
-            class_restriction?: string;
-            required_level?: number;
-            /** Format: uuid */
-            prerequisite_talent?: string | null;
-            /** @description JSON object of stat bonuses. */
-            stat_bonuses?: unknown;
-            readonly tier: number;
-        };
-        /**
-         * @description * `single_enemy` - Single Enemy
-         *     * `single_ally` - Single Ally
-         *     * `self` - Self
-         *     * `aoe` - Area of Effect
-         *     * `ranged` - Ranged Projectile
-         * @enum {string}
-         */
-        TargetingEnum: "single_enemy" | "single_ally" | "self" | "aoe" | "ranged";
         TokenRefresh: {
             readonly access: string;
             refresh: string;
@@ -5007,20 +3749,6 @@ export interface components {
             /** Format: date-time */
             readonly last_login: string | null;
         };
-        /**
-         * @description * `` - None / Not a Weapon
-         *     * `staff` - Staff
-         *     * `wand` - Wand
-         *     * `sword` - Sword
-         *     * `dagger` - Dagger
-         *     * `bow` - Bow
-         *     * `mace` - Mace
-         *     * `hammer` - Hammer
-         *     * `lance` - Lance
-         *     * `shield` - Shield
-         * @enum {string}
-         */
-        WeaponTypeEnum: "staff" | "wand" | "sword" | "dagger" | "bow" | "mace" | "hammer" | "lance" | "shield";
     };
     responses: never;
     parameters: never;
@@ -6614,6 +5342,33 @@ export interface operations {
             };
         };
     };
+    v1_blog_articles_schedule_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostDetail"];
+                "application/x-www-form-urlencoded": components["schemas"]["PostDetail"];
+                "multipart/form-data": components["schemas"]["PostDetail"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostDetail"];
+                };
+            };
+        };
+    };
     v1_blog_articles_submit_create: {
         parameters: {
             query?: never;
@@ -6661,6 +5416,56 @@ export interface operations {
         };
     };
     v1_blog_articles_bulk_publish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostDetail"];
+                "application/x-www-form-urlencoded": components["schemas"]["PostDetail"];
+                "multipart/form-data": components["schemas"]["PostDetail"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostDetail"];
+                };
+            };
+        };
+    };
+    v1_blog_articles_bulk_publish_create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostDetail"];
+                "application/x-www-form-urlencoded": components["schemas"]["PostDetail"];
+                "multipart/form-data": components["schemas"]["PostDetail"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostDetail"];
+                };
+            };
+        };
+    };
+    v1_blog_articles_bulk_reject_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -6896,6 +5701,160 @@ export interface operations {
             path: {
                 id: string;
             };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_comments_approve_thread_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_comments_delete_thread_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_comments_disapprove_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_comments_disapprove_thread_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_comments_replies_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_comments_bulk_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_comments_bulk_delete_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_comments_bulk_disapprove_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -7270,6 +6229,33 @@ export interface operations {
             };
         };
     };
+    v1_blog_posts_schedule_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostDetail"];
+                "application/x-www-form-urlencoded": components["schemas"]["PostDetail"];
+                "multipart/form-data": components["schemas"]["PostDetail"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostDetail"];
+                };
+            };
+        };
+    };
     v1_blog_posts_submit_create: {
         parameters: {
             query?: never;
@@ -7317,6 +6303,56 @@ export interface operations {
         };
     };
     v1_blog_posts_bulk_publish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostDetail"];
+                "application/x-www-form-urlencoded": components["schemas"]["PostDetail"];
+                "multipart/form-data": components["schemas"]["PostDetail"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostDetail"];
+                };
+            };
+        };
+    };
+    v1_blog_posts_bulk_publish_create_2: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostDetail"];
+                "application/x-www-form-urlencoded": components["schemas"]["PostDetail"];
+                "multipart/form-data": components["schemas"]["PostDetail"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostDetail"];
+                };
+            };
+        };
+    };
+    v1_blog_posts_bulk_reject_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -7487,6 +6523,160 @@ export interface operations {
             path: {
                 id: string;
             };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_public_comments_approve_thread_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_public_comments_delete_thread_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_public_comments_disapprove_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_public_comments_disapprove_thread_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_public_comments_replies_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_public_comments_bulk_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_public_comments_bulk_delete_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_blog_public_comments_bulk_disapprove_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -9362,1709 +8552,6 @@ export interface operations {
             };
         };
     };
-    v1_game_data_bootstrap_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_data_items_list: {
-        parameters: {
-            query?: {
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedItemTemplateList"];
-                };
-            };
-        };
-    };
-    v1_game_data_items_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this Item Template. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ItemTemplate"];
-                };
-            };
-        };
-    };
-    v1_game_data_manifest_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_data_maps_list: {
-        parameters: {
-            query?: {
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedMapDataList"];
-                };
-            };
-        };
-    };
-    v1_game_data_maps_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                map_key: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MapData"];
-                };
-            };
-        };
-    };
-    v1_game_data_maps_npc_spawns_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                map_key: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MapData"];
-                };
-            };
-        };
-    };
-    v1_game_data_npcs_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["NpcTemplate"][];
-                };
-            };
-        };
-    };
-    v1_game_data_npcs_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this NPC Template. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["NpcTemplate"];
-                };
-            };
-        };
-    };
-    v1_game_data_skills_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SkillTemplate"][];
-                };
-            };
-        };
-    };
-    v1_game_data_skills_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this Skill Template. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SkillTemplate"];
-                };
-            };
-        };
-    };
-    v1_game_data_talents_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TalentTemplate"][];
-                };
-            };
-        };
-    };
-    v1_game_data_talents_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this Talent Template. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TalentTemplate"];
-                };
-            };
-        };
-    };
-    v1_game_logic_achievements_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_achievements_check_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_achievements_my_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_character_create_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CharacterCreate"];
-                "application/x-www-form-urlencoded": components["schemas"]["CharacterCreate"];
-                "multipart/form-data": components["schemas"]["CharacterCreate"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterCreate"];
-                };
-            };
-        };
-    };
-    v1_game_logic_characters_list: {
-        parameters: {
-            query?: {
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedCharacterListList"];
-                };
-            };
-        };
-    };
-    v1_game_logic_characters_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CharacterCreate"];
-                "application/x-www-form-urlencoded": components["schemas"]["CharacterCreate"];
-                "multipart/form-data": components["schemas"]["CharacterCreate"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterCreate"];
-                };
-            };
-        };
-    };
-    v1_game_logic_characters_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this Character. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterDetail"];
-                };
-            };
-        };
-    };
-    v1_game_logic_characters_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this Character. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CharacterDetail"];
-                "application/x-www-form-urlencoded": components["schemas"]["CharacterDetail"];
-                "multipart/form-data": components["schemas"]["CharacterDetail"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterDetail"];
-                };
-            };
-        };
-    };
-    v1_game_logic_characters_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this Character. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_characters_partial_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this Character. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PatchedCharacterDetail"];
-                "application/x-www-form-urlencoded": components["schemas"]["PatchedCharacterDetail"];
-                "multipart/form-data": components["schemas"]["PatchedCharacterDetail"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterDetail"];
-                };
-            };
-        };
-    };
-    v1_game_logic_characters_activate_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description A UUID string identifying this Character. */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CharacterDetail"];
-                "application/x-www-form-urlencoded": components["schemas"]["CharacterDetail"];
-                "multipart/form-data": components["schemas"]["CharacterDetail"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterDetail"];
-                };
-            };
-        };
-    };
-    v1_game_logic_daily_reward_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_daily_reward_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_events_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_game_state_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                player_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_guilds_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_guilds_retrieve_2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_guilds_invite_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_guilds_kick_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_guilds_promote_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_guilds_create_guild_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_guilds_leave_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_guilds_my_guild_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_inventory_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_inventory_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_inventory_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_inventory_remove_item_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_inventory_add_item_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_inventory_equip_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_inventory_my_inventory_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_inventory_unequip_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_leaderboard_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_marketplace_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_marketplace_cancel_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_marketplace_buy_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_marketplace_create_listing_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_marketplace_my_listings_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_party_list: {
-        parameters: {
-            query?: {
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedPartyList"];
-                };
-            };
-        };
-    };
-    v1_game_logic_party_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["Party"];
-                "application/x-www-form-urlencoded": components["schemas"]["Party"];
-                "multipart/form-data": components["schemas"]["Party"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Party"];
-                };
-            };
-        };
-    };
-    v1_game_logic_party_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_party_destroy_2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_party_invite_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["Party"];
-                "application/x-www-form-urlencoded": components["schemas"]["Party"];
-                "multipart/form-data": components["schemas"]["Party"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Party"];
-                };
-            };
-        };
-    };
-    v1_game_logic_quest_templates_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestProgress"];
-                };
-            };
-        };
-    };
-    v1_game_logic_quests_list: {
-        parameters: {
-            query?: {
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedQuestProgressList"];
-                };
-            };
-        };
-    };
-    v1_game_logic_quests_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["QuestProgress"];
-                "application/x-www-form-urlencoded": components["schemas"]["QuestProgress"];
-                "multipart/form-data": components["schemas"]["QuestProgress"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestProgress"];
-                };
-            };
-        };
-    };
-    v1_game_logic_quests_start_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["QuestProgress"];
-                "application/x-www-form-urlencoded": components["schemas"]["QuestProgress"];
-                "multipart/form-data": components["schemas"]["QuestProgress"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestProgress"];
-                };
-            };
-        };
-    };
-    v1_game_logic_quests_templates_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestProgress"];
-                };
-            };
-        };
-    };
-    v1_game_logic_servers_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_servers_heartbeat_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                map_key: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_servers_register_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_session_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_session_destroy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_session_heartbeat_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_sessions_end_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_sessions_heartbeat_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_sessions_start_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_skills_list: {
-        parameters: {
-            query?: {
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedPlayerSkillList"];
-                };
-            };
-        };
-    };
-    v1_game_logic_skills_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PlayerSkill"];
-                "application/x-www-form-urlencoded": components["schemas"]["PlayerSkill"];
-                "multipart/form-data": components["schemas"]["PlayerSkill"];
-            };
-        };
-        responses: {
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlayerSkill"];
-                };
-            };
-        };
-    };
-    v1_game_logic_skills_equip_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PlayerSkill"];
-                "application/x-www-form-urlencoded": components["schemas"]["PlayerSkill"];
-                "multipart/form-data": components["schemas"]["PlayerSkill"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlayerSkill"];
-                };
-            };
-        };
-    };
-    v1_game_logic_skills_unequip_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PlayerSkill"];
-                "application/x-www-form-urlencoded": components["schemas"]["PlayerSkill"];
-                "multipart/form-data": components["schemas"]["PlayerSkill"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlayerSkill"];
-                };
-            };
-        };
-    };
-    v1_game_logic_skills_upgrade_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["PlayerSkill"];
-                "application/x-www-form-urlencoded": components["schemas"]["PlayerSkill"];
-                "multipart/form-data": components["schemas"]["PlayerSkill"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PlayerSkill"];
-                };
-            };
-        };
-    };
-    v1_game_logic_stats_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_stats_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_stats_allocate_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_stats_gain_xp_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_stats_gain_xp_create_2: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_stats_leaderboard_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_stats_my_stats_retrieve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No response body */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    v1_game_logic_talents_list: {
-        parameters: {
-            query?: {
-                /** @description A page number within the paginated result set. */
-                page?: number;
-                /** @description Number of results to return per page. */
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedCharacterTalentList"];
-                };
-            };
-        };
-    };
-    v1_game_logic_talents_learn_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CharacterTalent"];
-                "application/x-www-form-urlencoded": components["schemas"]["CharacterTalent"];
-                "multipart/form-data": components["schemas"]["CharacterTalent"];
-            };
-        };
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CharacterTalent"];
-                };
-            };
-        };
-    };
     v1_media_files_list: {
         parameters: {
             query?: {
@@ -11149,6 +8636,98 @@ export interface operations {
         responses: {
             /** @description No response body */
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_notifications_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_notifications_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_notifications_mark_all_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_notifications_unread_count_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    v1_search_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

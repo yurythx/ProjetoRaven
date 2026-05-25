@@ -16,14 +16,6 @@ class CacheKeys:
     FORUM_TOPIC_LIST = "forum:topics:category:{category_id}:page:{page}"
     FORUM_TOPIC_DETAIL = "forum:topic:{id}"
     
-    GAME_DATA_ITEMS = "game:items:all"
-    GAME_DATA_SKILLS = "game:skills:all"
-    GAME_DATA_MAPS = "game:maps:all"
-    GAME_DATA_BOOTSTRAP = "game:bootstrap:v{version}"
-    
-    GAME_LEADERBOARD = "game:leaderboard:{metric}:{limit}"
-    GAME_CHARACTER_STATS = "game:char:{id}:stats"
-    
     USER_PROFILE = "user:{id}:profile"
 
 

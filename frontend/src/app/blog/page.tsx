@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 
 import { backendFetch } from "@/lib/backend";
@@ -7,7 +6,7 @@ import { BlogHeaderActions } from "@/app/blog/blog-header-actions";
 import { BlogAdminPanel } from "@/app/blog/blog-admin-panel";
 import { BlogSearchBar } from "@/app/blog/blog-search-bar";
 import { BlogSidebarTaxonomy } from "@/app/blog/blog-sidebar-taxonomy";
-import { fixImageUrl } from "@/lib/utils";
+import { BlogPostsGrid } from "@/app/blog/blog-posts-grid";
 
 type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] };
 
@@ -168,46 +167,25 @@ export default async function BlogPage(props: {
               <p className="text-[var(--rv-text-muted)] text-sm">Tente outros termos ou limpe os filtros.</p>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2">
-              {(postsRes.data?.results || []).map((p, idx) => (
-                <article key={p.id} className="rv-card group flex flex-col hover:scale-[1.02] transition-all duration-300">
-                  <Link href={`/blog/${p.slug}`} className="relative h-36 sm:h-44 overflow-hidden rounded-t-2xl border-b border-white/5">
-                    {p.image ? (
-                      <Image src={fixImageUrl(p.image) ?? ""} alt={p.title} fill unoptimized priority={idx === 0} className="object-cover group-hover:scale-110 transition-transform duration-700" />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-[var(--rv-surface-2)] to-[var(--rv-surface)] flex items-center justify-center">
-                        <span className="text-4xl opacity-10">◈</span>
-                      </div>
-                    )}
-                    <div className="absolute top-4 left-4">
-                      <span className="rv-badge rv-badge-purple text-[8px]">{p.category_name}</span>
-                    </div>
-                  </Link>
-                  <div className="p-4 sm:p-6 flex flex-col flex-1 gap-4">
-                    <div className="flex items-center justify-between rv-label text-[8px] text-[var(--rv-text-dim)]">
-                      <span>{p.published_at ? new Date(p.published_at).toLocaleDateString() : "Rascunho"}</span>
-                      <span>{p.read_time_minutes} min leitura</span>
-                    </div>
-                    <Link href={`/blog/${p.slug}`}>
-                      <h3 className="rv-display text-lg text-[var(--rv-text-primary)] group-hover:text-[var(--rv-accent)] transition-colors line-clamp-2">{p.title}</h3>
-                    </Link>
-                    <p className="text-xs text-[var(--rv-text-muted)] line-clamp-3 leading-relaxed flex-1">{p.excerpt}</p>
-                    <div className="rv-divider" />
-                    <div className="flex items-center justify-between">
-                      <span className="rv-label text-[8px] text-[var(--rv-text-dim)]">por {p.author_name}</span>
-                      <Link href={`/blog/${p.slug}`} className="text-[10px] text-[var(--rv-accent)] flex items-center gap-1 group-hover:gap-2 transition-all">Ler Artigo →</Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <BlogPostsGrid
+              initialPosts={postsRes.data?.results ?? []}
+              initialPage={page}
+              initialHasNext={canNext}
+              queryString={(() => {
+                const p = new URLSearchParams();
+                p.set("page_size", String(pageSize));
+                if (q) p.set("search", q);
+                if (category) p.set("category", category);
+                if (tag) p.set("tag", tag);
+                if (sort === "popular") p.set("ordering", "-view_count");
+                return p.toString();
+              })()}
+            />
           )}
 
-          {postsRes.ok && (canPrev || canNext) && (
-            <div className="flex items-center justify-between pt-8">
-              <Link href={buildHref({ page: page - 1 })} className={`rv-btn rv-btn-ghost h-10 px-6 text-xs ${!canPrev ? "pointer-events-none opacity-20" : ""}`}>← Anterior</Link>
-              <span className="rv-label text-[10px] text-[var(--rv-text-dim)]">Página {page}</span>
-              <Link href={buildHref({ page: page + 1 })} className={`rv-btn rv-btn-ghost h-10 px-6 text-xs ${!canNext ? "pointer-events-none opacity-20" : ""}`}>Próxima →</Link>
+          {postsRes.ok && canPrev && (
+            <div className="flex items-center justify-start pt-4">
+              <Link href={buildHref({ page: page - 1 })} className="rv-btn rv-btn-ghost h-10 px-6 text-xs">← Anterior</Link>
             </div>
           )}
         </div>

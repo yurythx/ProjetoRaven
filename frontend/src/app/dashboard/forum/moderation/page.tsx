@@ -19,6 +19,9 @@ export default function ForumModerationPage() {
           Supervisione tópicos, modere replies e mantenha a comunidade saudável.{" "}
           <Link href="/forum" className="text-[var(--rv-accent)] hover:underline">Abrir fórum →</Link>
         </p>
+        <Link href="/dashboard/forum/categories" className="rv-btn rv-btn-ghost h-9 px-4 text-xs inline-flex items-center gap-2 mt-2">
+          ◈ Gerenciar Categorias →
+        </Link>
       </div>
       <ForumModerationPanel />
     </div>

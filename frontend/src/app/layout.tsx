@@ -3,6 +3,7 @@ import { Exo_2, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import { cookies } from "next/headers";
+import { AppFooter } from "@/components/app-footer";
 import { AppHeader } from "@/components/app-header";
 import { AuthProvider } from "@/components/auth-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -37,7 +38,6 @@ export const viewport: Viewport = {
 };
 
 const base = getSiteBaseUrl();
-const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
 
 export const metadata: Metadata = {
   title: {
@@ -53,8 +53,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     types: {
-      "application/rss+xml": `${apiBase}/api/v1/blog/rss/`,
-      "application/atom+xml": `${apiBase}/api/v1/blog/atom/`,
+      "application/rss+xml": "/api/blog/rss",
     },
   },
 };
@@ -76,7 +75,7 @@ export default async function RootLayout({
       className={`${exo2.variable} ${inter.variable} ${jetbrainsMono.variable} h-full`}
     >
       <head>
-        <link rel="alternate" type="application/rss+xml" title="Projeto Raven — Blog" href="/rss.xml" />
+        <link rel="alternate" type="application/rss+xml" title="Projeto Raven — Blog RSS" href="/api/blog/rss" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
       </head>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--rv-text-primary)] antialiased relative">
@@ -96,6 +95,7 @@ export default async function RootLayout({
                 <main className="relative z-10 flex-1 pt-20">
                   <ErrorBoundary>{children}</ErrorBoundary>
                 </main>
+                <AppFooter />
                 <UiToaster />
                 <SonnerProvider />
               </ToastProvider>

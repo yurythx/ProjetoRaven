@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -18,18 +19,20 @@ import { stripHtml } from "@/lib/utils";
 
 type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] };
 
+type ForumAuthor = { id: string; username: string; display_name: string; avatar_url?: string | null };
+
 type TopicDetail = {
   id: string; title: string; slug: string; content: string;
   reply_count: number; view_count: number; status: string;
   is_pinned: boolean; is_locked: boolean;
   created_at: string; updated_at: string;
-  author: { id: string; username: string; display_name: string };
+  author: ForumAuthor;
   category: { id: string; name: string; slug: string };
 };
 
 type ReplyListItem = {
   id: string; content: string;
-  author: { id: string; username: string; display_name: string };
+  author: ForumAuthor;
   is_solution: boolean; is_hidden: boolean;
   reactions: Record<string, number>;
   created_at: string; updated_at: string;
@@ -185,8 +188,12 @@ export default async function ForumTopicPage({
               {topic.is_pinned && <span className="rv-badge rv-badge-gold text-[8px]">📌 Fixado</span>}
               {topic.is_locked && <span className="rv-badge rv-badge-red text-[8px]">🔒 Fechado</span>}
               <div className="flex items-center gap-2">
-                <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] flex items-center justify-center text-white font-black text-xs flex-shrink-0">
-                  {authorName[0].toUpperCase()}
+                <div className="h-7 w-7 rounded-full flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)]">
+                  {topic.author.avatar_url ? (
+                    <Image src={topic.author.avatar_url} alt={authorName} fill className="object-cover" sizes="28px" />
+                  ) : (
+                    <span className="absolute inset-0 flex items-center justify-center text-white font-black text-xs">{authorName[0].toUpperCase()}</span>
+                  )}
                 </div>
                 {topic.author?.username ? (
                   <Link href={`/u/${topic.author.username}`} className="rv-label text-[10px] text-[var(--rv-text-muted)] hover:text-[var(--rv-accent)] transition-colors">
@@ -243,8 +250,12 @@ export default async function ForumTopicPage({
                 style={r.is_solution ? { background: "rgba(139,92,246,0.05)" } : {}}>
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <div className="h-7 w-7 rounded-full bg-gradient-to-br from-[var(--rv-surface-2)] to-[var(--rv-surface)] border border-[var(--rv-border)] flex items-center justify-center text-[var(--rv-text-muted)] font-black text-xs flex-shrink-0">
-                      {rAuthorName[0].toUpperCase()}
+                    <div className="h-7 w-7 rounded-full flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-[var(--rv-surface-2)] to-[var(--rv-surface)] border border-[var(--rv-border)]">
+                      {r.author.avatar_url ? (
+                        <Image src={r.author.avatar_url} alt={rAuthorName} fill className="object-cover" sizes="28px" />
+                      ) : (
+                        <span className="absolute inset-0 flex items-center justify-center text-[var(--rv-text-muted)] font-black text-xs">{rAuthorName[0].toUpperCase()}</span>
+                      )}
                     </div>
                     {r.author?.username ? (
                       <Link href={`/u/${r.author.username}`} className="rv-label text-[10px] text-[var(--rv-text-muted)] hover:text-[var(--rv-accent)] transition-colors">

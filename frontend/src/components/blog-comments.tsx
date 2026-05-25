@@ -34,14 +34,29 @@ export function BlogComments({ postId, postSlug }: { postId: string; postSlug: s
     return isVerified && isActive && !isBanned;
   }, [user]);
 
-  const load = useCallback(async (signal?: AbortSignal) => {
+  const load = useCallback(async (signal?: AbortSignal, attempt = 1): Promise<void> => {
     setError(null);
     setIsLoading(true);
-    const res = await fetch(`/api/blog/comments?post_slug=${encodeURIComponent(postSlug)}`, {
-      method: "GET",
-      headers: { Accept: "application/json" },
-      signal,
-    });
+    let res: Response;
+    try {
+      res = await fetch(`/api/blog/comments?post_slug=${encodeURIComponent(postSlug)}`, {
+        method: "GET",
+        headers: { Accept: "application/json" },
+        signal,
+      });
+    } catch (err) {
+      setIsLoading(false);
+      if ((err as { name?: string }).name !== "AbortError") {
+        setError("Não foi possível carregar os comentários.");
+      }
+      return;
+    }
+    // Retry up to 2x on server errors (handles dev cold-start compilation delay)
+    if (res.status >= 500 && attempt < 3) {
+      await new Promise<void>((r) => setTimeout(r, attempt * 1500));
+      if (signal?.aborted) return;
+      return load(signal, attempt + 1);
+    }
     setIsLoading(false);
     const data = await res.json().catch(() => null);
     if (!res.ok) {
@@ -111,19 +126,27 @@ export function BlogComments({ postId, postSlug }: { postId: string; postSlug: s
               return;
             }
             setIsSubmitting(true);
-            const res = await fetch("/api/blog/comments", {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Accept: "application/json" },
-              body: JSON.stringify({
-                post: postId,
-                post_slug: postSlug,
-                content: content.trim(),
-              }),
-            });
+            let res: Response | null = null;
+            for (let attempt = 1; attempt <= 3; attempt++) {
+              try {
+                res = await fetch("/api/blog/comments", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", Accept: "application/json" },
+                  body: JSON.stringify({
+                    post: postId,
+                    post_slug: postSlug,
+                    content: content.trim(),
+                  }),
+                });
+                if (res.status < 500) break;
+              } catch { /* network error — fall through to retry */ }
+              if (attempt < 3) await new Promise<void>((r) => setTimeout(r, attempt * 1500));
+            }
             setIsSubmitting(false);
+            if (!res) { setError("Falha ao enviar comentário."); return; }
             const data = await res.json().catch(() => null);
             if (!res.ok) {
-              setError(typeof data?.error === "string" ? data.error : "Falha ao enviar comentário.");
+              setError(typeof (data as Record<string,unknown>)?.error === "string" ? String((data as Record<string,unknown>).error) : "Falha ao enviar comentário.");
               return;
             }
             setContent("");

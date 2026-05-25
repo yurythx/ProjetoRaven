@@ -219,10 +219,13 @@ function SearchContent() {
                 </div>
                 <div className="space-y-3">
                   {data.topics.map((t) => (
-                    <Link
+                    <div
                       key={t.slug}
-                      href={t.url}
-                      className="rv-card p-5 flex items-center gap-4 hover:border-[var(--rv-cyan)]/40 hover:bg-[var(--rv-surface-2)] transition-all group"
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => router.push(t.url)}
+                      onKeyDown={(e) => e.key === "Enter" && router.push(t.url)}
+                      className="rv-card p-5 flex items-center gap-4 hover:border-[var(--rv-cyan)]/40 hover:bg-[var(--rv-surface-2)] transition-all group cursor-pointer"
                     >
                       <div className="flex-1 min-w-0">
                         <h3 className="rv-display text-base text-[var(--rv-text-primary)] truncate group-hover:text-[var(--rv-cyan)] transition-colors">
@@ -246,7 +249,7 @@ function SearchContent() {
                         </div>
                       </div>
                       <ChevronRight className="h-4 w-4 text-[var(--rv-text-dim)] flex-shrink-0 group-hover:text-[var(--rv-cyan)] transition-colors" aria-hidden />
-                    </Link>
+                    </div>
                   ))}
                 </div>
                 <div className="mt-3 text-right">
