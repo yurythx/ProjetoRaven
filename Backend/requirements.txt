@@ -19,7 +19,7 @@ prometheus-client>=0.20.0
 # Real-time (WebSocket)
 channels>=4.0.0
 channels-redis>=4.2.0
-daphne>=4.1.0
+daphne>=4.2.1
 
 # Utils
 python-dotenv>=1.0.0
