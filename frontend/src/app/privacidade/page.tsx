@@ -105,7 +105,7 @@ export default function PrivacidadePage() {
         </Section>
 
         <Section title="10. Alterações nesta Política">
-          Podemos atualizar esta Política periodicamente. A data de "última atualização" no topo
+          Podemos atualizar esta Política periodicamente. A data de &ldquo;última atualização&rdquo; no topo
           indica quando foi revisada pela última vez. Alterações relevantes serão comunicadas por
           aviso na Plataforma.
         </Section>

@@ -28,7 +28,7 @@ export default function TermosPage() {
         style={{ fontFamily: "var(--font-body)" }}
       >
         <Section title="1. Aceitação dos Termos">
-          Ao acessar ou usar o Projeto Raven ("Plataforma"), você concorda com estes Termos de Uso.
+          Ao acessar ou usar o Projeto Raven (&ldquo;Plataforma&rdquo;), você concorda com estes Termos de Uso.
           Se não concordar com algum ponto, não utilize a Plataforma.
         </Section>
 
@@ -64,7 +64,7 @@ export default function TermosPage() {
         </Section>
 
         <Section title="7. Limitação de Responsabilidade">
-          A Plataforma é fornecida "no estado em que se encontra". Não garantimos disponibilidade
+          A Plataforma é fornecida &ldquo;no estado em que se encontra&rdquo;. Não garantimos disponibilidade
           ininterrupta, ausência de erros ou adequação a um propósito específico. Em nenhuma hipótese
           seremos responsáveis por danos indiretos, incidentais ou consequenciais decorrentes do uso
           da Plataforma.

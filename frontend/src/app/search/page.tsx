@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Search, FileText, MessageSquare, Clock, ChevronRight, Loader2 } from "lucide-react";
 import { fixImageUrl } from "@/lib/utils";
 
@@ -171,9 +172,11 @@ function SearchContent() {
                       className="rv-card p-5 flex gap-4 hover:border-[var(--rv-accent)]/40 hover:bg-[var(--rv-surface-2)] transition-all group"
                     >
                       {p.image && (
-                        <img
+                        <Image
                           src={fixImageUrl(p.image) ?? ""}
                           alt=""
+                          width={80}
+                          height={64}
                           className="h-16 w-20 rounded-xl object-cover flex-shrink-0 opacity-80 group-hover:opacity-100 transition-opacity"
                         />
                       )}
