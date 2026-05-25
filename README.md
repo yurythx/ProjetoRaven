@@ -242,109 +242,32 @@ git clone <url-do-repositorio> ProjetoRaven
 cd ProjetoRaven
 ```
 
-### Passo 2 — Gerar chaves JWT RSA (única vez)
+### Passo 2 — Executar o setup interativo
 
 ```bash
-mkdir -p Backend/keys
-openssl genrsa -out Backend/keys/private.pem 2048
-openssl rsa -in Backend/keys/private.pem -pubout -out Backend/keys/public.pem
-chmod 600 Backend/keys/private.pem
+chmod +x setup.sh
+./setup.sh
 ```
 
-> As chaves ficam em `.gitignore`. **Nunca as comite.** Elas persistem entre deploys pelo volume `Backend/keys`.
+O `setup.sh` cuida de tudo de forma interativa:
 
-### Passo 3 — Configurar variáveis do backend
+| O que faz | Detalhe |
+|---|---|
+| Verifica pré-requisitos | Docker, openssl, python3 |
+| Pergunta domínio e credenciais | Apenas 5 respostas simples |
+| Gera todos os segredos | SECRET_KEY, senhas, Fernet key |
+| Gera as chaves JWT RSA 2048-bit | Em `Backend/keys/` (gitignored) |
+| Gera as chaves VAPID | Web Push via python3-cryptography |
+| Escreve `Backend/.env.prod` | Completo, sem edição manual |
+| Escreve `frontend/.env.prod` | Completo, sem edição manual |
+| Mostra config do Cloudflare Tunnel | Quais rotas configurar |
+| Oferece executar o deploy na hora | Chama `./deploy.sh` automaticamente |
 
-```bash
-cp Backend/.env.prod.example Backend/.env.prod
-nano Backend/.env.prod
-```
+**O `setup.sh` só precisa ser executado uma vez.** Para deploys subsequentes (`git pull` + rebuild), use apenas `./deploy.sh`.
 
-Gere o `DJANGO_SECRET_KEY`:
+### Passo 3 — Configurar o Cloudflare Tunnel
 
-```bash
-python3 -c "import secrets; print(secrets.token_urlsafe(64))"
-```
-
-Gere o `TOTP_ENCRYPTION_KEY`:
-
-```bash
-python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-```
-
-Preencha obrigatoriamente:
-
-```bash
-DJANGO_SECRET_KEY=<gerado-acima>
-DEBUG=False
-ALLOWED_HOSTS=seudominio.com,www.seudominio.com
-SITE_URL=https://seudominio.com
-CORS_ALLOWED_ORIGINS=https://seudominio.com
-CSRF_TRUSTED_ORIGINS=https://seudominio.com
-
-POSTGRES_DB=projeto_raven
-POSTGRES_USER=raven
-POSTGRES_PASSWORD=<senha-forte>
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
-
-REDIS_PASSWORD=<senha-forte>
-REDIS_URL=redis://:REDIS_PASSWORD@redis:6379/1
-CELERY_BROKER_URL=redis://:REDIS_PASSWORD@redis:6379/2
-CHANNEL_LAYER_URL=redis://:REDIS_PASSWORD@redis:6379/3
-
-EMAIL_SETTINGS_ENCRYPTION_SALT=<string-aleatoria-32-chars>
-TOTP_ENCRYPTION_KEY=<gerado-acima>
-
-JWT_PRIVATE_KEY_PATH=/app/keys/private.pem
-JWT_PUBLIC_KEY_PATH=/app/keys/public.pem
-
-FRONTEND_PORT=3100
-DJANGO_PORT=8100
-
-# Admin criado automaticamente no primeiro boot
-DJANGO_ADMIN_EMAIL=admin@seudominio.com
-DJANGO_ADMIN_USERNAME=admin
-DJANGO_ADMIN_PASSWORD=<senha-forte>
-
-SECURE_SSL_REDIRECT=False
-SCHEMA_ENABLED=False
-REST_THROTTLING_ENABLED=True
-```
-
-### Passo 4 — Configurar variáveis do frontend
-
-```bash
-cp frontend/.env.prod.example frontend/.env.prod
-nano frontend/.env.prod
-```
-
-```bash
-NEXT_PUBLIC_API_BASE_URL=https://seudominio.com
-NEXT_PUBLIC_SITE_URL=https://seudominio.com
-NEXT_PUBLIC_WS_BASE_URL=https://seudominio.com
-INTERNAL_API_BASE_URL=http://django:8000
-```
-
-> `NEXT_PUBLIC_*` são embutidas no bundle em **build-time**. Qualquer alteração exige rebuild da imagem.
-
-### Passo 5 — Gerar chaves VAPID (Web Push, opcional)
-
-```bash
-npx web-push generate-vapid-keys
-```
-
-Adicione ao `Backend/.env.prod`:
-
-```bash
-VAPID_PUBLIC_KEY=<public-key>
-VAPID_PRIVATE_KEY=<private-key>
-VAPID_ADMIN_EMAIL=admin@seudominio.com
-```
-
-### Passo 6 — Configurar Cloudflare Tunnel
-
-No painel do Cloudflare → **Zero Trust → Networks → Tunnels**, configure:
+No painel do Cloudflare → **Zero Trust → Networks → Tunnels**, configure as rotas exibidas no final do `setup.sh`:
 
 | Hostname público | Serviço interno |
 |---|---|
@@ -354,18 +277,16 @@ No painel do Cloudflare → **Zero Trust → Networks → Tunnels**, configure:
 
 > A rota `/ws/*` é **obrigatória** para o fórum em tempo real. O Next.js standalone não faz proxy de WebSocket.
 
-### Passo 7 — Fazer o deploy
-
-#### Opção A — Script automatizado (recomendado)
+### Passo 4 — Deploy (se não executou pelo setup.sh)
 
 ```bash
 chmod +x deploy.sh
 ./deploy.sh
 ```
 
-O script executa automaticamente:
+O `deploy.sh` executa automaticamente:
 1. Verifica Docker, docker compose e openssl
-2. Valida os arquivos `.env.prod` (detecta `CHANGE_ME` não preenchidos)
+2. Valida os arquivos `.env.prod`
 3. Gera as chaves RSA se não existirem
 4. Pede confirmação antes de iniciar
 5. Faz pull das imagens base (postgres, redis)
@@ -375,26 +296,7 @@ O script executa automaticamente:
 9. Testa os endpoints de health check
 10. Exibe o status final
 
-#### Opção B — Manual
-
-```bash
-# Carregar variáveis de ambiente no shell
-set -a
-source Backend/.env.prod
-source frontend/.env.prod
-set +a
-
-# Construir imagens
-docker compose -f docker-compose.prod.yml build
-
-# Subir todos os serviços
-docker compose -f docker-compose.prod.yml up -d
-
-# Verificar status
-docker compose -f docker-compose.prod.yml ps
-```
-
-### Passo 8 — Verificar o deploy
+### Verificar o deploy
 
 ```bash
 # Status dos containers
@@ -408,18 +310,7 @@ curl http://127.0.0.1:8100/api/health/ready/
 curl -I http://127.0.0.1:3100/
 
 # Logs em tempo real
-docker compose -f docker-compose.prod.yml logs -f
 docker compose -f docker-compose.prod.yml logs -f django
-```
-
-### Passo 9 — Primeiro administrador
-
-Se as variáveis `DJANGO_ADMIN_*` estiverem definidas no `.env.prod`, o admin é criado automaticamente no boot. Para criação manual:
-
-```bash
-# Registre uma conta em /register, depois promova:
-docker compose -f docker-compose.prod.yml exec django \
-  python manage.py promote_superadmin seu@email.com
 ```
 
 ### Atualizar para nova versão
@@ -427,15 +318,9 @@ docker compose -f docker-compose.prod.yml exec django \
 ```bash
 git pull
 
-# Rebuild e reiniciar
-docker compose -f docker-compose.prod.yml build
-docker compose -f docker-compose.prod.yml up -d
-
-# Ou via script (recomendado — inclui health checks)
+# Rebuild e reiniciar (as migrações rodam automaticamente)
 ./deploy.sh
 ```
-
-> As migrações são executadas automaticamente na inicialização do container Django.
 
 ---
 

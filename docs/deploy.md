@@ -50,106 +50,42 @@ cd ProjetoRaven
 
 ---
 
-## Passo 2 — Criar os arquivos de ambiente
-
-### Backend
+## Passo 2 — Executar o setup interativo
 
 ```bash
-cp Backend/.env.prod.example Backend/.env.prod
-nano Backend/.env.prod
+chmod +x setup.sh
+./setup.sh
 ```
 
-Variáveis obrigatórias a preencher:
+O script faz as perguntas abaixo e configura tudo automaticamente:
 
-| Variável | Exemplo | Observação |
-|---|---|---|
-| `DJANGO_SECRET_KEY` | `python3 -c "import secrets; print(secrets.token_urlsafe(64))"` | Gere com o comando |
-| `POSTGRES_PASSWORD` | senha forte | Use um gerador de senhas |
-| `REDIS_PASSWORD` | senha forte | Preencha em `REDIS_URL` e `CHANNEL_LAYER_URL` também |
-| `ALLOWED_HOSTS` | `seudominio.com,www.seudominio.com` | |
-| `SITE_URL` | `https://seudominio.com` | |
-| `CORS_ALLOWED_ORIGINS` | `https://seudominio.com` | |
-| `CSRF_TRUSTED_ORIGINS` | `https://seudominio.com` | |
-| `EMAIL_SETTINGS_ENCRYPTION_SALT` | string aleatória de 32+ chars | |
-| `TOTP_ENCRYPTION_KEY` | `python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"` | Criptografa segredos TOTP no banco |
-| `SECURE_SSL_REDIRECT` | `False` | Cloudflare já termina TLS — Django não deve redirecionar |
-| `DJANGO_ADMIN_EMAIL` | `admin@seudominio.com` | Cria superadmin automaticamente no boot |
-| `DJANGO_ADMIN_USERNAME` | `admin` | |
-| `DJANGO_ADMIN_PASSWORD` | senha forte | |
-| `ADMIN_ALLOWED_IPS` | `1.2.3.4` (opcional) | Restringe `/admin/` e `/api/schema/` por IP |
-| `SCHEMA_ENABLED` | `False` | Desativa Swagger/Redoc em produção |
-| `VAPID_PUBLIC_KEY` | ver Passo 4 | |
-| `VAPID_PRIVATE_KEY` | ver Passo 4 | |
-| `VAPID_ADMIN_EMAIL` | `admin@seudominio.com` | |
-
-**Portas** — ajuste se já houver serviços nessas portas no servidor:
-
-```bash
-FRONTEND_PORT=3100   # Cloudflare roteia yourdomain.com → localhost:3100
-DJANGO_PORT=8100     # Cloudflare roteia /api/ e /ws/ → localhost:8100
-```
-
-### Frontend
-
-```bash
-cp frontend/.env.prod.example frontend/.env.prod
-nano frontend/.env.prod
-```
-
-| Variável | Exemplo |
+| Pergunta | Padrão |
 |---|---|
-| `NEXT_PUBLIC_API_BASE_URL` | `https://seudominio.com` |
-| `NEXT_PUBLIC_SITE_URL` | `https://seudominio.com` |
-| `NEXT_PUBLIC_WS_BASE_URL` | `https://seudominio.com` |
+| Domínio (sem https://) | `seudominio.com` |
+| Porta do frontend no host | `3100` |
+| Porta do Django no host | `8100` |
+| E-mail do admin | `admin@seudominio.com` |
+| Username do admin | `admin` |
+| Senha do admin | — |
+| Gerar chaves VAPID? | S |
+| IPs restritos para /admin/ | (opcional) |
+| Sentry DSN | (opcional) |
 
-> `NEXT_PUBLIC_*` são embutidas no bundle do browser em **build-time** — qualquer alteração exige rebuild da imagem.
+O que o `setup.sh` executa automaticamente:
 
----
+- Gera `DJANGO_SECRET_KEY`, `POSTGRES_PASSWORD`, `REDIS_PASSWORD`, `EMAIL_SETTINGS_ENCRYPTION_SALT`, `TOTP_ENCRYPTION_KEY`
+- Gera as chaves JWT RSA 2048-bit em `Backend/keys/`
+- Gera as chaves VAPID (via python3-cryptography ou npx)
+- Escreve `Backend/.env.prod` completo
+- Escreve `frontend/.env.prod` completo
+- Exibe o resumo das rotas a configurar no Cloudflare
+- Oferece executar `./deploy.sh` imediatamente
 
-## Passo 3 — Gerar chaves JWT RSA
-
-As chaves são geradas **uma única vez** e persistem entre deploys.
-
-```bash
-mkdir -p Backend/keys
-openssl genrsa -out Backend/keys/private.pem 2048
-openssl rsa -in Backend/keys/private.pem -pubout -out Backend/keys/public.pem
-chmod 600 Backend/keys/private.pem
-```
-
-> Os arquivos `*.pem` estão no `.gitignore`. **Nunca os comite no repositório.**
->
-> O `deploy.sh` gera as chaves automaticamente se elas não existirem.
-
----
-
-## Passo 4 — Gerar chaves VAPID (Web Push)
-
-```bash
-npx web-push generate-vapid-keys
-```
-
-Saída esperada:
-
-```
-Public Key:
-BExemplo...
-
-Private Key:
-exemplo...
-```
-
-Preencha em `Backend/.env.prod`:
-
-```bash
-VAPID_PUBLIC_KEY=BExemplo...
-VAPID_PRIVATE_KEY=exemplo...
-VAPID_ADMIN_EMAIL=admin@seudominio.com
-```
+> O `setup.sh` só precisa rodar **uma vez**. Para deploys subsequentes use apenas `./deploy.sh`.
 
 ---
 
-## Passo 5 — Configurar o Cloudflare Tunnel
+## Passo 3 — Configurar o Cloudflare Tunnel
 
 No painel do Cloudflare → **Zero Trust → Networks → Tunnels**, configure as rotas:
 
@@ -163,7 +99,7 @@ No painel do Cloudflare → **Zero Trust → Networks → Tunnels**, configure a
 
 ---
 
-## Passo 6 — Fazer o deploy
+## Passo 4 — Fazer o deploy
 
 ### Opção A — Script automatizado (recomendado)
 
@@ -205,7 +141,7 @@ docker compose -f docker-compose.prod.yml ps
 
 ---
 
-## Passo 7 — Verificar o deploy
+## Passo 5 — Verificar o deploy
 
 ```bash
 # Status dos containers
@@ -228,23 +164,11 @@ docker compose -f docker-compose.prod.yml logs -f frontend
 
 ---
 
-## Passo 8 — Criar o primeiro administrador (somente no primeiro deploy)
+## Passo 6 — Primeiro administrador
 
-### Opção A — Automático (recomendado)
+O `setup.sh` já configura as variáveis `DJANGO_ADMIN_*` — o admin é criado automaticamente no primeiro boot pelo `seed_prod`. Nenhuma ação necessária.
 
-Defina as variáveis em `Backend/.env.prod` antes do deploy:
-
-```bash
-DJANGO_ADMIN_EMAIL=admin@seudominio.com
-DJANGO_ADMIN_USERNAME=admin
-DJANGO_ADMIN_PASSWORD=senhaForte123!
-```
-
-O `seed_prod` cria/atualiza o usuário automaticamente na inicialização do container.
-
-### Opção B — Manual
-
-Se as variáveis não estiverem definidas, siga o fluxo após o deploy:
+Se precisar promover manualmente um usuário já registrado:
 
 1. Registre uma conta normalmente pelo site em `/register`
 2. Execute o comando de promoção:
@@ -255,8 +179,6 @@ docker compose -f docker-compose.prod.yml exec django \
 ```
 
 O comando concede `is_staff`, `is_superuser` e todos os grupos (`members`, `blog_editors`, `forum_moderators`, `admins`).
-
-> Em deploys subsequentes (`git pull` + rebuild) este passo pode ser ignorado — o banco e as permissões são preservados.
 
 ---
 
