@@ -59,7 +59,7 @@ class Post(UUIDModel):
         ARCHIVED = "archived", "Archived"
 
     title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, max_length=200)
 
     excerpt = models.TextField(max_length=500)
     content = models.TextField()
