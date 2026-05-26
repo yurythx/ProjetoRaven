@@ -430,7 +430,7 @@ export function BlogCommentModeration() {
                       <div key={r.id} className="rounded-xl border border-foreground/10 bg-background p-3">
                         <div className="flex items-center justify-between gap-3">
                           <div className="text-xs font-medium text-foreground/70">{r.author_name || r.name || "Anônimo"}</div>
-                          <div className="text-xs text-foreground/60">{new Date(r.created_at).toLocaleString("pt-BR")}</div>
+                          <div className="text-xs text-foreground/60" suppressHydrationWarning>{new Date(r.created_at).toLocaleString("pt-BR")}</div>
                         </div>
                         <div className="mt-2 whitespace-pre-wrap text-sm text-foreground/80">{r.content}</div>
                       </div>

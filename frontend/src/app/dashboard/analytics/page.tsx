@@ -97,7 +97,7 @@ export default function AnalyticsPage() {
         </h1>
         {data && (
           <p className="text-xs text-[var(--rv-text-muted)]">
-            Atualizado em {new Date(data.generated_at).toLocaleString("pt-BR")} · Atualiza a cada 2 min
+            Atualizado em <span suppressHydrationWarning>{new Date(data.generated_at).toLocaleString("pt-BR")}</span> · Atualiza a cada 2 min
           </p>
         )}
       </div>

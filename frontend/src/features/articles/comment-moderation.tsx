@@ -714,7 +714,7 @@ export function CommentModeration() {
                             <Badge variant="outline">Resposta</Badge>
                           )}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-muted-foreground" suppressHydrationWarning>
                           {meta} • {new Date(c.created_at).toLocaleString()}
                         </div>
                       </div>
@@ -844,7 +844,7 @@ export function CommentModeration() {
                                         <Badge variant="outline">Resposta</Badge>
                                         <Badge variant="outline">Comentário público</Badge>
                                       </div>
-                                      <div className="text-sm text-muted-foreground">
+                                      <div className="text-sm text-muted-foreground" suppressHydrationWarning>
                                         {meta2} • {new Date(r.created_at).toLocaleString()}
                                       </div>
                                     </div>
@@ -999,7 +999,7 @@ export function CommentModeration() {
                     {isReply ? <Badge variant="outline">Resposta</Badge> : <Badge variant="outline">Comentário</Badge>}
                     <div className="text-sm font-medium">{title}</div>
                   </div>
-                  <div className="mt-1 text-xs text-muted-foreground">
+                  <div className="mt-1 text-xs text-muted-foreground" suppressHydrationWarning>
                     #{it.id} • {new Date(it.created_at).toLocaleString()}
                   </div>
                   {snippet && <div className="mt-2 text-sm whitespace-pre-wrap">{snippet}</div>}

@@ -200,7 +200,7 @@ export function ForumModerationPanel() {
                           {t.is_locked && (
                             <span className="rv-badge rv-badge-red text-[8px]"><Lock className="h-2 w-2 inline mr-0.5" />Fechado</span>
                           )}
-                          <span className="text-[9px] text-[var(--rv-text-dim)]">{formatDate(t.created_at)}</span>
+                          <span className="text-[9px] text-[var(--rv-text-dim)]" suppressHydrationWarning>{formatDate(t.created_at)}</span>
                         </div>
                       </td>
 

@@ -337,7 +337,7 @@ export default function MePage() {
               </div>
               <div>
                 <span className="block text-xs text-[var(--rv-text-dim)] uppercase tracking-wider mb-1">Membro Desde</span>
-                <span className="text-sm text-[var(--rv-text-primary)]">{new Date(String(u?.date_joined || Date.now())).toLocaleDateString("pt-BR")}</span>
+                <span className="text-sm text-[var(--rv-text-primary)]" suppressHydrationWarning>{new Date(String(u?.date_joined || Date.now())).toLocaleDateString("pt-BR")}</span>
               </div>
             </div>
           </div>

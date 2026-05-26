@@ -128,11 +128,11 @@ function InfoTab({ user, onActivate, onDeactivate, onBanClick, onUnban, onVerify
         <div className="grid grid-cols-2 gap-3 text-xs">
           <div className="flex items-center gap-2 text-[var(--rv-text-muted)]">
             <Calendar className="h-3.5 w-3.5 opacity-50 shrink-0" />
-            <span>Criado: {fmtDate(user.date_joined)}</span>
+            <span suppressHydrationWarning>Criado: {fmtDate(user.date_joined)}</span>
           </div>
           <div className="flex items-center gap-2 text-[var(--rv-text-muted)]">
             <Clock className="h-3.5 w-3.5 opacity-50 shrink-0" />
-            <span>Login: {fmtDateTime(user.last_login)}</span>
+            <span suppressHydrationWarning>Login: {fmtDateTime(user.last_login)}</span>
           </div>
         </div>
         {user.is_banned && user.ban_reason && (
@@ -343,7 +343,7 @@ function AuditoriaTab({ events, isLoading }: { events: AdminAuditEvent[]; isLoad
                   <span className="text-[10px] text-[var(--rv-text-muted)]">{auditDetails(ev)}</span>
                 )}
               </div>
-              <span className="text-[10px] text-[var(--rv-text-dim)] whitespace-nowrap shrink-0">{fmtDateTime(ev.created_at)}</span>
+              <span className="text-[10px] text-[var(--rv-text-dim)] whitespace-nowrap shrink-0" suppressHydrationWarning>{fmtDateTime(ev.created_at)}</span>
             </div>
           ))}
         </div>
@@ -962,9 +962,9 @@ export function UserAdminPanel() {
                         </div>
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <p className="text-[10px] text-[var(--rv-text-dim)]">{fmtDate(row.date_joined)}</p>
+                        <p className="text-[10px] text-[var(--rv-text-dim)]" suppressHydrationWarning>{fmtDate(row.date_joined)}</p>
                         {row.last_login && (
-                          <p className="text-[9px] text-[var(--rv-text-dim)] opacity-60">{fmtDateTime(row.last_login)}</p>
+                          <p className="text-[9px] text-[var(--rv-text-dim)] opacity-60" suppressHydrationWarning>{fmtDateTime(row.last_login)}</p>
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">

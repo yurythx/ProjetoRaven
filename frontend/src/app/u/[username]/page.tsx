@@ -143,7 +143,7 @@ export default function PublicProfilePage({
               <span>@{profile.username}</span>
               <span className="text-[var(--rv-border)]">·</span>
               <Calendar className="h-3 w-3" />
-              <span>
+              <span suppressHydrationWarning>
                 Membro desde{" "}
                 {new Date(profile.date_joined).toLocaleDateString("pt-BR", {
                   month: "long",

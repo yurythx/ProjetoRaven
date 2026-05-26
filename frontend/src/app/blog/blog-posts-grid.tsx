@@ -72,7 +72,7 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
             </Link>
             <div className="p-4 sm:p-6 flex flex-col flex-1 gap-4">
               <div className="flex items-center justify-between rv-label text-[8px] text-[var(--rv-text-dim)]">
-                <span>{p.published_at ? new Date(p.published_at).toLocaleDateString() : "Rascunho"}</span>
+                <span suppressHydrationWarning>{p.published_at ? new Date(p.published_at).toLocaleDateString() : "Rascunho"}</span>
                 <span>{p.read_time_minutes} min leitura</span>
               </div>
               <Link href={`/blog/${p.slug}`}>

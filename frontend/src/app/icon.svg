@@ -1,28 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Background -->
-  <rect width="32" height="32" rx="7" fill="#092e20"/>
-
-  <!-- Raven silhouette: perched, facing right -->
-  <!-- Beak tip → forehead → back of head → back → tail → belly → breast → throat → beak tip -->
-  <path fill="white" d="
-    M 30 14
-    C 29 11 26 8 22 8
-    C 19 7 17 9 16 11
-    C 14 13 11 18 10 21
-    C 9 23 7 26 6 29
-    L 4 31 L 7 29 L 5 32
-    C 8 30 12 27 15 27
-    C 17 27 21 26 23 24
-    C 26 22 27 19 27 17
-    C 27 16 28 15 30 14
-    Z
-  "/>
-
-  <!-- Lower beak (hooked tip) -->
-  <path fill="white" d="M 30 14 C 29 16 26 16 25 15 C 27 13 29 13 30 14 Z"/>
-
-  <!-- Eye: dark hole in the white head -->
-  <circle cx="22" cy="10" r="1.5" fill="#092e20"/>
-  <!-- Eye highlight: brand accent -->
-  <circle cx="22.5" cy="9.5" r="0.6" fill="#44b78b"/>
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#44b78b"/>
+      <stop offset="100%" stop-color="#5ecfa5"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="7" fill="url(#g)"/>
+  <rect x="2" y="2" width="28" height="28" rx="5" fill="#000000"/>
+  <text x="16" y="23" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="19" fill="#44b78b">R</text>
 </svg>

@@ -250,7 +250,7 @@ export function AuditEventsPanel() {
                 const details = formatDetails(ev);
                 return (
                   <tr key={ev.id} className="hover:bg-white/[0.015] transition-colors">
-                    <td className="px-5 py-3 text-[10px] text-[var(--rv-text-dim)] whitespace-nowrap">
+                    <td className="px-5 py-3 text-[10px] text-[var(--rv-text-dim)] whitespace-nowrap" suppressHydrationWarning>
                       {formatWhen(ev.created_at)}
                     </td>
                     <td className="px-5 py-3 whitespace-nowrap">

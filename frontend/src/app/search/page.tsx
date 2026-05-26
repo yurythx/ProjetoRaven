@@ -192,7 +192,7 @@ function SearchContent() {
                         <div className="flex items-center gap-3 mt-2 text-[10px] text-[var(--rv-text-dim)] rv-label tracking-wide">
                           {p.author && <span>{p.author}</span>}
                           {p.published_at && (
-                            <span className="flex items-center gap-1">
+                            <span className="flex items-center gap-1" suppressHydrationWarning>
                               <Clock className="h-3 w-3" aria-hidden /> {formatDate(p.published_at)}
                             </span>
                           )}
@@ -243,7 +243,7 @@ function SearchContent() {
                             {t.category_name}
                           </Link>
                           {t.author && <span>{t.author}</span>}
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1" suppressHydrationWarning>
                             <Clock className="h-3 w-3" aria-hidden /> {formatDate(t.created_at)}
                           </span>
                           <span className="flex items-center gap-1">
