@@ -71,6 +71,15 @@ async function proxy(req: Request, segments: string[]) {
       cache: "no-store",
     });
 
+    if (res.status === 204 || res.status === 205 || res.status === 304) {
+      const isMutation = req.method !== "GET" && req.method !== "HEAD";
+      if (isMutation && res.ok) {
+        revalidateTag("blog:posts");
+        revalidateTag("blog:taxonomies");
+      }
+      return new NextResponse(null, { status: res.status });
+    }
+
     const contentType = res.headers.get("content-type") ?? "application/json";
     const text = await res.text();
 

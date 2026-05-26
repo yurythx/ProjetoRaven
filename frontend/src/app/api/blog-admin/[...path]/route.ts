@@ -79,6 +79,27 @@ async function proxy(req: Request, segments: string[]) {
     }
   }
 
+  if (res.status === 204 || res.status === 205 || res.status === 304) {
+    const isMutation = req.method !== "GET" && req.method !== "HEAD";
+    if (isMutation && res.ok) {
+      const root = segments[0] ?? "";
+      if (root === "posts" || root === "articles") {
+        revalidateTag("blog:posts");
+        const maybeSlug = segments[1];
+        if (maybeSlug) revalidateTag(`blog:post:${maybeSlug}`);
+      }
+      if (root === "categories") {
+        revalidateTag("blog:taxonomies");
+        revalidateTag("blog:categories");
+      }
+      if (root === "tags") {
+        revalidateTag("blog:taxonomies");
+        revalidateTag("blog:tags");
+      }
+    }
+    return new NextResponse(null, { status: res.status });
+  }
+
   const contentType = res.headers.get("content-type") ?? "application/json";
   const text = await res.text();
 

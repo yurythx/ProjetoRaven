@@ -65,6 +65,9 @@ async function proxy(req: Request, segments: string[]) {
     }
   }
 
+  if (res.status === 204 || res.status === 205 || res.status === 304) {
+    return new NextResponse(null, { status: res.status });
+  }
   const contentType = res.headers.get("content-type") ?? "application/json";
   const text = await res.text();
   return new NextResponse(text, { status: res.status, headers: { "content-type": contentType } });
