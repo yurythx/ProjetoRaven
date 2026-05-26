@@ -58,11 +58,11 @@ function buildCsp(): string {
 
   const directives = [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline'${extraScript}`,
+    `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com${extraScript}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: ${INTERNAL_MEDIA_ORIGIN}${extraImg}`,
     "font-src 'self'",
-    "connect-src 'self'",
+    "connect-src 'self' https://cloudflareinsights.com",
     "media-src 'self'",
     "object-src 'none'",
     "frame-src 'self'",

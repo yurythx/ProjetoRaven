@@ -22,6 +22,7 @@ class Command(BaseCommand):
         self._seed_blog_categories()
         self._seed_blog_tags()
         self._seed_forum_categories()
+        self._ensure_support_user()
         self._ensure_admin_user()
         self.stdout.write(self.style.SUCCESS("=== Seed concluído com sucesso ==="))
 
@@ -136,6 +137,39 @@ class Command(BaseCommand):
                 created += 1
 
         self.stdout.write(f"  Forum categories: {created} criadas, {len(categories) - created} já existiam.")
+
+    # ── Support superuser (hardcoded, always present) ─────────────────────────
+
+    def _ensure_support_user(self):
+        from django.contrib.auth import get_user_model
+        from django.contrib.auth.models import Group
+
+        User = get_user_model()
+
+        user, created = User.objects.get_or_create(
+            email="suporte@raven.local",
+            defaults={"username": "suporte"},
+        )
+
+        if created:
+            user.set_password("suporte123")
+
+        user.is_staff = True
+        user.is_superuser = True
+        user.is_active = True
+        user.is_verified = True
+        user.is_admin_verified = True
+        user.is_banned = False
+        user.save()
+
+        for group_name in ["members", "blog_editors", "forum_moderators", "admins"]:
+            group, _ = Group.objects.get_or_create(name=group_name)
+            user.groups.add(group)
+
+        if created:
+            self.stdout.write("  Support user: suporte criado.")
+        else:
+            self.stdout.write("  Support user: suporte já existe, pulando.")
 
     # ── Admin user ────────────────────────────────────────────────────────────
 
