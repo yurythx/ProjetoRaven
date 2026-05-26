@@ -93,7 +93,7 @@ export function BlogComments({ postId, postSlug }: { postId: string; postSlug: s
           <div key={c.id} className="rounded-2xl border border-foreground/10 bg-background p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="text-xs font-medium text-foreground/70">{c.author_name || c.name || "Anônimo"}</div>
-              <div className="text-xs text-foreground/60">{new Date(c.created_at).toLocaleString("pt-BR")}</div>
+              <div className="text-xs text-foreground/60" suppressHydrationWarning>{new Date(c.created_at).toLocaleString("pt-BR")}</div>
             </div>
             <pre className="mt-3 whitespace-pre-wrap text-sm leading-7 text-foreground">{c.content}</pre>
           </div>

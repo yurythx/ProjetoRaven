@@ -122,7 +122,7 @@ export default function NotificationsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`rv-badge ${verbBadgeClass(n.verb)} text-[8px]`}>{verbLabel(n.verb)}</span>
-                    <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">
+                    <span className="rv-label text-[9px] text-[var(--rv-text-dim)]" suppressHydrationWarning>
                       {new Date(n.created_at).toLocaleString("pt-BR")}
                     </span>
                   </div>

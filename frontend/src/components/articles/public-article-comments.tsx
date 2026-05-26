@@ -333,7 +333,7 @@ export function PublicArticleComments({ articleId, articleSlug, companySlug }: P
                                             </Badge>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <div className="text-xs text-muted-foreground">{dateLabel}</div>
+                                            <div className="text-xs text-muted-foreground" suppressHydrationWarning>{dateLabel}</div>
                                             <Button
                                                 size="sm"
                                                 variant="ghost"
@@ -385,7 +385,7 @@ export function PublicArticleComments({ articleId, articleSlug, companySlug }: P
                                                         <div className="flex items-center justify-between gap-4">
                                                             <div className="font-semibold truncate">{name2}</div>
                                                             <div className="flex items-center gap-2">
-                                                                <div className="text-xs text-muted-foreground">{date2}</div>
+                                                                <div className="text-xs text-muted-foreground" suppressHydrationWarning>{date2}</div>
                                                                 <Button
                                                                     size="sm"
                                                                     variant="ghost"

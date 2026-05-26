@@ -76,7 +76,7 @@ export function HiddenRepliesPanel({ topicSlug }: { topicSlug: string }) {
           <div key={r.id} className="rounded-2xl border border-foreground/10 bg-background p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="text-xs font-medium text-foreground/70">{r.author.display_name || r.author.username}</div>
-              <div className="text-xs text-foreground/60">{new Date(r.created_at).toLocaleString("pt-BR")}</div>
+              <div className="text-xs text-foreground/60" suppressHydrationWarning>{new Date(r.created_at).toLocaleString("pt-BR")}</div>
             </div>
             <div
               className="prose prose-sm sm:prose-base dark:prose-invert mt-3 max-w-none"
