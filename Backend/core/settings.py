@@ -16,7 +16,9 @@ APP_BUILD_TIME = os.environ.get("APP_BUILD_TIME", "")
 DEBUG = os.environ.get("DEBUG", "True").lower() == "true"
 METRICS_ENABLED = os.environ.get("METRICS_ENABLED", "False").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,web").split(",")
+_allowed_hosts_env = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,web").split(",")
+# Always allow internal Docker service names used by the Next.js → Django proxy
+ALLOWED_HOSTS = list({*_allowed_hosts_env, "django", "127.0.0.1", "localhost"})
 
 INSTALLED_APPS = [
     "django.contrib.admin",
