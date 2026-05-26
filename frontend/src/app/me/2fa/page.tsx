@@ -98,7 +98,7 @@ export default function TwoFASettingsPage() {
       setError((res.data as Record<string, string> | null)?.detail ?? "Erro ao gerar códigos.");
       return;
     }
-    setRecoveryCodes(res.data.codes);
+    setRecoveryCodes(res.data?.codes ?? []);
     setStep("codes");
   }
 
