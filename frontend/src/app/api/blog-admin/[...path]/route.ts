@@ -33,7 +33,7 @@ async function proxy(req: Request, segments: string[]) {
   baseHeaders.delete("host");
 
   let body: BodyInit | undefined;
-  if (req.method !== "GET" && req.method !== "HEAD") {
+  if (req.method !== "GET" && req.method !== "HEAD" && req.method !== "DELETE") {
     const contentType = req.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
       const json = (await req.json().catch(() => null)) as Record<string, unknown> | null;
@@ -42,10 +42,10 @@ async function proxy(req: Request, segments: string[]) {
         body = new TextEncoder().encode(JSON.stringify(json));
         baseHeaders.set("content-type", "application/json");
       } else {
-        body = await req.arrayBuffer();
+        body = await req.arrayBuffer().catch(() => undefined);
       }
     } else {
-      body = await req.arrayBuffer();
+      body = await req.arrayBuffer().catch(() => undefined);
     }
   }
 

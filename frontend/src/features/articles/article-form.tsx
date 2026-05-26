@@ -219,6 +219,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
     mutationFn: async (values: FormValues) => {
       const payload = { ...values, category: values.category ? String(values.category) : null }
       if (!payload.image) delete (payload as { image?: unknown }).image
+      if (!payload.published_at) delete (payload as { published_at?: unknown }).published_at
 
       const savedSlug = initialData?.slug ?? createdSlug
       const url = savedSlug

@@ -61,7 +61,7 @@ async function proxy(req: Request, segments: string[]) {
   headers.delete("host");
   if (access) headers.set("Authorization", `Bearer ${access}`);
 
-  const body = req.method === "GET" || req.method === "HEAD" ? undefined : await req.arrayBuffer();
+  const body = req.method === "GET" || req.method === "HEAD" || req.method === "DELETE" ? undefined : await req.arrayBuffer();
 
   try {
     const res = await fetch(target, {

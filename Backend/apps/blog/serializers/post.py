@@ -206,7 +206,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating posts."""
 
     category = serializers.UUIDField(required=False, allow_null=True, write_only=True)
-    slug = serializers.SlugField(required=False, allow_blank=True)
+    slug = serializers.SlugField(required=False, allow_blank=True, max_length=200)
     excerpt = serializers.CharField(required=False, allow_blank=True, default="")
     tags = serializers.ListField(child=serializers.UUIDField(), required=False, write_only=True)
     tag_names = serializers.ListField(
@@ -297,7 +297,7 @@ class PostUpdateSerializer(serializers.ModelSerializer):
     """Serializer for updating posts."""
 
     category = serializers.UUIDField(required=False, allow_null=True, write_only=True)
-    slug = serializers.SlugField(required=False, allow_blank=True)
+    slug = serializers.SlugField(required=False, allow_blank=True, max_length=200)
     tags = serializers.ListField(child=serializers.UUIDField(), required=False, write_only=True)
     tag_names = serializers.ListField(
         child=serializers.CharField(max_length=50),

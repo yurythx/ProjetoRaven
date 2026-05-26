@@ -32,13 +32,13 @@ async function proxy(req: Request, segments: string[]) {
   baseHeaders.delete("host");
 
   let body: BodyInit | undefined;
-  if (req.method !== "GET" && req.method !== "HEAD") {
+  if (req.method !== "GET" && req.method !== "HEAD" && req.method !== "DELETE") {
     const contentType = req.headers.get("content-type") ?? "";
     if (contentType.includes("application/json")) {
       body = new TextEncoder().encode(JSON.stringify(await req.json().catch(() => null)));
       baseHeaders.set("content-type", "application/json");
     } else {
-      body = await req.arrayBuffer();
+      body = await req.arrayBuffer().catch(() => undefined);
     }
   }
 
