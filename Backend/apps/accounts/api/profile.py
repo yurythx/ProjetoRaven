@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from ..services.profile import ProfileService
 from ..serializers.user import UserProfileSerializer, UserProfileUpdateSerializer
 from ..permissions import IsNotBanned
-from apps.common.utils import get_ip_and_ua
+from apps.common.utils import get_ip_and_ua, build_media_url
 
 
 class MeView(APIView):
@@ -178,7 +178,7 @@ class PublicProfileView(APIView):
                 "slug": p.slug,
                 "title": p.title,
                 "published_at": p.published_at,
-                "cover_image": request.build_absolute_uri(p.image.url) if p.image else None,
+                "cover_image": build_media_url(p.image.url) if p.image else None,
             }
             for p in posts_qs[:5]
         ]
@@ -188,7 +188,7 @@ class PublicProfileView(APIView):
             "display_name":  user.display_name or user.username,
             "date_joined":   user.date_joined,
             "is_verified":   bool(getattr(user, "is_verified", False)),
-            "avatar":        request.build_absolute_uri(user.avatar.url) if getattr(user, "avatar", None) else None,
+            "avatar":        build_media_url(user.avatar.url) if getattr(user, "avatar", None) else None,
             "bio":           getattr(user, "bio", None) or None,
             "website":       getattr(user, "website", None) or None,
             "stats": {

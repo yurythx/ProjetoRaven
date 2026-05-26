@@ -3,6 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.throttling import AnonRateThrottle
+from apps.common.utils import build_media_url
 
 
 class GlobalSearchView(APIView):
@@ -46,7 +47,7 @@ class GlobalSearchView(APIView):
             image = None
             if p.image:
                 try:
-                    image = self.request.build_absolute_uri(p.image.url)
+                    image = build_media_url(p.image.url)
                 except Exception:
                     pass
             results.append({

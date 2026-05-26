@@ -60,7 +60,7 @@ function buildCsp(): string {
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com${extraScript}`,
     "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob: ${INTERNAL_MEDIA_ORIGIN}${extraImg}`,
+    `img-src 'self' data: blob: http://django:8000 https://django:8000${extraImg}`,
     "font-src 'self'",
     "connect-src 'self' https://cloudflareinsights.com",
     "media-src 'self'",
@@ -99,6 +99,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "django", port: "8000", pathname: "/**" },
+      { protocol: "https", hostname: "django", port: "8000", pathname: "/**" },
+      { protocol: "https", hostname: "projetoraven.com", pathname: "/**" },
       { protocol: "http", hostname: "127.0.0.1", port: "8006", pathname: "/**" },
       { protocol: "http", hostname: "localhost", port: "8006", pathname: "/**" },
       { protocol: "http", hostname: "localhost", pathname: "/**" },
