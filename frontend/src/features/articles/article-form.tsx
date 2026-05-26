@@ -75,7 +75,7 @@ const formSchema = z.object({
   title: z.string().min(5, "O título deve ter pelo menos 5 caracteres."),
   slug: z.string().min(3, "O link permanente deve ter pelo menos 3 caracteres.").regex(/^[a-z0-9-]+$/, "O link deve conter apenas letras minúsculas, números e hifens."),
   content: z.string().min(10, "O conteúdo deve ter pelo menos 10 caracteres."),
-  excerpt: z.string().optional(),
+  excerpt: z.string().max(500, "O resumo deve ter no máximo 500 caracteres.").optional(),
   category: z.string().optional(),
   image: z.string().optional(),
   meta_title: z.string().max(70, "O título SEO deve ter menos de 70 caracteres.").optional(),
@@ -967,7 +967,12 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
               name="excerpt"
               render={({ field, fieldState }) => (
                 <div>
-                  <label htmlFor="af-excerpt" className="rv-label-field">Resumo do artigo</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label htmlFor="af-excerpt" className="rv-label-field">Resumo do artigo</label>
+                    <span className={`text-xs ${(field.value?.length ?? 0) > 500 ? 'text-red-400 font-bold' : 'text-[var(--rv-text-dim)]'}`}>
+                      {field.value?.length ?? 0}/500
+                    </span>
+                  </div>
                   <textarea
                     id="af-excerpt"
                     name={field.name}
@@ -982,7 +987,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
                     }}
                     onBlur={field.onBlur}
                   />
-                  <FieldHint>Aparece na listagem de posts.</FieldHint>
+                  <FieldHint>Aparece na listagem de posts. Máximo 500 caracteres.</FieldHint>
                   <FieldError message={fieldState.error?.message} />
                 </div>
               )}

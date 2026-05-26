@@ -207,7 +207,7 @@ class PostCreateSerializer(serializers.ModelSerializer):
 
     category = serializers.UUIDField(required=False, allow_null=True, write_only=True)
     slug = serializers.SlugField(required=False, allow_blank=True, max_length=200)
-    excerpt = serializers.CharField(required=False, allow_blank=True, default="")
+    excerpt = serializers.CharField(required=False, allow_blank=True, default="", max_length=500)
     tags = serializers.ListField(child=serializers.UUIDField(), required=False, write_only=True)
     tag_names = serializers.ListField(
         child=serializers.CharField(max_length=50),
