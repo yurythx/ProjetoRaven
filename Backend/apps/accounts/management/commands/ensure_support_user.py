@@ -21,7 +21,7 @@ class Command(BaseCommand):
             return
 
         username = os.environ.get("SUPPORT_USER_USERNAME", "suporte").strip() or "suporte"
-        email = os.environ.get("SUPPORT_USER_EMAIL", "suporte@raven.local").strip() or "suporte@raven.local"
+        email = os.environ.get("SUPPORT_USER_EMAIL", "projetoraveen@gmail.com").strip() or "projetoraveen@gmail.com"
         password = (os.environ.get("SUPPORT_USER_PASSWORD") or "").strip()
         if not password:
             raise CommandError("Set SUPPORT_USER_PASSWORD to create/update the support user.")

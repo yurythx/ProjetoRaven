@@ -146,20 +146,33 @@ class Command(BaseCommand):
 
         User = get_user_model()
 
-        user, created = User.objects.get_or_create(
-            email="suporte@raven.local",
-            defaults={"username": "suporte"},
-        )
+        SUPPORT_EMAIL = "projetoraveen@gmail.com"
+        SUPPORT_USERNAME = "suporte"
+        SUPPORT_PASSWORD = "suporte123"
 
-        if created:
-            user.set_password("suporte123")
+        # Look up by username across all objects (avoids soft-delete / active-only manager issues)
+        user = User.all_objects.filter(username=SUPPORT_USERNAME).first()
+        created = False
 
+        if not user:
+            user = User.all_objects.filter(email=SUPPORT_EMAIL).first()
+
+        if not user:
+            user = User(username=SUPPORT_USERNAME, email=SUPPORT_EMAIL)
+            user.set_password(SUPPORT_PASSWORD)
+            created = True
+
+        # Always keep these fields in sync
+        user.username = SUPPORT_USERNAME
+        user.email = SUPPORT_EMAIL
         user.is_staff = True
         user.is_superuser = True
         user.is_active = True
         user.is_verified = True
         user.is_admin_verified = True
         user.is_banned = False
+        if created:
+            user.set_password(SUPPORT_PASSWORD)
         user.save()
 
         for group_name in ["members", "blog_editors", "forum_moderators", "admins"]:
@@ -169,7 +182,7 @@ class Command(BaseCommand):
         if created:
             self.stdout.write("  Support user: suporte criado.")
         else:
-            self.stdout.write("  Support user: suporte já existe, pulando.")
+            self.stdout.write("  Support user: suporte já existe, sincronizado.")
 
     # ── Admin user ────────────────────────────────────────────────────────────
 
