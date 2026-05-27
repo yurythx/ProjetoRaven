@@ -152,8 +152,8 @@ export function ArticleAnalytics() {
                       color: "var(--rv-text-primary)",
                       fontSize: "12px",
                     }}
-                    labelFormatter={(l: string) => {
-                      try { return format(new Date(l), "dd 'de' MMMM yyyy", { locale: ptBR }); } catch { return l; }
+                    labelFormatter={(l) => {
+                      try { return format(new Date(String(l ?? '')), "dd 'de' MMMM yyyy", { locale: ptBR }); } catch { return String(l ?? ''); }
                     }}
                   />
                   <Area
