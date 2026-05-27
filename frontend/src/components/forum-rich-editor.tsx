@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useMemo } from "react";
-import { EditorContent, useEditor } from "@tiptap/react";
+import React, { useEffect, useMemo, useRef } from "react";
+import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
 
 import { Bold, Code, Italic, List, ListOrdered, Quote, Redo, Underline as UnderlineIcon, Undo } from "lucide-react";
 
+import { cleanPastedHtml, parsePlainTextToHtml } from "@/lib/editor-paste";
 import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -53,6 +54,8 @@ export function ForumRichEditor({
   className?: string;
   disabled?: boolean;
 }) {
+  const editorRef = useRef<Editor | null>(null)
+
   const extensions = useMemo(
     () => [
       StarterKit.configure({
@@ -79,9 +82,28 @@ export function ForumRichEditor({
         class:
           "prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[160px] px-4 py-4 scroll-smooth selection:bg-primary/20",
       },
+      handlePaste(_view, event) {
+        const text = event.clipboardData?.getData('text/plain')
+        const html = event.clipboardData?.getData('text/html')
+        if (html?.trim()) return false
+        if (!text?.trim()) return false
+        const ed = editorRef.current
+        if (!ed) return false
+        ed.commands.insertContent(parsePlainTextToHtml(text), {
+          parseOptions: { preserveWhitespace: false },
+        })
+        return true
+      },
+      transformPastedHTML(html) {
+        return cleanPastedHtml(html)
+      },
     },
     immediatelyRender: false,
   });
+
+  useEffect(() => {
+    editorRef.current = editor ?? null
+  }, [editor])
 
   if (!editor) return null;
 

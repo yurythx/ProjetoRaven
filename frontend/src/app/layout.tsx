@@ -8,6 +8,7 @@ import { AppHeader } from "@/components/app-header";
 import { AuthProvider } from "@/components/auth-provider";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { PwaRegister } from "@/components/pwa-register";
+import { NotificationProvider } from "@/contexts/notifications";
 import { QueryProvider } from "@/components/query-provider";
 import { SonnerProvider } from "@/components/sonner-provider";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -90,6 +91,7 @@ export default async function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <QueryProvider>
+              <NotificationProvider>
               <ToastProvider>
                 <AppHeader />
                 <main className="relative z-10 flex-1 pt-20">
@@ -99,6 +101,7 @@ export default async function RootLayout({
                 <UiToaster />
                 <SonnerProvider />
               </ToastProvider>
+              </NotificationProvider>
             </QueryProvider>
           </AuthProvider>
         </ThemeProvider>

@@ -1,215 +1,225 @@
-"use client"
+"use client";
 
-import { useQuery } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query";
 import {
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
-    AreaChart,
-    Area
-} from "recharts"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Loader2, TrendingUp, Eye, FileText, Calendar } from "lucide-react"
-import { format } from "date-fns"
-import { ptBR } from "date-fns/locale"
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+} from "recharts";
+import { TrendingUp, Eye, FileText, Calendar, BarChart2 } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import Link from "next/link";
+
+type AnalyticsData = {
+  total_articles?: number;
+  total_views?: number;
+  published_count?: number;
+  draft_count?: number;
+  most_viewed?: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    total_views: number;
+    views_last_30_days: number;
+  }>;
+  views_by_date?: Array<{ date: string; count: number }>;
+};
 
 export function ArticleAnalytics() {
-    const { data, isLoading } = useQuery({
-        queryKey: ['article-analytics'],
-        queryFn: async () => {
-            try {
-                const res = await fetch('/api/blog-admin/articles/analytics/')
-                if (!res.ok) return {}
-                return await res.json() ?? {}
-            } catch {
-                return {}
-            }
-        }
-    })
+  const { data, isLoading } = useQuery<AnalyticsData>({
+    queryKey: ["article-analytics"],
+    queryFn: async () => {
+      const res = await fetch("/api/blog-admin/articles/analytics/");
+      if (!res.ok) return {};
+      return (await res.json()) ?? {};
+    },
+  });
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center p-20" role="status" aria-live="polite">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden="true" />
-            </div>
-        )
-    }
-
-    const safe = (data ?? {}) as {
-        total_articles?: unknown
-        total_views?: unknown
-        most_viewed?: unknown
-        views_by_date?: unknown
-    }
-    const total_articles = Number.isFinite(Number(safe.total_articles)) ? Number(safe.total_articles) : 0
-    const total_views = Number.isFinite(Number(safe.total_views)) ? Number(safe.total_views) : 0
-    const most_viewed = Array.isArray(safe.most_viewed) ? safe.most_viewed as Array<{ id: string; title: string; slug: string; total_views: number; views_last_30_days: number }> : []
-    const views_by_date = Array.isArray(safe.views_by_date) ? safe.views_by_date as Array<{ date: string; count: number }> : []
-
+  if (isLoading) {
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-[2rem] shadow-xl overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-500">
-                        <FileText className="h-24 w-24 text-primary" />
-                    </div>
-                    <CardContent className="pt-8 relative z-10">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Total de Posts</p>
-                                <h3 className="text-4xl font-black tracking-tighter text-foreground">{total_articles}</h3>
-                            </div>
-                            <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shadow-lg shadow-primary/5">
-                                <FileText className="h-7 w-7" aria-hidden="true" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+      <div className="flex items-center justify-center py-20">
+        <div className="h-8 w-8 rounded-full border-2 border-[var(--rv-accent)] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
-                <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-[2rem] shadow-xl overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-500">
-                        <Eye className="h-24 w-24 text-blue-500" />
-                    </div>
-                    <CardContent className="pt-8 relative z-10">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Visualizações Totais</p>
-                                <h3 className="text-4xl font-black tracking-tighter text-foreground">{total_views.toLocaleString()}</h3>
-                            </div>
-                            <div className="h-14 w-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-500 shadow-lg shadow-blue-500/5">
-                                <Eye className="h-7 w-7" aria-hidden="true" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+  const total_articles = data?.total_articles ?? 0;
+  const total_views = data?.total_views ?? 0;
+  const published_count = data?.published_count ?? 0;
+  const draft_count = data?.draft_count ?? 0;
+  const most_viewed = data?.most_viewed ?? [];
+  const views_by_date = data?.views_by_date ?? [];
 
-                <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-[2rem] shadow-xl overflow-hidden relative group">
-                    <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-500">
-                        <TrendingUp className="h-24 w-24 text-emerald-500" />
-                    </div>
-                    <CardContent className="pt-8 relative z-10">
-                        <div className="flex items-center justify-between">
-                            <div className="space-y-1">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Engajamento / Post</p>
-                                <h3 className="text-4xl font-black tracking-tighter text-foreground">
-                                    {total_articles > 0 ? (total_views / total_articles).toFixed(1) : 0}
-                                </h3>
-                            </div>
-                            <div className="h-14 w-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shadow-lg shadow-emerald-500/5">
-                                <TrendingUp className="h-7 w-7" aria-hidden="true" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+  const statCards = [
+    {
+      label: "Total de Posts",
+      value: total_articles,
+      icon: FileText,
+      color: "var(--rv-accent)",
+      sub: `${published_count} publicados · ${draft_count} rascunhos`,
+    },
+    {
+      label: "Visualizações Totais",
+      value: total_views.toLocaleString("pt-BR"),
+      icon: Eye,
+      color: "var(--rv-cyan)",
+      sub: "todas as publicações",
+    },
+    {
+      label: "Média por Post",
+      value: total_articles > 0 ? (total_views / total_articles).toFixed(1) : "0",
+      icon: TrendingUp,
+      color: "var(--rv-gold)",
+      sub: "visualizações / artigo",
+    },
+  ];
+
+  return (
+    <div className="space-y-8">
+      {/* Stat cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {statCards.map(({ label, value, icon: Icon, color, sub }) => (
+          <div key={label} className="rv-card p-6 flex items-start gap-4">
+            <div
+              className="h-10 w-10 flex-shrink-0 rounded-xl flex items-center justify-center"
+              style={{ background: `color-mix(in srgb, ${color} 15%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 25%, transparent)` }}
+            >
+              <Icon className="h-5 w-5" style={{ color }} />
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                    <CardHeader className="p-8 pb-4">
-                        <CardTitle className="flex items-center gap-3 text-2xl font-black tracking-tighter">
-                            <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                                <Calendar className="h-5 w-5 text-primary" aria-hidden="true" />
-                            </div>
-                            Fluxo de Audiência
-                        </CardTitle>
-                        <CardDescription className="font-medium">Visualizações agregadas nos últimos 15 dias</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-8 pt-0">
-                        <div className="h-[320px] w-full mt-6">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={views_by_date}>
-                                    <defs>
-                                        <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                                    <XAxis
-                                        dataKey="date"
-                                        tickFormatter={(date) => {
-                                            try {
-                                                return format(new Date(date), 'dd/MM')
-                                            } catch {
-                                                return String(date)
-                                            }
-                                        }}
-                                        stroke="rgba(255,255,255,0.3)"
-                                        fontSize={10}
-                                        fontWeight="bold"
-                                        tickLine={false}
-                                        axisLine={false}
-                                        dy={10}
-                                    />
-                                    <YAxis
-                                        stroke="rgba(255,255,255,0.3)"
-                                        fontSize={10}
-                                        fontWeight="bold"
-                                        tickLine={false}
-                                        axisLine={false}
-                                        tickFormatter={(value) => `${value}`}
-                                    />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: 'rgba(15,15,15,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', backdropFilter: 'blur(10px)', color: '#fff', fontSize: '12px' }}
-                                        labelFormatter={(label) => format(new Date(label), 'dd MMMM yyyy', { locale: ptBR })}
-                                    />
-                                    <Area
-                                        type="monotone"
-                                        dataKey="count"
-                                        name="Visualizações"
-                                        stroke="hsl(var(--primary))"
-                                        strokeWidth={4}
-                                        fillOpacity={1}
-                                        fill="url(#colorViews)"
-                                        animationDuration={1500}
-                                    />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-white/5 backdrop-blur-xl border-white/10 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
-                    <CardHeader className="p-8 pb-4">
-                        <CardTitle className="flex items-center gap-3 text-2xl font-black tracking-tighter">
-                            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                <TrendingUp className="h-5 w-5 text-emerald-500" aria-hidden="true" />
-                            </div>
-                            Top Performance
-                        </CardTitle>
-                        <CardDescription className="font-medium">Posts com maior engajamento recente</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-8 pt-0">
-                        <div className="space-y-8 mt-6">
-                            {most_viewed.map((article: { id: string; title: string; slug: string; total_views: number; views_last_30_days: number }, index: number) => (
-                                <div key={article.id || `article-${index}`} className="flex items-center justify-between group/item">
-                                    <div className="flex items-center gap-5">
-                                        <div className="h-10 w-10 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-xs font-black group-hover/item:bg-primary group-hover/item:text-primary-foreground transition-all duration-300">
-                                            {index + 1}
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-sm line-clamp-1 group-hover/item:text-primary transition-colors">{article.title}</p>
-                                            <p className="text-[9px] text-muted-foreground font-black uppercase tracking-widest mt-1 opacity-50">{article.slug}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-8">
-                                        <div className="text-right">
-                                            <p className="text-sm font-black tracking-tighter">{article.total_views}</p>
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-50">Total</p>
-                                        </div>
-                                        <div className="text-right px-4 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/10">
-                                            <p className="text-sm font-black tracking-tighter text-emerald-500">+{article.views_last_30_days}</p>
-                                            <p className="text-[9px] font-black uppercase tracking-widest text-emerald-500/70">30 Dias</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+            <div className="min-w-0">
+              <p className="rv-label text-[9px] text-[var(--rv-text-dim)] tracking-widest mb-1">{label.toUpperCase()}</p>
+              <p className="rv-display text-3xl text-[var(--rv-text-primary)]">{value}</p>
+              <p className="text-[11px] text-[var(--rv-text-dim)] mt-1">{sub}</p>
             </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Views chart */}
+        <div className="rv-card p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--rv-accent) 15%, transparent)" }}>
+              <Calendar className="h-4 w-4 text-[var(--rv-accent)]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--rv-text-primary)]">Fluxo de Audiência</p>
+              <p className="text-[11px] text-[var(--rv-text-muted)]">Visualizações nos últimos 15 dias</p>
+            </div>
+          </div>
+          {views_by_date.length === 0 ? (
+            <div className="flex items-center justify-center h-[240px] text-[var(--rv-text-dim)] text-sm">
+              Nenhum dado disponível
+            </div>
+          ) : (
+            <div className="h-[240px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={views_by_date}>
+                  <defs>
+                    <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--rv-accent)" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="var(--rv-accent)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--rv-border)" />
+                  <XAxis
+                    dataKey="date"
+                    tickFormatter={(d: string) => {
+                      try { return format(new Date(d), "dd/MM"); } catch { return d; }
+                    }}
+                    stroke="var(--rv-text-dim)"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    dy={8}
+                  />
+                  <YAxis
+                    stroke="var(--rv-text-dim)"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "var(--rv-surface)",
+                      border: "1px solid var(--rv-border)",
+                      borderRadius: "12px",
+                      color: "var(--rv-text-primary)",
+                      fontSize: "12px",
+                    }}
+                    labelFormatter={(l: string) => {
+                      try { return format(new Date(l), "dd 'de' MMMM yyyy", { locale: ptBR }); } catch { return l; }
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="count"
+                    name="Visualizações"
+                    stroke="var(--rv-accent)"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorViews)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
         </div>
-    )
+
+        {/* Top posts */}
+        <div className="rv-card p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--rv-gold) 15%, transparent)" }}>
+              <BarChart2 className="h-4 w-4 text-[var(--rv-gold)]" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[var(--rv-text-primary)]">Top Performance</p>
+              <p className="text-[11px] text-[var(--rv-text-muted)]">Posts com maior engajamento</p>
+            </div>
+          </div>
+
+          {most_viewed.length === 0 ? (
+            <div className="flex items-center justify-center h-[240px] text-[var(--rv-text-dim)] text-sm">
+              Nenhum post publicado ainda
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {most_viewed.map((article, index) => (
+                <Link
+                  key={article.id}
+                  href={`/blog/${article.slug}`}
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--rv-surface-2)] transition-colors group"
+                >
+                  <span className="rv-display text-lg text-[var(--rv-text-dim)] w-6 text-center flex-shrink-0">
+                    {index + 1}
+                  </span>
+                  <p className="flex-1 text-sm text-[var(--rv-text-primary)] truncate group-hover:text-[var(--rv-accent)] transition-colors">
+                    {article.title}
+                  </p>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <div className="text-right">
+                      <p className="text-xs font-semibold text-[var(--rv-text-primary)]">{article.total_views}</p>
+                      <p className="rv-label text-[8px] text-[var(--rv-text-dim)]">TOTAL</p>
+                    </div>
+                    <div
+                      className="text-right px-2 py-1 rounded-lg"
+                      style={{ background: "color-mix(in srgb, var(--rv-gold) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--rv-gold) 20%, transparent)" }}
+                    >
+                      <p className="text-xs font-semibold text-[var(--rv-gold)]">+{article.views_last_30_days}</p>
+                      <p className="rv-label text-[8px] text-[var(--rv-gold)]/70">30D</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

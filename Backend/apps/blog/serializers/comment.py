@@ -4,7 +4,9 @@ from apps.blog.models import Comment, Post
 class CommentListSerializer(serializers.ModelSerializer):
     author_name = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()
+    article = serializers.UUIDField(source="post_id", read_only=True)
     article_slug = serializers.CharField(source="post.slug", read_only=True)
+    article_title = serializers.CharField(source="post.title", read_only=True)
 
     class Meta:
         model = Comment
@@ -15,11 +17,13 @@ class CommentListSerializer(serializers.ModelSerializer):
             "name",
             "email",
             "post",
+            "article",
+            "article_title",
+            "article_slug",
             "parent",
             "is_public",
             "is_approved",
             "reply_count",
-            "article_slug",
             "created_at",
         ]
         read_only_fields = fields
@@ -30,7 +34,7 @@ class CommentListSerializer(serializers.ModelSerializer):
         return obj.name or None
 
     def get_reply_count(self, obj):
-        return obj.replies.filter(is_public=True, is_approved=True).count()
+        return obj.replies.filter(is_public=True).count()
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):

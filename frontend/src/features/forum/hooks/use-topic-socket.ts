@@ -11,18 +11,22 @@ export type ForumReplyEvent = {
   is_solution: boolean;
 };
 
+function toWsProtocol(proto: string): string {
+  return proto === "https:" ? "wss:" : proto === "http:" ? "ws:" : proto;
+}
+
 function buildWsUrl(topicSlug: string): string {
   const wsBase = process.env.NEXT_PUBLIC_WS_BASE_URL;
   let protocol: string;
   let host: string;
   if (wsBase) {
     const parsed = new URL(wsBase);
-    protocol = parsed.protocol;
+    protocol = toWsProtocol(parsed.protocol);
     host = parsed.host;
   } else {
     const apiBase = getApiBaseUrl();
     const parsed = new URL(apiBase);
-    protocol = parsed.protocol === "https:" ? "wss:" : "ws:";
+    protocol = toWsProtocol(parsed.protocol);
     host = parsed.host;
   }
   return `${protocol}//${host}/ws/forum/topic/${topicSlug}/`;

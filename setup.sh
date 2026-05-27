@@ -494,7 +494,7 @@ cat > "$FRONTEND_ENV" << EOF
 # ── Public (embutido no build — rebuild necessário após alterar) ──────────────
 NEXT_PUBLIC_API_BASE_URL=${SITE_URL}
 NEXT_PUBLIC_SITE_URL=${SITE_URL}
-NEXT_PUBLIC_WS_BASE_URL=${SITE_URL}
+NEXT_PUBLIC_WS_BASE_URL=wss://${DOMAIN}
 
 # ── Server-side only ──────────────────────────────────────────────────────────
 # URL interna usada pelo Next.js server → Django (dentro da rede Docker)

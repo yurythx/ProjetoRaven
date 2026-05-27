@@ -7,12 +7,12 @@ import { useAuth } from "@/components/auth-provider";
 
 type ReactionType = "like" | "dislike" | "heart" | "laugh" | "wow";
 
-const REACTIONS: { key: ReactionType; label: string }[] = [
-  { key: "like", label: "Like" },
-  { key: "dislike", label: "Dislike" },
-  { key: "heart", label: "Heart" },
-  { key: "laugh", label: "Laugh" },
-  { key: "wow", label: "Wow" },
+const REACTIONS: { key: ReactionType; emoji: string; label: string }[] = [
+  { key: "like",    emoji: "👍", label: "Curtir"    },
+  { key: "heart",   emoji: "❤️", label: "Amei"      },
+  { key: "laugh",   emoji: "😂", label: "Haha"      },
+  { key: "wow",     emoji: "😮", label: "Uau"       },
+  { key: "dislike", emoji: "👎", label: "Não curti" },
 ];
 
 export function ReplyReactions({
@@ -28,6 +28,7 @@ export function ReplyReactions({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isAuthed = useMemo(() => Boolean(user), [user]);
+  const totalReactions = Object.values(summary).reduce((a, b) => a + b, 0);
 
   async function react(reaction: ReactionType) {
     if (!isAuthed) return;
@@ -41,35 +42,45 @@ export function ReplyReactions({
     setIsSubmitting(false);
     const data = await res.json().catch(() => null);
     if (!res.ok) {
-      const message =
-        typeof data?.error === "string"
-          ? data.error
-          : typeof data?.detail === "string"
-            ? data.detail
-            : "Falha ao reagir.";
-      setError(message);
+      setError(
+        typeof data?.error === "string" ? data.error
+        : typeof data?.detail === "string" ? data.detail
+        : "Falha ao reagir."
+      );
       return;
     }
     router.refresh();
   }
 
+  if (totalReactions === 0 && !isAuthed) return null;
+
   return (
-    <div className="mt-3">
-      <div className="flex flex-wrap gap-2">
-        {REACTIONS.map((r) => (
+    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      {REACTIONS.map((r) => {
+        const count = summary[r.key] ?? 0;
+        if (!isAuthed && count === 0) return null;
+        return (
           <button
             key={r.key}
             type="button"
+            title={r.label}
             disabled={!isAuthed || isSubmitting}
-            onClick={async () => react(r.key)}
-            className="h-8 rounded-xl border border-foreground/15 bg-background px-3 text-xs font-medium text-foreground disabled:opacity-60"
+            onClick={() => react(r.key)}
+            className={`rv-btn h-7 px-2.5 gap-1 text-[11px] rounded-full border transition-all
+              ${count > 0
+                ? "border-[var(--rv-accent)]/40 bg-[var(--rv-accent)]/10 text-[var(--rv-accent)]"
+                : "border-[var(--rv-border)] bg-transparent text-[var(--rv-text-muted)]"}
+              hover:border-[var(--rv-accent)]/60 hover:bg-[var(--rv-accent)]/15 disabled:opacity-40`}
           >
-            {r.label} · {summary[r.key] ?? 0}
+            <span>{r.emoji}</span>
+            {count > 0 && <span className="font-semibold">{count}</span>}
           </button>
-        ))}
-      </div>
-      {error ? <div className="mt-2 text-xs text-red-600">{error}</div> : null}
+        );
+      })}
+      {!isAuthed && totalReactions > 0 && (
+        <span className="text-[10px] text-[var(--rv-text-dim)]">Entre para reagir</span>
+      )}
+      {error && <span className="text-xs text-red-400">{error}</span>}
     </div>
   );
 }
-

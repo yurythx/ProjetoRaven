@@ -35,63 +35,82 @@ export function TopicModerationActions({
     setIsSubmitting(false);
     const data = await res.json().catch(() => null);
     if (!res.ok) {
-      const message =
-        typeof data?.error === "string"
-          ? data.error
-          : typeof data?.detail === "string"
-            ? data.detail
-            : "Falha ao executar ação.";
-      setError(message);
+      setError(
+        typeof data?.error === "string" ? data.error
+        : typeof data?.detail === "string" ? data.detail
+        : "Falha ao executar ação."
+      );
       return;
     }
     router.refresh();
   }
 
+  const canClose   = !isLocked && status !== "archived";
+  const canOpen    = isLocked  && status !== "archived";
   const canArchive = status !== "archived";
-  const canClose = !isLocked && status !== "archived";
-  const canOpen = isLocked && status !== "archived";
 
   return (
-    <div className="mt-6 rounded-2xl border border-foreground/10 bg-background p-5">
-      <div className="text-sm font-semibold text-foreground">Moderação</div>
-      <div className="mt-3 flex flex-wrap gap-3">
+    <div className="rv-card mt-6 p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--rv-text-muted)] mb-3">
+        Moderação
+      </p>
+      <div className="flex flex-wrap gap-2">
         <button
           type="button"
           disabled={isSubmitting}
-          onClick={async () => action(`/api/forum/topics/${encodeURIComponent(slug)}/${isPinned ? "unpin" : "pin"}`)}
-          className="h-10 rounded-xl border border-foreground/15 bg-background px-4 text-sm font-medium text-foreground disabled:opacity-60"
+          onClick={() => action(`/api/forum/topics/${encodeURIComponent(slug)}/${isPinned ? "unpin" : "pin"}`)}
+          className={`rv-btn h-8 px-3 text-xs rounded-lg border transition-all
+            ${isPinned
+              ? "border-[var(--rv-accent)]/50 bg-[var(--rv-accent)]/10 text-[var(--rv-accent)]"
+              : "border-[var(--rv-border)] text-[var(--rv-text-muted)]"}
+            hover:border-[var(--rv-accent)]/60 hover:bg-[var(--rv-accent)]/10 disabled:opacity-40`}
         >
-          {isPinned ? "Desfixar" : "Fixar"}
+          {isPinned ? "📌 Desfixar" : "📌 Fixar"}
         </button>
-        <button
-          type="button"
-          disabled={isSubmitting || !canClose}
-          onClick={async () => action(`/api/forum/topics/${encodeURIComponent(slug)}/close`)}
-          className="h-10 rounded-xl border border-foreground/15 bg-background px-4 text-sm font-medium text-foreground disabled:opacity-60"
-        >
-          Fechar
-        </button>
-        <button
-          type="button"
-          disabled={isSubmitting || !canOpen}
-          onClick={async () => action(`/api/forum/topics/${encodeURIComponent(slug)}/open`)}
-          className="h-10 rounded-xl border border-foreground/15 bg-background px-4 text-sm font-medium text-foreground disabled:opacity-60"
-        >
-          Reabrir
-        </button>
-        <button
-          type="button"
-          disabled={isSubmitting || !canArchive}
-          onClick={async () => action(`/api/forum/topics/${encodeURIComponent(slug)}/archive`)}
-          className="h-10 rounded-xl border border-foreground/15 bg-background px-4 text-sm font-medium text-foreground disabled:opacity-60"
-        >
-          Arquivar
-        </button>
+
+        {canClose && (
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => action(`/api/forum/topics/${encodeURIComponent(slug)}/close`)}
+            className="rv-btn h-8 px-3 text-xs rounded-lg border border-[var(--rv-border)] text-[var(--rv-text-muted)] hover:border-amber-500/60 hover:bg-amber-500/10 hover:text-amber-500 disabled:opacity-40 transition-all"
+          >
+            🔒 Fechar
+          </button>
+        )}
+
+        {canOpen && (
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => action(`/api/forum/topics/${encodeURIComponent(slug)}/open`)}
+            className="rv-btn h-8 px-3 text-xs rounded-lg border border-[var(--rv-border)] text-[var(--rv-text-muted)] hover:border-green-500/60 hover:bg-green-500/10 hover:text-green-500 disabled:opacity-40 transition-all"
+          >
+            🔓 Reabrir
+          </button>
+        )}
+
+        {canArchive && (
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => action(`/api/forum/topics/${encodeURIComponent(slug)}/archive`)}
+            className="rv-btn h-8 px-3 text-xs rounded-lg border border-[var(--rv-border)] text-[var(--rv-text-muted)] hover:border-red-500/60 hover:bg-red-500/10 hover:text-red-500 disabled:opacity-40 transition-all"
+          >
+            🗄️ Arquivar
+          </button>
+        )}
       </div>
-      <div className="mt-3 text-xs text-foreground/60">
-        Status: {status} · {isLocked ? "fechado" : "aberto"} · {isPinned ? "fixado" : "normal"}
-      </div>
-      {error ? <div className="mt-3 text-sm text-red-600">{error}</div> : null}
+
+      <p className="mt-3 text-[11px] text-[var(--rv-text-dim)]">
+        Status: <span className="font-medium">{status}</span>
+        {" · "}
+        {isLocked ? "🔒 fechado" : "🔓 aberto"}
+        {" · "}
+        {isPinned ? "📌 fixado" : "normal"}
+      </p>
+
+      {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
     </div>
   );
 }

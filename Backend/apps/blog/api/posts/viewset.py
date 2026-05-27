@@ -7,6 +7,7 @@ from apps.common.throttling import BlogPostThrottle
 from ...services.post import PostService
 from ...repositories.post import DjangoPostRepository
 from ...repositories.tag import DjangoTagRepository
+from ...selectors.post import PostSelector
 from ...serializers.post import PostListSerializer, PostDetailSerializer, PostCreateSerializer, PostUpdateSerializer
 from ...permissions.blog_permissions import IsBlogEditorOrReadOnly
 from ...models import Post
@@ -24,7 +25,7 @@ class PostViewSet(viewsets.ModelViewSet):
         if self.action in ("create", "update", "partial_update"):
             return [AnonRateThrottle(), BlogPostThrottle()]
         return super().get_throttles()
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.repository = DjangoPostRepository()
@@ -40,23 +41,23 @@ class PostViewSet(viewsets.ModelViewSet):
         return PostDetailSerializer
 
     def get_queryset(self):
-        qs = self.repository.get_all()
-        if self.action in ["list", "retrieve"]:
-            qs = qs.select_related("author")
         user = self.request.user
-
         is_editor = bool(
             user
             and user.is_authenticated
             and (getattr(user, "is_blog_editor", False) or user.is_staff or user.is_superuser)
         )
-
-        if not is_editor:
-            qs = qs.filter(status=Post.Status.PUBLISHED)
-            if not user.is_authenticated:
-                qs = qs.filter(is_public=True)
-
-        return qs
+        if is_editor:
+            return PostSelector.get_admin_list()
+        # Authenticated non-editors: published posts (including non-public/members-only)
+        if getattr(user, "is_authenticated", False):
+            return (
+                Post.objects.filter(status=Post.Status.PUBLISHED)
+                .select_related("author", "category")
+                .prefetch_related("tags")
+            )
+        # Unauthenticated: published + public only
+        return PostSelector.get_published()
 
     def retrieve(self, request, *args, **kwargs):
         from django.db.models import F

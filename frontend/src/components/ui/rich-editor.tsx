@@ -1,7 +1,7 @@
 "use client"
 
-import { useMemo } from 'react'
-import { useEditor, EditorContent } from '@tiptap/react'
+import { useEffect, useMemo, useRef } from 'react'
+import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
@@ -38,6 +38,7 @@ import {
     TooltipProvider,
     TooltipTrigger
 } from "@/components/ui/tooltip"
+import { cleanPastedHtml, parsePlainTextToHtml } from "@/lib/editor-paste"
 
 interface RichEditorProps {
     content: string
@@ -82,6 +83,8 @@ function ToolbarButton({
 }
 
 export function RichEditor({ content, onChange, placeholder, className }: RichEditorProps) {
+    const editorRef = useRef<Editor | null>(null)
+
     const extensions = useMemo(() => [
         StarterKit.configure({
             heading: {
@@ -115,9 +118,29 @@ export function RichEditor({ content, onChange, placeholder, className }: RichEd
             attributes: {
                 class: 'prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[300px] px-4 py-4 scroll-smooth selection:bg-primary/20',
             },
+            handlePaste(_view, event) {
+                const text = event.clipboardData?.getData('text/plain')
+                const html = event.clipboardData?.getData('text/html')
+                // If rich HTML exists (Word, Google Docs, etc.) let transformPastedHTML clean it
+                if (html?.trim()) return false
+                if (!text?.trim()) return false
+                const ed = editorRef.current
+                if (!ed) return false
+                ed.commands.insertContent(parsePlainTextToHtml(text), {
+                    parseOptions: { preserveWhitespace: false },
+                })
+                return true
+            },
+            transformPastedHTML(html) {
+                return cleanPastedHtml(html)
+            },
         },
         immediatelyRender: false,
     })
+
+    useEffect(() => {
+        editorRef.current = editor ?? null
+    }, [editor])
 
     if (!editor) {
         return null

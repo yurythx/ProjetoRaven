@@ -86,6 +86,26 @@ services:
              python manage.py collectstatic --noinput &&
              daphne -b 0.0.0.0 -p 8000 core.asgi:application"
 
+  # ── Scheduled post publisher (runs every 60 s) ───────────────────────────────
+  scheduler:
+    build:
+      context: ./Backend
+      target: production
+    restart: unless-stopped
+    env_file: ./Backend/.env.prod
+    environment:
+      USE_SQLITE: "False"
+      POSTGRES_HOST: postgres
+    volumes:
+      - ./Backend/keys:/app/keys:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "while true; do python manage.py publish_scheduled; sleep 60; done"
+
   # ── Frontend (exposto ao cloudflared via host) ────────────────────────────────
   frontend:
     build:

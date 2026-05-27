@@ -71,6 +71,10 @@ class TopicViewSet(viewsets.ModelViewSet):
                 except ValueError:
                     queryset = queryset.filter(category__slug=category_param)
 
+            author_param = self.request.query_params.get("author", "").strip()
+            if author_param:
+                queryset = queryset.filter(author__username=author_param)
+
             q = self.request.query_params.get("q", "").strip()
             if q:
                 # _apply_search applies its own order_by when using full-text search

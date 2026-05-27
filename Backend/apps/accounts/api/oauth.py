@@ -109,3 +109,26 @@ class ConnectedAccountsView(APIView):
             "id", "provider", "provider_uid", "created_at"
         )
         return Response(list(accounts))
+
+
+class DisconnectSocialAccountView(APIView):
+    """Disconnect (delete) a linked OAuth account from the authenticated user."""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, account_id):
+        try:
+            account = SocialAccount.objects.get(id=account_id, user=request.user)
+        except SocialAccount.DoesNotExist:
+            return Response({"detail": "Not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Prevent disconnecting the only login method if the user has no password
+        if not request.user.has_usable_password():
+            remaining = SocialAccount.objects.filter(user=request.user).count()
+            if remaining <= 1:
+                return Response(
+                    {"detail": "Não é possível desconectar — esta é a única forma de acesso à sua conta. Defina uma senha primeiro."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        account.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

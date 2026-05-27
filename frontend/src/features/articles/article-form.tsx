@@ -9,7 +9,7 @@ import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query"
 import { Article, Category, Tag } from "@/types"
 import {
   Loader2, ArrowLeft, Image as ImageIcon, X, Globe, MessageSquareQuote,
-  Layout, CheckCircle2, XCircle, Send, Sparkles, Link as LinkIcon, Lock, Trash2, Calendar,
+  Layout, CheckCircle2, XCircle, Send, Sparkles, Link as LinkIcon, Lock, Trash2, Calendar, Star,
 } from "lucide-react"
 import dynamic from "next/dynamic"
 const RichEditor = dynamic(
@@ -83,6 +83,7 @@ const formSchema = z.object({
   meta_keywords: z.string().optional(),
   tags: z.array(z.string()),
   published_at: z.string().optional().nullable(),
+  is_featured: z.boolean().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -163,6 +164,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
       published_at: initialData?.published_at
         ? new Date(initialData.published_at).toISOString().slice(0, 16)
         : "",
+      is_featured: initialData?.is_featured ?? false,
     },
   })
 
@@ -784,6 +786,34 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
                 </div>
               </div>
             </div>
+
+            {/* Featured toggle — somente editores */}
+            {canPublish && (
+              <Controller
+                control={form.control}
+                name="is_featured"
+                render={({ field }) => (
+                  <button
+                    type="button"
+                    onClick={() => field.onChange(!field.value)}
+                    className={`w-full flex items-center justify-between gap-3 px-4 py-3 rounded-xl border transition-all ${
+                      field.value
+                        ? "border-[var(--rv-gold)]/50 bg-[var(--rv-gold)]/10 text-[var(--rv-gold)]"
+                        : "border-[var(--rv-border)] text-[var(--rv-text-muted)] hover:border-[var(--rv-gold)]/40 hover:bg-[var(--rv-gold)]/5"
+                    }`}
+                    aria-pressed={field.value}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Star className={`h-4 w-4 ${field.value ? "fill-current" : ""}`} aria-hidden="true" />
+                      <span className="text-sm font-medium">Publicação em destaque</span>
+                    </div>
+                    <div className={`h-5 w-9 rounded-full transition-colors relative ${field.value ? "bg-[var(--rv-gold)]" : "bg-[var(--rv-surface-2)]"}`}>
+                      <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${field.value ? "translate-x-4" : "translate-x-0.5"}`} />
+                    </div>
+                  </button>
+                )}
+              />
+            )}
 
             {/* Categoria */}
             <Controller

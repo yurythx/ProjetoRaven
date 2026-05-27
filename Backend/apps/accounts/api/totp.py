@@ -79,14 +79,32 @@ class TOTP2FAEnableView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        import hashlib
+        import secrets
         import pyotp
+        from ..models import TOTPRecoveryCode
+
         totp = pyotp.TOTP(decrypt_totp_secret(user.totp_secret))
         if not totp.verify(code, valid_window=1):
             return Response({"detail": "Código inválido."}, status=status.HTTP_400_BAD_REQUEST)
 
         user.totp_enabled = True
         user.save(update_fields=["totp_enabled"])
-        return Response({"detail": "2FA ativado com sucesso."})
+
+        codes = [secrets.token_hex(5).upper() for _ in range(8)]
+        TOTPRecoveryCode.objects.filter(user=user).delete()
+        TOTPRecoveryCode.objects.bulk_create([
+            TOTPRecoveryCode(
+                user=user,
+                code_hash=hashlib.sha256(c.encode()).hexdigest(),
+            )
+            for c in codes
+        ])
+
+        return Response({
+            "detail": "2FA ativado com sucesso.",
+            "recovery_codes": codes,
+        })
 
 
 class TOTP2FADisableView(APIView):

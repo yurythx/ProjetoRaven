@@ -1,20 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
+import { useNotifications } from "@/contexts/notifications";
 import { Bell, BellOff, Check, Loader2 } from "lucide-react";
-
-type Notification = {
-  id: string;
-  verb: string;
-  actor_name: string;
-  message: string;
-  target_url: string;
-  read: boolean;
-  created_at: string;
-};
 
 function verbLabel(verb: string) {
   if (verb === "forum_reply") return "Fórum";
@@ -31,34 +22,11 @@ function verbBadgeClass(verb: string) {
 export default function NotificationsPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [fetching, setFetching] = useState(true);
-  const [marking, setMarking] = useState(false);
+  const { notifications, unreadCount, fetched, markAllRead, markRead } = useNotifications();
 
   useEffect(() => {
     if (!isLoading && !user) router.replace("/login");
   }, [isLoading, user, router]);
-
-  useEffect(() => {
-    if (!user) return;
-    setFetching(true);
-    fetch("/api/notifications")
-      .then((r) => r.json())
-      .then((data: unknown) => {
-        setNotifications(Array.isArray(data) ? data as Notification[] : []);
-      })
-      .catch(() => setNotifications([]))
-      .finally(() => setFetching(false));
-  }, [user]);
-
-  const markAllRead = async () => {
-    setMarking(true);
-    await fetch("/api/notifications", { method: "POST" }).catch(() => null);
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setMarking(false);
-  };
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
 
   if (isLoading) {
     return (
@@ -89,17 +57,16 @@ export default function NotificationsPage() {
           </div>
           {unreadCount > 0 && (
             <button
-              onClick={markAllRead}
-              disabled={marking}
+              onClick={() => void markAllRead()}
               className="rv-btn rv-btn-ghost text-xs h-9 px-4 flex items-center gap-2"
             >
-              {marking ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+              <Check className="h-3 w-3" />
               Marcar todas lidas
             </button>
           )}
         </div>
 
-        {fetching ? (
+        {!fetched ? (
           <div className="flex justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-[var(--rv-accent)]" />
           </div>
@@ -108,7 +75,7 @@ export default function NotificationsPage() {
             <BellOff className="h-10 w-10 mx-auto mb-4 text-[var(--rv-text-dim)] opacity-40" />
             <h2 className="rv-display text-xl text-[var(--rv-text-primary)] mb-2">Nenhuma notificação</h2>
             <p className="text-sm text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
-              Quando alguém responder seus tópicos, você será notificado aqui.
+              Quando alguém responder seus tópicos ou comentar seus artigos, você será notificado aqui.
             </p>
           </div>
         ) : (
@@ -131,7 +98,8 @@ export default function NotificationsPage() {
                   </p>
                   {n.target_url && (
                     <Link
-                      href={n.target_url.startsWith("http") ? n.target_url : n.target_url}
+                      href={n.target_url}
+                      onClick={() => { if (!n.read) void markRead(n.id); }}
                       className="text-xs text-[var(--rv-accent)] hover:underline mt-1 inline-block"
                     >
                       Ver →

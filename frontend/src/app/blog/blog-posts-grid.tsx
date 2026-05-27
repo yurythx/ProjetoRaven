@@ -8,7 +8,7 @@ import { fixImageUrl } from "@/lib/utils";
 
 type BlogPostListItem = {
   id: string; title: string; slug: string; excerpt: string;
-  author_name: string; category_name: string;
+  author_name: string; author_username?: string | null; category_name: string;
   published_at: string | null; created_at: string;
   view_count: number; read_time_minutes: number;
   image: string | null;
@@ -81,7 +81,13 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
               <p className="text-xs text-[var(--rv-text-muted)] line-clamp-3 leading-relaxed flex-1">{p.excerpt}</p>
               <div className="rv-divider" />
               <div className="flex items-center justify-between">
-                <span className="rv-label text-[8px] text-[var(--rv-text-dim)]">por {p.author_name}</span>
+                {p.author_username ? (
+                  <Link href={`/u/${p.author_username}`} className="rv-label text-[8px] text-[var(--rv-text-dim)] hover:text-[var(--rv-accent)] transition-colors">
+                    por {p.author_name}
+                  </Link>
+                ) : (
+                  <span className="rv-label text-[8px] text-[var(--rv-text-dim)]">por {p.author_name}</span>
+                )}
                 <Link href={`/blog/${p.slug}`} className="text-[10px] text-[var(--rv-accent)] flex items-center gap-1 group-hover:gap-2 transition-all">Ler Artigo →</Link>
               </div>
             </div>

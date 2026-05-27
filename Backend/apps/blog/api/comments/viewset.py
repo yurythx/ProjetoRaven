@@ -11,6 +11,7 @@ from apps.common.throttling import CommentThrottle
 _EDITOR_ACTIONS = {
     "approve", "disapprove", "destroy", "list_pending",
     "bulk_approve", "bulk_disapprove", "bulk_delete",
+    "bulk_filtered_count", "bulk_approve_filtered", "bulk_disapprove_filtered", "bulk_delete_filtered",
     "approve_thread", "disapprove_thread", "delete_thread",
     "replies",
 }
@@ -207,6 +208,74 @@ class CommentViewSet(viewsets.GenericViewSet):
         from apps.blog.models import Comment
         ids = request.data.get("ids", [])
         deleted, _ = Comment.objects.filter(id__in=ids).delete()
+        return response.Response({"deleted": deleted})
+
+    # ── Bulk filtered moderation ─────────────────────────────────────────────
+
+    def _build_filter_qs(self, payload: dict):
+        """Build a Comment queryset from a filter payload sent by the moderation UI."""
+        from apps.blog.models import Comment
+
+        filters: dict = {}
+        if "is_approved" in payload:
+            val = payload["is_approved"]
+            if isinstance(val, str):
+                filters["is_approved"] = val.lower() not in ("false", "0")
+            else:
+                filters["is_approved"] = bool(val)
+        if "is_public" in payload:
+            val = payload["is_public"]
+            filters["is_public"] = (val not in (False, "false", "0")) if not isinstance(val, bool) else val
+        if "parent__isnull" in payload:
+            val = payload["parent__isnull"]
+            filters["parent__isnull"] = (val not in (False, "false", "0")) if not isinstance(val, bool) else val
+        if payload.get("article"):
+            filters["post_id"] = payload["article"]
+        if payload.get("created_at__gte"):
+            filters["created_at__gte"] = payload["created_at__gte"]
+        if payload.get("created_at__lte"):
+            filters["created_at__lte"] = payload["created_at__lte"]
+
+        qs = Comment.objects.filter(**filters)
+
+        search = (payload.get("search") or "").strip()
+        if search:
+            qs = qs.filter(
+                Q(content__icontains=search) | Q(name__icontains=search) | Q(email__icontains=search)
+            )
+
+        include_replies = payload.get("include_replies", True)
+        if include_replies and "parent__isnull" not in filters:
+            pass  # no additional filter needed
+        elif not include_replies:
+            qs = qs.filter(parent__isnull=True)
+
+        return qs
+
+    @action(detail=False, methods=["post"], url_path="bulk_filtered_count")
+    def bulk_filtered_count(self, request):
+        qs = self._build_filter_qs(request.data)
+        count = qs.count()
+        sample = qs.select_related("post", "author").order_by("-created_at")[:5]
+        sample_data = ModerationCommentSerializer(sample, many=True).data
+        return response.Response({"count": count, "sample_items": sample_data})
+
+    @action(detail=False, methods=["post"], url_path="bulk_approve_filtered")
+    def bulk_approve_filtered(self, request):
+        qs = self._build_filter_qs(request.data)
+        updated = qs.update(is_approved=True)
+        return response.Response({"updated": updated})
+
+    @action(detail=False, methods=["post"], url_path="bulk_disapprove_filtered")
+    def bulk_disapprove_filtered(self, request):
+        qs = self._build_filter_qs(request.data)
+        updated = qs.update(is_approved=False)
+        return response.Response({"updated": updated})
+
+    @action(detail=False, methods=["post"], url_path="bulk_delete_filtered")
+    def bulk_delete_filtered(self, request):
+        qs = self._build_filter_qs(request.data)
+        deleted, _ = qs.delete()
         return response.Response({"deleted": deleted})
 
     # ── Legacy ───────────────────────────────────────────────────────────────

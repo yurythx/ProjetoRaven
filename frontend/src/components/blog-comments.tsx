@@ -78,42 +78,40 @@ export function BlogComments({ postId, postSlug }: { postId: string; postSlug: s
   }, [load]);
 
   return (
-    <div className="mt-8 rounded-2xl border border-foreground/10 bg-background p-5" aria-busy={isLoading}>
-      <div className="text-base font-semibold text-foreground">Comentários</div>
+    <div className="mt-8 rv-card p-5 sm:p-6" aria-busy={isLoading}>
+      <div className="rv-display text-base text-[var(--rv-text-primary)] mb-4">Comentários</div>
 
-      {isLoading ? <div className="mt-3 text-sm text-foreground/70">Carregando...</div> : null}
+      {isLoading ? <div className="text-sm text-[var(--rv-text-dim)]">Carregando...</div> : null}
       {error ? (
-        <div className="mt-3 text-sm text-red-600" role="alert">
-          {error}
-        </div>
+        <div className="text-sm text-red-400" role="alert">{error}</div>
       ) : null}
 
-      <div className="mt-5 grid gap-3">
+      <div className="mt-2 grid gap-3">
         {comments.map((c) => (
-          <div key={c.id} className="rounded-2xl border border-foreground/10 bg-background p-4">
-            <div className="flex items-center justify-between gap-4">
-              <div className="text-xs font-medium text-foreground/70">{c.author_name || c.name || "Anônimo"}</div>
-              <div className="text-xs text-foreground/60" suppressHydrationWarning>{new Date(c.created_at).toLocaleString("pt-BR")}</div>
+          <div key={c.id} className="rounded-xl border border-[var(--rv-border)] bg-[var(--rv-surface-2)] p-4">
+            <div className="flex items-center justify-between gap-4 mb-2">
+              <div className="text-xs font-medium text-[var(--rv-text-muted)]">{c.author_name || c.name || "Anônimo"}</div>
+              <div className="text-[10px] text-[var(--rv-text-dim)]" suppressHydrationWarning>{new Date(c.created_at).toLocaleString("pt-BR")}</div>
             </div>
-            <pre className="mt-3 whitespace-pre-wrap text-sm leading-7 text-foreground">{c.content}</pre>
+            <p className="text-sm leading-relaxed text-[var(--rv-text-muted)] whitespace-pre-wrap break-words">{c.content}</p>
           </div>
         ))}
         {!isLoading && comments.length === 0 && !error ? (
-          <div className="text-sm text-foreground/70">Nenhum comentário ainda.</div>
+          <div className="text-sm text-[var(--rv-text-dim)] py-4 text-center">Nenhum comentário ainda. Seja o primeiro!</div>
         ) : null}
       </div>
 
       {!user ? (
-        <div className="mt-8 rounded-xl border border-foreground/10 bg-background p-4 text-sm text-foreground/80">
-          Faça <Link href="/login" className="underline">login</Link> para comentar.
+        <div className="mt-6 rv-card p-4 text-sm text-[var(--rv-text-muted)]">
+          Faça <Link href="/login" className="text-[var(--rv-accent)] hover:underline">login</Link> para comentar.
         </div>
       ) : !canComment ? (
-        <div className="mt-8 rounded-xl border border-foreground/10 bg-background p-4 text-sm text-foreground/80">
-          Sua conta precisa estar ativa para comentar.
+        <div className="mt-6 rv-card p-4 text-sm text-[var(--rv-text-muted)]">
+          Sua conta precisa estar ativa e verificada para comentar.
         </div>
       ) : (
         <form
-          className="mt-8 grid gap-3"
+          className="mt-6 grid gap-3"
           onSubmit={async (e) => {
             e.preventDefault();
             setError(null);
@@ -153,25 +151,26 @@ export function BlogComments({ postId, postSlug }: { postId: string; postSlug: s
             await load();
           }}
         >
-          <div className="text-sm font-semibold text-foreground">Deixe um comentário</div>
-          <label htmlFor="blog-comment" className="grid gap-1 text-sm">
-            <span className="font-medium text-foreground">Comentário</span>
-            <textarea
-              id="blog-comment"
-              name="content"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              rows={5}
-              className="w-full resize-y rounded-xl border border-foreground/15 bg-background p-3 text-sm text-foreground"
-            />
-          </label>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="h-11 rounded-xl bg-foreground px-4 text-sm font-medium text-background disabled:opacity-60"
-          >
-            {isSubmitting ? "Enviando..." : "Enviar"}
-          </button>
+          <div className="text-xs text-[var(--rv-text-dim)] uppercase tracking-wider mb-1">Seu comentário</div>
+          <textarea
+            id="blog-comment"
+            name="content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={4}
+            placeholder="Escreva seu comentário..."
+            className="rv-input resize-y text-sm"
+            style={{ minHeight: "6rem" }}
+          />
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rv-btn rv-btn-primary h-10 px-6 text-xs disabled:opacity-40"
+            >
+              {isSubmitting ? "Enviando..." : "Enviar Comentário"}
+            </button>
+          </div>
         </form>
       )}
     </div>

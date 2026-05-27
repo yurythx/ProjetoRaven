@@ -7,6 +7,7 @@ class PostListSerializer(serializers.ModelSerializer):
     """Serializer for post list (lightweight)."""
 
     author_name = serializers.CharField(source="author.display_name", read_only=True)
+    author_username = serializers.CharField(source="author.username", read_only=True)
     category_name = serializers.SerializerMethodField()
     tags = serializers.SerializerMethodField()
     tag_slugs = serializers.SerializerMethodField()
@@ -22,6 +23,7 @@ class PostListSerializer(serializers.ModelSerializer):
             "slug",
             "excerpt",
             "author_name",
+            "author_username",
             "category_name",
             "category_slug",
             "category_id",

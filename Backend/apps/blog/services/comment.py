@@ -69,7 +69,7 @@ class CommentService:
             safe_name = ""
             safe_email = ""
 
-        return self.repo.create(
+        comment = self.repo.create(
             post=post,
             parent=parent,
             author=author,
@@ -80,3 +80,12 @@ class CommentService:
             is_public=True,
             is_approved=is_approved,
         )
+
+        if is_approved and is_authenticated:
+            try:
+                from apps.notifications.signals import notify_blog_comment
+                notify_blog_comment(post, comment)
+            except Exception:
+                pass
+
+        return comment

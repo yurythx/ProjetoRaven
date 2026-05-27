@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { useTheme } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useNotifications } from "@/contexts/notifications";
+import { Bell } from "lucide-react";
 import { useEffect, useState } from "react";
 
 // ── Data ─────────────────────────────────────────────────────────────────────
@@ -23,6 +25,7 @@ export function AppHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const { unreadCount } = useNotifications();
   const u = (user ?? null) as Record<string, unknown> | null;
   const isLoggedIn = Boolean(user) && !isLoading;
   const isAdmin = Boolean(u?.is_admin);
@@ -154,6 +157,21 @@ export function AppHeader() {
               </>
             ) : (
               <div className="flex items-center gap-2">
+                {/* Notification bell */}
+                <Link
+                  href="/notifications"
+                  className={`relative h-9 w-9 rounded-xl border flex items-center justify-center transition-all ${iconBtnBase}`}
+                  title="Notificações"
+                  aria-label={unreadCount > 0 ? `${unreadCount} notificações não lidas` : "Notificações"}
+                >
+                  <Bell className={`h-4 w-4 ${headerDark ? "text-white/70" : "text-[var(--rv-text-muted)]"}`} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-[var(--rv-accent)] text-[9px] font-bold text-black flex items-center justify-center leading-none">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
+
                 {/* User pill */}
                 <Link
                   href="/me"
@@ -201,6 +219,19 @@ export function AppHeader() {
             )}
             {!isLoading && user && (
               <>
+                {/* Notification bell */}
+                <Link
+                  href="/notifications"
+                  className={`relative h-9 w-9 rounded-xl border flex items-center justify-center transition-all ${iconBtnBase}`}
+                  aria-label={unreadCount > 0 ? `${unreadCount} notificações não lidas` : "Notificações"}
+                >
+                  <Bell className={`h-4 w-4 ${headerDark ? "text-white/70" : "text-[var(--rv-text-muted)]"}`} />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 min-w-4 px-1 rounded-full bg-[var(--rv-accent)] text-[9px] font-bold text-black flex items-center justify-center leading-none">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
                 <Link href="/me" className="relative h-9 w-9 flex-shrink-0">
                   <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] flex items-center justify-center text-white font-black text-sm">
                     {heroName[0].toUpperCase()}
@@ -254,6 +285,23 @@ export function AppHeader() {
               >
                 <span>⬡</span>
                 {isAdmin ? "Console" : "Panel"}
+              </Link>
+            )}
+
+            {isLoggedIn && (
+              <Link
+                href="/notifications"
+                className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl rv-label text-xs text-white/65 hover:text-white hover:bg-white/8 border border-transparent transition-all"
+              >
+                <span className="flex items-center gap-3">
+                  <Bell className="h-3.5 w-3.5 text-white/35" />
+                  Notificações
+                </span>
+                {unreadCount > 0 && (
+                  <span className="h-5 min-w-5 px-1.5 rounded-full bg-[var(--rv-accent)] text-[9px] font-bold text-black flex items-center justify-center">
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
               </Link>
             )}
 

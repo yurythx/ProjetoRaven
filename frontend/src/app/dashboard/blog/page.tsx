@@ -49,14 +49,25 @@ export default function DashboardBlogPage() {
           <span className="text-[var(--rv-text-muted)]">Moderação Editorial</span>
         </nav>
 
-        <div className="flex items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center gap-3">
             <span className="rv-badge rv-badge-purple">✦ Editorial</span>
-            <h1 className="rv-display text-3xl text-[var(--rv-text-primary)]">Moderação de Posts</h1>
+            <h1 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Moderação de Posts</h1>
           </div>
-          <Link href="/dashboard/blog/analytics" className="rv-btn rv-btn-ghost h-9 px-4 text-xs">
-            Analytics →
-          </Link>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link href="/dashboard/blog/midia" className="rv-btn rv-btn-ghost h-9 px-3 sm:px-4 text-xs">
+              Mídia
+            </Link>
+            <Link href="/dashboard/blog/taxonomias" className="rv-btn rv-btn-ghost h-9 px-3 sm:px-4 text-xs">
+              Taxonomias
+            </Link>
+            <Link href="/dashboard/blog/comentarios" className="rv-btn rv-btn-ghost h-9 px-3 sm:px-4 text-xs">
+              Comentários
+            </Link>
+            <Link href="/dashboard/blog/analytics" className="rv-btn rv-btn-ghost h-9 px-3 sm:px-4 text-xs">
+              Analytics →
+            </Link>
+          </div>
         </div>
 
         <Guard>

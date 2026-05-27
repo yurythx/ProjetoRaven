@@ -25,13 +25,14 @@ export function ReplyComposer({ topicId, disabled }: { topicId: string; disabled
   }, [user]);
 
   return (
-    <div className="rounded-2xl border border-foreground/10 bg-background p-5">
-      <div className="text-sm font-semibold text-foreground">Responder</div>
-      {!isAuthed ? <div className="mt-2 text-sm text-foreground/80">Entre para responder.</div> : null}
-      {isAuthed && !isGameUser ? (
-        <div className="mt-2 text-sm text-foreground/80">Sua conta precisa estar ativa para responder.</div>
+    <div>
+      {!isAuthed ? (
+        <p className="text-sm text-[var(--rv-text-muted)] py-2">Entre para responder.</p>
+      ) : isAuthed && !isGameUser ? (
+        <p className="text-sm text-[var(--rv-text-muted)] py-2">Sua conta precisa estar ativa para responder.</p>
+      ) : disabled ? (
+        <p className="text-sm text-[var(--rv-text-muted)] py-2">Tópico fechado.</p>
       ) : null}
-      {disabled ? <div className="mt-2 text-sm text-foreground/80">Tópico fechado.</div> : null}
 
       <form
         className="mt-4 flex flex-col gap-3"
@@ -71,14 +72,16 @@ export function ReplyComposer({ topicId, disabled }: { topicId: string; disabled
           disabled={!isAuthed || !isGameUser || disabled || isSubmitting}
           className="min-h-[140px]"
         />
-        {error ? <div className="text-sm text-red-600">{error}</div> : null}
-        <button
-          type="submit"
-          disabled={!isAuthed || !isGameUser || disabled || isSubmitting || stripHtml(content).length < 3}
-          className="h-11 rounded-xl bg-foreground px-4 text-sm font-medium text-background disabled:opacity-60"
-        >
-          {isSubmitting ? "Enviando..." : "Enviar"}
-        </button>
+        {error ? <p className="text-sm text-red-400">{error}</p> : null}
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={!isAuthed || !isGameUser || disabled || isSubmitting || stripHtml(content).length < 3}
+            className="rv-btn rv-btn-primary h-10 px-6 text-xs disabled:opacity-40"
+          >
+            {isSubmitting ? "Enviando..." : "Enviar Resposta"}
+          </button>
+        </div>
       </form>
     </div>
   );

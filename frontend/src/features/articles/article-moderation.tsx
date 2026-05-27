@@ -322,15 +322,15 @@ export function ArticleModeration() {
 
   return (
     <section className="space-y-8 animate-in fade-in duration-700" aria-label="Moderação de Posts">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-[2.5rem] shadow-xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white/5 backdrop-blur-xl border border-white/10 p-4 sm:p-8 rounded-2xl sm:rounded-[2.5rem] shadow-xl">
         <div className="space-y-1">
-          <h2 className="text-3xl font-black tracking-tighter">Moderação Editorial</h2>
-          <p className="text-muted-foreground font-medium">
+          <h2 className="text-2xl sm:text-3xl font-black tracking-tighter">Moderação Editorial</h2>
+          <p className="text-muted-foreground font-medium text-sm">
             Fluxo de aprovação ITIL para controle de qualidade de conteúdo.
           </p>
         </div>
         <div className="w-full md:w-auto flex flex-col md:flex-row gap-3">
-          <div className="relative group min-w-[280px]">
+          <div className="relative group w-full md:w-72">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" aria-hidden="true" />
             <Input
               value={query}
@@ -404,27 +404,27 @@ export function ArticleModeration() {
                 {selectedCount > 0 ? `${selectedCount} item(ns) selecionado(s)` : `${items.length} resultado(s)`}
               </div>
             </div>
-            <div className="flex items-center gap-3 relative z-10">
+            <div className="flex items-center gap-2 sm:gap-3 relative z-10 flex-wrap">
               <Button
                 type="button"
-                className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[11px] shadow-lg shadow-primary/20"
+                className="rounded-xl h-9 sm:h-11 px-4 sm:px-6 font-black uppercase tracking-widest text-[10px] sm:text-[11px] shadow-lg shadow-primary/20"
                 disabled={selectedCount === 0 || isMutating}
                 onClick={() => {
                   const slugs = items.filter((a) => selectedIds.has(a.id)).map((a) => a.slug)
                   bulkApproveMutation.mutate(slugs)
                 }}
               >
-                {bulkApproveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-2" aria-hidden="true" />}
+                {bulkApproveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
                 Aprovar Lote
               </Button>
               <Button
                 type="button"
                 variant="destructive"
-                className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[11px] shadow-lg shadow-rose-500/20"
+                className="rounded-xl h-9 sm:h-11 px-4 sm:px-6 font-black uppercase tracking-widest text-[10px] sm:text-[11px] shadow-lg shadow-rose-500/20"
                 disabled={selectedCount === 0 || isMutating}
                 onClick={() => openReject(items.filter((a) => selectedIds.has(a.id)))}
               >
-                <X className="h-4 w-4 mr-2" aria-hidden="true" />
+                <X className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />
                 Rejeitar Lote
               </Button>
             </div>
@@ -473,24 +473,24 @@ export function ArticleModeration() {
                   </div>
                 </div>
 
-                <div className="mt-6 flex gap-3">
+                <div className="mt-4 sm:mt-6 flex gap-2 sm:gap-3">
                   <Button
                     type="button"
-                    className="flex-1 rounded-xl h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/10"
+                    className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/10"
                     disabled={isMutating}
                     onClick={() => approveMutation.mutate(a.slug)}
                   >
-                    {approveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-2" aria-hidden="true" />}
+                    {approveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
                     Aprovar
                   </Button>
                   <Button
                     type="button"
                     variant="destructive"
-                    className="flex-1 rounded-xl h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-rose-500/10"
+                    className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-rose-500/10"
                     disabled={isMutating}
                     onClick={() => openReject([a])}
                   >
-                    <X className="h-4 w-4 mr-2" aria-hidden="true" /> Rejeitar
+                    <X className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" /> Rejeitar
                   </Button>
                 </div>
               </div>

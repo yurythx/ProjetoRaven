@@ -46,7 +46,7 @@ from .api.totp import (
     TOTP2FAVerifyView,
     TOTP2FARecoveryCodesView,
 )
-from .api.oauth import OAuthInitView, OAuthCallbackView, ConnectedAccountsView
+from .api.oauth import OAuthInitView, OAuthCallbackView, ConnectedAccountsView, DisconnectSocialAccountView
 from .api.oauth_admin import OAuthProviderSettingsView
 from .api.push import PushSubscribeView, VapidPublicKeyView
 
@@ -82,6 +82,7 @@ urlpatterns = [
     path("2fa/verify/", TOTP2FAVerifyView.as_view(), name="2fa_verify"),
     path("2fa/recovery-codes/", TOTP2FARecoveryCodesView.as_view(), name="2fa_recovery_codes"),
     path("oauth/connected/", ConnectedAccountsView.as_view(), name="oauth_connected"),
+    path("oauth/connected/<uuid:account_id>/", DisconnectSocialAccountView.as_view(), name="oauth_disconnect"),
     path("oauth/<str:provider>/", OAuthInitView.as_view(), name="oauth_init"),
     path("oauth/<str:provider>/callback/", OAuthCallbackView.as_view(), name="oauth_callback"),
     path("admin/oauth-providers/", OAuthProviderSettingsView.as_view(), name="oauth_providers_list"),

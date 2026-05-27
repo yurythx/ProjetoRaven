@@ -27,7 +27,7 @@ const CARDS = [
   {
     title: "Moderação",
     desc: "Controle de comentários e interações.",
-    href: "/blog/comentarios",
+    href: "/dashboard/blog/comentarios",
     icon: MessageSquare,
     color: "var(--rv-cyan)",
     role: "editor"

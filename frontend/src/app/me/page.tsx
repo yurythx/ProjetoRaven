@@ -6,7 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { notify } from "@/lib/notifications";
-import { Globe, KeyRound, Eye, EyeOff, Mail } from "lucide-react";
+import { Globe, KeyRound, Eye, EyeOff, Mail, Unlink } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function MePage() {
   const router = useRouter();
@@ -464,6 +465,7 @@ export default function MePage() {
           </div>
 
           <SecurityCard totpEnabled={Boolean(u?.totp_enabled)} />
+          <ConnectedAccountsCard />
           <PushNotificationsCard />
           <DeleteAccountCard onDeleted={() => logout()} />
         </div>
@@ -678,6 +680,98 @@ function SecurityCard({ totpEnabled }: { totpEnabled: boolean }) {
           </Link>
         )}
       </div>
+    </div>
+  );
+}
+
+type SocialAccountRow = { id: string; provider: string; provider_uid: string; created_at: string };
+
+const PROVIDER_LABELS: Record<string, string> = {
+  google: "Google",
+  discord: "Discord",
+};
+
+const PROVIDER_ICONS: Record<string, string> = {
+  google: "🇬",
+  discord: "🎮",
+};
+
+function ConnectedAccountsCard() {
+  const queryClient = useQueryClient();
+
+  const { data: accounts, isLoading } = useQuery<SocialAccountRow[]>({
+    queryKey: ["connected-accounts"],
+    queryFn: async () => {
+      const res = await fetch("/api/accounts/connected-accounts");
+      if (!res.ok) throw new Error(`Erro ${res.status}`);
+      return res.json() as Promise<SocialAccountRow[]>;
+    },
+  });
+
+  const disconnectMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/accounts/connected-accounts/${encodeURIComponent(id)}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as Record<string, string>;
+        throw new Error(data.detail ?? "Erro ao desconectar.");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connected-accounts"] });
+      notify.success("Conta desconectada", "A conta social foi removida.");
+    },
+    onError: (err: unknown) => {
+      notify.error("Erro", err instanceof Error ? err.message : "Falha ao desconectar conta.");
+    },
+  });
+
+  const accountsByProvider = (accounts ?? []).reduce<Record<string, SocialAccountRow>>((acc, a) => {
+    acc[a.provider] = a;
+    return acc;
+  }, {});
+
+  return (
+    <div className="rv-card p-6 md:col-span-2">
+      <h3 className="rv-display text-xl text-[var(--rv-text-primary)] mb-4">Contas Conectadas</h3>
+
+      {isLoading ? (
+        <div className="h-6 w-6 rounded-full border-2 border-[var(--rv-accent)] border-t-transparent animate-spin" />
+      ) : (
+        <div className="space-y-3">
+          {(["google", "discord"] as const).map((provider) => {
+            const linked = accountsByProvider[provider];
+            return (
+              <div key={provider} className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl" aria-hidden="true">{PROVIDER_ICONS[provider]}</span>
+                  <div>
+                    <span className="block text-sm font-medium text-[var(--rv-text-primary)]">
+                      {PROVIDER_LABELS[provider]}
+                    </span>
+                    {linked ? (
+                      <span className="text-xs text-[var(--rv-accent)]">Conectado</span>
+                    ) : (
+                      <span className="text-xs text-[var(--rv-text-dim)]">Não conectado</span>
+                    )}
+                  </div>
+                </div>
+                {linked ? (
+                  <button
+                    onClick={() => disconnectMutation.mutate(linked.id)}
+                    disabled={disconnectMutation.isPending}
+                    className="rv-btn rv-btn-ghost h-8 px-3 text-xs flex items-center gap-1.5 border border-red-500/30 text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+                  >
+                    <Unlink className="h-3.5 w-3.5" />
+                    Desconectar
+                  </button>
+                ) : (
+                  <span className="text-[10px] text-[var(--rv-text-dim)] italic">Use o login social para conectar</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
