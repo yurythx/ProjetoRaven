@@ -6,3 +6,6 @@ class BlogConfig(AppConfig):
     name = "apps.blog"
     label = "blog"
     verbose_name = "Blog & News"
+
+    def ready(self):
+        import apps.blog.signals  # noqa
