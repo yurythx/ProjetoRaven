@@ -191,7 +191,7 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
                     formData.append('image', file)
 
                     // Mostrar estado de upload
-                    notify.info("Enviando imagem...")
+                    notify.success("Enviando imagem...")
 
                     fetch('/api/media/files', {
                         method: 'POST',
