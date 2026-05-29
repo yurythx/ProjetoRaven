@@ -10,13 +10,13 @@ def create_default_groups(sender, **kwargs):
         PermissionInitializer.create_groups_and_permissions()
 
 
-@receiver(post_delete, sender="accounts.CustomUser")
+@receiver(post_delete, sender="accounts.User")
 def delete_avatar_on_user_delete(sender, instance, **kwargs):
     if instance.avatar and os.path.isfile(instance.avatar.path):
         os.remove(instance.avatar.path)
 
 
-@receiver(pre_save, sender="accounts.CustomUser")
+@receiver(pre_save, sender="accounts.User")
 def delete_old_avatar_on_update(sender, instance, **kwargs):
     if not instance.pk:
         return

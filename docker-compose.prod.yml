@@ -71,7 +71,7 @@ services:
     volumes:
       - media_files:/app/mediafiles
       - static_files:/app/staticfiles
-      - ./Backend/keys:/app/keys:ro
+      - ./Backend/keys:/app/keys
     ports:
       # Exposto apenas para o cloudflared rotear /api/ diretamente (opcional)
       - "127.0.0.1:${DJANGO_PORT:-8100}:8000"
@@ -81,7 +81,10 @@ services:
       redis:
         condition: service_healthy
     command: >
-      sh -c "python manage.py migrate --noinput &&
+      sh -c "mkdir -p /app/keys &&
+             ([ -f /app/keys/private.pem ] || (openssl genrsa -out /app/keys/private.pem 2048 &&
+             openssl rsa -in /app/keys/private.pem -pubout -out /app/keys/public.pem)) &&
+             python manage.py migrate --noinput &&
              python manage.py seed_prod &&
              python manage.py collectstatic --noinput &&
              daphne -b 0.0.0.0 -p 8000 core.asgi:application"
@@ -97,7 +100,7 @@ services:
       USE_SQLITE: "False"
       POSTGRES_HOST: postgres
     volumes:
-      - ./Backend/keys:/app/keys:ro
+      - ./Backend/keys:/app/keys
     depends_on:
       postgres:
         condition: service_healthy

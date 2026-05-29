@@ -38,7 +38,13 @@ export const viewport: Viewport = {
   themeColor: "#092e20",
 };
 
-const base = getSiteBaseUrl();
+function safeMetadataBase(): URL {
+  try {
+    return new URL(getSiteBaseUrl());
+  } catch {
+    return new URL("http://localhost:3000");
+  }
+}
 
 export const metadata: Metadata = {
   title: {
@@ -46,7 +52,7 @@ export const metadata: Metadata = {
     default: "Projeto Raven — Blog & Fórum",
   },
   description: "Seu espaço para blog, discussões e comunidade. Explore artigos, participe do fórum e conecte-se.",
-  metadataBase: new URL(base),
+  metadataBase: safeMetadataBase(),
   openGraph: {
     title: "Projeto Raven — Blog & Fórum",
     description: "Seu espaço de blog e comunidade.",

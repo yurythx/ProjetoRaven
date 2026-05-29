@@ -239,31 +239,44 @@ if private_key_env and public_key_env:
     SIMPLE_JWT["VERIFYING_KEY"] = public_key_env
 else:
     if not private_key_path.exists() or not public_key_path.exists():
-        if DEBUG:
-            try:
-                from cryptography.hazmat.primitives import serialization
-                from cryptography.hazmat.primitives.asymmetric import rsa
-            except Exception as e:
-                raise RuntimeError("JWT keys missing and cryptography is not installed.") from e
+        try:
+            from cryptography.hazmat.primitives import serialization
+            from cryptography.hazmat.primitives.asymmetric import rsa
 
-            private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-            private_pem = private_key.private_bytes(
+            _private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+            _private_pem = _private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.TraditionalOpenSSL,
                 encryption_algorithm=serialization.NoEncryption()
             )
-            public_pem = private_key.public_key().public_bytes(
+            _public_pem = _private_key.public_key().public_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PublicFormat.SubjectPublicKeyInfo
             )
-            private_key_path.parent.mkdir(parents=True, exist_ok=True)
-            private_key_path.write_bytes(private_pem)
-            public_key_path.write_bytes(public_pem)
-        else:
-            raise RuntimeError("JWT RSA keys not found. Provide JWT_PRIVATE_KEY/JWT_PUBLIC_KEY or JWT_*_KEY_PATH.")
+            try:
+                private_key_path.parent.mkdir(parents=True, exist_ok=True)
+                private_key_path.write_bytes(_private_pem)
+                public_key_path.write_bytes(_public_pem)
+            except OSError:
+                import logging as _logging
+                _logging.getLogger(__name__).warning(
+                    "JWT keys not found and could not be saved to %s — using ephemeral keys. "
+                    "All tokens will be invalidated on restart. "
+                    "Set JWT_PRIVATE_KEY / JWT_PUBLIC_KEY env vars for persistence.",
+                    private_key_path.parent,
+                )
+                SIMPLE_JWT["SIGNING_KEY"] = _private_pem.decode()
+                SIMPLE_JWT["VERIFYING_KEY"] = _public_pem.decode()
+                _private_pem = _public_pem = None  # already set above, skip read below
 
-    SIMPLE_JWT["SIGNING_KEY"] = private_key_path.read_text()
-    SIMPLE_JWT["VERIFYING_KEY"] = public_key_path.read_text()
+            if _private_pem is not None:
+                SIMPLE_JWT["SIGNING_KEY"] = private_key_path.read_text()
+                SIMPLE_JWT["VERIFYING_KEY"] = public_key_path.read_text()
+        except ImportError as e:
+            raise RuntimeError("JWT keys missing and cryptography is not installed.") from e
+    else:
+        SIMPLE_JWT["SIGNING_KEY"] = private_key_path.read_text()
+        SIMPLE_JWT["VERIFYING_KEY"] = public_key_path.read_text()
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS",

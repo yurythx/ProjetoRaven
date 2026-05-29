@@ -11,8 +11,11 @@ export function getApiBaseUrl() {
 }
 
 export function getSiteBaseUrl() {
-  const url = process.env.NEXT_PUBLIC_SITE_URL;
-  if (url) return url.replace(/\/+$/, "");
+  const raw = process.env.NEXT_PUBLIC_SITE_URL;
+  if (raw) {
+    const url = raw.replace(/\/+$/, "");
+    return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+  }
 
   const vercel = process.env.VERCEL_URL;
   if (vercel) return `https://${vercel}`.replace(/\/+$/, "");
