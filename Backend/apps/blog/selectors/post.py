@@ -59,20 +59,28 @@ class PostSelector:
 
     @staticmethod
     def search_published(query: str) -> QuerySet:
-        """Full-text search on published posts (PostgreSQL); falls back to icontains."""
+        """Full-text search on published posts using the denormalized search_vector field."""
         qs = _base_published()
-        try:
-            from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+        if not query:
+            return qs
 
-            vector = (
-                SearchVector("title", weight="A")
-                + SearchVector("excerpt", weight="B")
-                + SearchVector("content", weight="C")
+        try:
+            from django.contrib.postgres.search import SearchQuery, SearchRank
+            # config='portuguese' deve bater com o trigger da migração
+            sq = SearchQuery(query, config='portuguese')
+            return (
+                qs.filter(search_vector=sq)
+                .annotate(rank=SearchRank("search_vector", sq))
+                .order_by("-rank")
             )
-            sq = SearchQuery(query)
-            return qs.annotate(rank=SearchRank(vector, sq)).filter(rank__gte=0.01).order_by("-rank")
         except Exception:
-            return qs.filter(Q(title__icontains=query) | Q(excerpt__icontains=query))
+            # Fallback for non-postgres or if search_vector is not yet populated
+            from django.db.models import Q
+            return qs.filter(
+                Q(title__icontains=query) | 
+                Q(excerpt__icontains=query) | 
+                Q(content__icontains=query)
+            )
 
     @staticmethod
     def get_featured(limit: int = 6) -> QuerySet:

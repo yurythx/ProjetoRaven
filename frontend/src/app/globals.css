@@ -238,6 +238,79 @@ html[data-theme="light"] ::selection {
   box-shadow: 0 0 24px var(--rv-accent-glow);
 }
 
+/* ===================================================================
+   RICH EDITOR CUSTOM STYLES
+=================================================================== */
+.rv-editor-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.rv-editor-table th,
+.rv-editor-table td {
+  border: 1px solid var(--rv-border);
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.rv-editor-table th {
+  background-color: var(--rv-surface-2);
+  font-weight: bold;
+}
+
+.is-editor-empty:first-child::before {
+  color: var(--rv-text-dim);
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+pre {
+  background: var(--rv-surface-2) !important;
+  border: 1px solid var(--rv-border);
+  border-radius: 0.75rem;
+  padding: 1.5rem !important;
+  margin: 1.5rem 0;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--rv-accent);
+}
+
+pre code {
+  color: var(--rv-text-primary);
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Tiptap Table Resizing */
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  z-index: 20;
+  background-color: var(--rv-accent);
+  pointer-events: none;
+}
+
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(68, 183, 139, 0.1);
+  pointer-events: none;
+}
+
 /* ── Glassmorphism — dark mode only ── */
 html[data-theme="dark"] .rv-card {
   background: rgba(5, 14, 9, 0.48);

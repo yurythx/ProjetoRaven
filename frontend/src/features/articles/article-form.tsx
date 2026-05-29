@@ -311,6 +311,9 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
 
   // ── Checklist ───────────────────────────────────────────────────────────────
 
+  const wordCount = (watchedContent ?? "").trim() ? (watchedContent ?? "").trim().split(/\s+/).length : 0;
+  const charCount = (watchedContent ?? "").length;
+
   const requiredChecks = {
     title: (watchedTitle ?? "").trim().length >= 5,
     slug: /^[a-z0-9-]{3,}$/.test((watchedSlug ?? "").trim()),
@@ -321,8 +324,9 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
 
   const recommendedChecks = {
     image: Boolean((watchedImage ?? "").trim()),
-    meta_title: Boolean((watchedMetaTitle ?? "").trim()),
-    meta_description: Boolean((watchedMetaDescription ?? "").trim()),
+    meta_title: (watchedMetaTitle ?? "").trim().length >= 10 && (watchedMetaTitle ?? "").trim().length <= 60,
+    meta_description: (watchedMetaDescription ?? "").trim().length >= 50 && (watchedMetaDescription ?? "").trim().length <= 160,
+    word_count: wordCount >= 300,
   }
 
   const isReadyForReview = Object.values(requiredChecks).every(Boolean)
@@ -613,6 +617,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
                   </div>
                   <div aria-labelledby="af-content-label" role="group">
                     <RichEditor
+                      id={initialData?.id || "new-article"}
                       content={field.value}
                       onChange={field.onChange}
                       placeholder="Comece a escrever sua história..."
@@ -736,6 +741,49 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
 
         {/* ── Sidebar ── */}
         <div className="space-y-6">
+
+          {/* Checklist de Qualidade */}
+          <div className="rv-card p-5 space-y-4">
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <Sparkles className="h-4 w-4 text-[var(--rv-accent)]" aria-hidden="true" />
+                <h3 className="rv-display text-sm text-[var(--rv-text-primary)]">Checklist de Qualidade</h3>
+              </div>
+              <div className="rv-divider mb-4" />
+            </div>
+            
+            <div className="space-y-3">
+              <p className="rv-label text-[9px] text-[var(--rv-text-dim)]">Obrigatório</p>
+              <CheckItem ok={requiredChecks.title} label="Título (min. 5 chars)" />
+              <CheckItem ok={requiredChecks.slug} label="Link permanente válido" />
+              <CheckItem ok={requiredChecks.content} label="Conteúdo presente" />
+              <CheckItem ok={requiredChecks.category} label="Categoria selecionada" />
+              <CheckItem ok={requiredChecks.excerpt} label="Resumo do post" />
+              
+              <div className="pt-2">
+                <p className="rv-label text-[9px] text-[var(--rv-text-dim)]">Recomendado (SEO)</p>
+              </div>
+              <CheckItem ok={recommendedChecks.image} label="Imagem de capa" />
+              <CheckItem ok={recommendedChecks.meta_title} label="Meta Title (10-60 chars)" note={`${(watchedMetaTitle ?? "").length} chars`} />
+              <CheckItem ok={recommendedChecks.meta_description} label="Meta Description (50-160)" note={`${(watchedMetaDescription ?? "").length} chars`} />
+              <CheckItem ok={recommendedChecks.word_count} label="Mínimo de 300 palavras" note={`${wordCount} palavras`} />
+            </div>
+
+            <div className="pt-4 border-t border-[var(--rv-border)]">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-[var(--rv-text-muted)]">Saúde do Post</span>
+                <span className={`font-bold ${isReadyForPublish ? 'text-emerald-500' : 'text-amber-500'}`}>
+                  {isReadyForPublish ? 'Excelente' : isReadyForReview ? 'Bom' : 'Incompleto'}
+                </span>
+              </div>
+              <div className="h-1.5 w-full bg-[var(--rv-surface-2)] rounded-full mt-2 overflow-hidden">
+                <div 
+                  className={`h-full transition-all duration-500 ${isReadyForPublish ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                  style={{ width: `${(Object.values(requiredChecks).filter(Boolean).length + Object.values(recommendedChecks).filter(Boolean).length) / (Object.keys(requiredChecks).length + Object.keys(recommendedChecks).length) * 100}%` }}
+                />
+              </div>
+            </div>
+          </div>
 
           {/* Publicação */}
           <div className="rv-card p-5 space-y-5">

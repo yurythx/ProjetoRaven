@@ -5,6 +5,8 @@ News and updates - focused on reading via Next.js ISR.
 from django.db import models
 from django.db.models import F
 from django.utils import timezone
+from django.contrib.postgres.search import SearchVectorField
+from django.contrib.postgres.indexes import GinIndex
 
 from apps.common.models import UUIDModel
 
@@ -105,6 +107,8 @@ class Post(UUIDModel):
 
     view_count = models.IntegerField(default=0)
 
+    search_vector = SearchVectorField(null=True, editable=False)
+
     meta_title = models.CharField(max_length=70, blank=True)
     meta_description = models.CharField(max_length=160, blank=True)
     meta_keywords = models.CharField(max_length=500, blank=True)
@@ -119,6 +123,7 @@ class Post(UUIDModel):
             models.Index(fields=["-created_at"]),
             models.Index(fields=["slug"]),
             models.Index(fields=["status", "-published_at"]),
+            GinIndex(fields=["search_vector"], name="blog_post_search_vector_idx"),
         ]
 
     def __str__(self):
