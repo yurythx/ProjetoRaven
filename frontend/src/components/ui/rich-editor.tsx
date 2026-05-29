@@ -1,14 +1,16 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useEditor, EditorContent, BubbleMenu, FloatingMenu, type Editor } from '@tiptap/react'
+import { useEditor, EditorContent, type Editor } from '@tiptap/react'
+import { BubbleMenu } from '@tiptap/extension-bubble-menu'
+import { FloatingMenu } from '@tiptap/extension-floating-menu'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
 import Placeholder from '@tiptap/extension-placeholder'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
-import Table from '@tiptap/extension-table'
+import { Table } from '@tiptap/extension-table'
 import TableRow from '@tiptap/extension-table-row'
 import TableHeader from '@tiptap/extension-table-header'
 import TableCell from '@tiptap/extension-table-cell'
