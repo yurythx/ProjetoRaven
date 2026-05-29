@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
-import { BubbleMenu } from '@tiptap/extension-bubble-menu'
-import { FloatingMenu } from '@tiptap/extension-floating-menu'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import TextAlign from '@tiptap/extension-text-align'
@@ -29,7 +27,6 @@ import {
     Quote,
     Undo,
     Redo,
-    Link as LinkIcon,
     ImageIcon,
     AlignLeft,
     AlignCenter,
@@ -39,7 +36,6 @@ import {
     Plus,
     Type,
     FileText,
-    Terminal,
     Save,
     Trash2
 } from 'lucide-react'
@@ -244,76 +240,6 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
         <TooltipProvider delayDuration={400}>
             <div className={`flex flex-col border rounded-xl bg-background shadow-sm overflow-hidden transition-all focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/40 ${className}`}>
                 
-                {/* Floating Menu (Slash Commands) */}
-                <FloatingMenu editor={editor} tippyOptions={{ duration: 100 }}>
-                    <div className="flex flex-col gap-1 p-2 bg-popover border rounded-lg shadow-xl min-w-[180px]">
-                        <p className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Inserir Bloco</p>
-                        <button 
-                            onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-                            className="flex items-center gap-2 px-2 py-1.5 text-xs hover:bg-muted rounded text-left"
-                        >
-                            <Heading1 className="h-3 w-3" /> Título Grande
-                        </button>
-                        <button 
-                            onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-                            className="flex items-center gap-2 px-2 py-1.5 text-xs hover:bg-muted rounded text-left"
-                        >
-                            <Heading2 className="h-3 w-3" /> Título Médio
-                        </button>
-                        <button 
-                            onClick={() => editor.chain().focus().toggleBulletList().run()}
-                            className="flex items-center gap-2 px-2 py-1.5 text-xs hover:bg-muted rounded text-left"
-                        >
-                            <List className="h-3 w-3" /> Lista
-                        </button>
-                        <button 
-                            onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-                            className="flex items-center gap-2 px-2 py-1.5 text-xs hover:bg-muted rounded text-left"
-                        >
-                            <TableIcon className="h-3 w-3" /> Tabela
-                        </button>
-                        <button 
-                            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-                            className="flex items-center gap-2 px-2 py-1.5 text-xs hover:bg-muted rounded text-left"
-                        >
-                            <Terminal className="h-3 w-3" /> Bloco de Código
-                        </button>
-                    </div>
-                </FloatingMenu>
-
-                {/* Bubble Menu (Floating on selection) */}
-                <BubbleMenu editor={editor} tippyOptions={{ duration: 100 }}>
-                    <div className="flex items-center gap-0.5 p-1 bg-popover border rounded-full shadow-lg backdrop-blur-md">
-                        <ToolbarButton
-                            icon={Bold}
-                            tooltip="Negrito"
-                            isActive={editor.isActive('bold')}
-                            onClick={() => editor.chain().focus().toggleBold().run()}
-                        />
-                        <ToolbarButton
-                            icon={Italic}
-                            tooltip="Itálico"
-                            isActive={editor.isActive('italic')}
-                            onClick={() => editor.chain().focus().toggleItalic().run()}
-                        />
-                        <ToolbarButton
-                            icon={LinkIcon}
-                            tooltip="Link"
-                            isActive={editor.isActive('link')}
-                            onClick={() => {
-                                const previousUrl = editor.getAttributes('link').href
-                                const url = window.prompt('URL:', previousUrl)
-                                if (url === null) return
-                                if (url === '') {
-                                    editor.chain().focus().extendMarkRange('link').unsetLink().run()
-                                    return
-                                }
-                                editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
-                            }}
-                        />
-                    </div>
-                </BubbleMenu>
-
                 <div className="flex flex-wrap items-center gap-0.5 p-1.5 border-b bg-muted/20 backdrop-blur-sm sticky top-0 z-10">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
