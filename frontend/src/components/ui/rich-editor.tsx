@@ -160,7 +160,7 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
         },
         editorProps: {
             attributes: {
-                class: 'rv-article-body prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-6 py-8 scroll-smooth selection:bg-primary/20',
+                class: 'rv-article-body prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[280px] sm:min-h-[400px] px-4 sm:px-6 py-4 sm:py-8 scroll-smooth selection:bg-primary/20',
                 style: 'font-family: var(--font-body)',
             },
             handlePaste(_view, event) {
@@ -241,7 +241,7 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
         <TooltipProvider delayDuration={400}>
             <div className={`flex flex-col border rounded-xl bg-background shadow-sm overflow-hidden transition-all focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/40 ${className}`}>
                 
-                <div className="flex flex-wrap items-center gap-0.5 p-1.5 border-b bg-muted/20 backdrop-blur-sm sticky top-0 z-10">
+                <div className="flex flex-wrap items-center gap-0.5 p-1.5 border-b bg-muted/20 sticky top-0 z-10 overflow-x-auto">
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <button className="h-8 px-2 flex items-center gap-1.5 text-xs font-medium hover:bg-muted rounded transition-colors">
@@ -407,7 +407,7 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
                     </div>
                 </div>
 
-                <div className="flex-1 relative overflow-auto p-4 bg-gradient-to-b from-transparent to-muted/5 min-h-[450px]">
+                <div className="flex-1 relative overflow-auto p-2 sm:p-4 bg-gradient-to-b from-transparent to-muted/5 min-h-[300px] sm:min-h-[450px]">
                     <EditorContent editor={editor} />
                 </div>
 

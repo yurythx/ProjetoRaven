@@ -126,7 +126,7 @@ export function MediaDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="w-[95vw] sm:max-w-3xl max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Biblioteca de Mídia</DialogTitle>
           <DialogDescription>Envie ou selecione uma imagem para o conteúdo.</DialogDescription>
@@ -172,7 +172,7 @@ export function MediaDialog({
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-80 overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-[45dvh] sm:max-h-80 overflow-y-auto pr-1">
                 {items.map((it) => (
                   <div key={it.id} className="group relative overflow-hidden rounded-xl border border-[var(--rv-border)] bg-[var(--rv-surface-2)] hover:border-[var(--rv-accent)] transition-colors">
                     <button

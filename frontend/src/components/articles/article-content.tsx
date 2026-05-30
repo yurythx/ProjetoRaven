@@ -14,8 +14,9 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
   const [lightboxAlt, setLightboxAlt] = useState("")
   const containerRef = useRef<HTMLDivElement>(null)
+  // Timestamp de abertura — evita "ghost click" em mobile que fecha imediatamente
+  const openedAtRef = useRef(0)
 
-  // Delegação de clique: qualquer <img> dentro do container abre o lightbox
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
@@ -23,7 +24,10 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
     const handleClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement
       if (target.tagName !== "IMG") return
+      e.preventDefault()
+      e.stopPropagation()
       const img = target as HTMLImageElement
+      openedAtRef.current = Date.now()
       setLightboxSrc(img.src)
       setLightboxAlt(img.alt ?? "")
     }
@@ -32,20 +36,33 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
     return () => container.removeEventListener("click", handleClick)
   }, [html])
 
-  const close = useCallback(() => setLightboxSrc(null), [])
+  const close = useCallback(() => {
+    // Ignora eventos de fechamento nos primeiros 250ms — previne ghost click mobile
+    if (Date.now() - openedAtRef.current < 250) return
+    setLightboxSrc(null)
+  }, [])
 
   // Fecha com Escape
   useEffect(() => {
     if (!lightboxSrc) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") close() }
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setLightboxSrc(null) }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [lightboxSrc, close])
+  }, [lightboxSrc])
 
   // Bloqueia scroll do body enquanto lightbox está aberto
   useEffect(() => {
-    document.body.style.overflow = lightboxSrc ? "hidden" : ""
-    return () => { document.body.style.overflow = "" }
+    if (lightboxSrc) {
+      document.body.style.overflow = "hidden"
+      document.body.style.touchAction = "none"
+    } else {
+      document.body.style.overflow = ""
+      document.body.style.touchAction = ""
+    }
+    return () => {
+      document.body.style.overflow = ""
+      document.body.style.touchAction = ""
+    }
   }, [lightboxSrc])
 
   return (
@@ -62,24 +79,26 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
           role="dialog"
           aria-modal="true"
           aria-label="Imagem ampliada"
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 backdrop-blur-md p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-4"
+          style={{ touchAction: "none" }}
           onClick={close}
         >
-          {/* Botão fechar */}
+          {/* Botão fechar — acessível e visível em mobile */}
           <button
             aria-label="Fechar imagem"
-            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-            onClick={close}
+            className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white transition-colors hover:bg-white/30 active:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            onClick={(e) => { e.stopPropagation(); setLightboxSrc(null) }}
           >
             <X className="h-5 w-5" />
           </button>
 
-          {/* Imagem ampliada */}
+          {/* Imagem ampliada — usa dvh/dvw para correta altura em mobile */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={lightboxSrc}
             alt={lightboxAlt}
-            className="max-h-[90vh] max-w-[90vw] select-none rounded-xl object-contain shadow-2xl"
+            className="max-h-[90dvh] max-w-[92dvw] select-none rounded-xl object-contain shadow-2xl"
+            draggable={false}
             onClick={(e) => e.stopPropagation()}
           />
         </div>
