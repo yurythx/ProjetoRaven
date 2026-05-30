@@ -8,6 +8,7 @@ import { BlogComments } from "@/components/blog-comments";
 import { BlogPostActions } from "@/app/blog/[slug]/blog-post-actions";
 import { JsonLd } from "@/components/json-ld";
 import { AboutAuthor } from "@/components/articles/about-author";
+import { ArticleContent } from "@/components/articles/article-content";
 import { backendFetch } from "@/lib/backend";
 import { getSiteBaseUrl } from "@/lib/env";
 import { sanitizeRichTextHtml } from "@/lib/sanitize-html";
@@ -223,22 +224,20 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
         {/* ── Content ── */}
         <article className="rv-card p-6 sm:p-10 mb-10">
-          <div
-            className="prose prose-base sm:prose-lg prose-invert max-w-none
-              prose-p:text-[var(--rv-text-muted)] prose-p:leading-[1.85] prose-p:tracking-[0.01em] prose-p:mb-6
-              prose-li:text-[var(--rv-text-muted)] prose-li:leading-[1.85] prose-li:tracking-[0.01em]
-              prose-headings:text-[var(--rv-text-primary)] prose-headings:font-black prose-headings:tracking-tight prose-headings:mt-10 prose-headings:mb-4
+          <ArticleContent
+            html={sanitizeRichTextHtml(post.content)}
+            className="rv-article-body prose prose-base sm:prose-lg prose-invert max-w-none
+              prose-p:text-[var(--rv-text-muted)]
+              prose-li:text-[var(--rv-text-muted)]
+              prose-headings:text-[var(--rv-text-primary)] prose-headings:font-black prose-headings:tracking-tight
               prose-h2:rv-display prose-h3:rv-display
               prose-a:text-[var(--rv-accent)] prose-a:no-underline hover:prose-a:underline
               prose-code:text-[var(--rv-cyan)] prose-code:bg-[var(--rv-surface-2)] prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm
               prose-pre:bg-[var(--rv-surface-2)] prose-pre:border prose-pre:border-[var(--rv-border)] prose-pre:rounded-xl
               prose-blockquote:border-l-[var(--rv-accent)] prose-blockquote:text-[var(--rv-text-muted)] prose-blockquote:not-italic prose-blockquote:pl-4
-              prose-img:rounded-xl prose-img:border prose-img:border-[var(--rv-border)]
               prose-strong:text-[var(--rv-text-primary)] prose-em:text-[var(--rv-accent)]
               prose-ul:text-[var(--rv-text-muted)] prose-ol:text-[var(--rv-text-muted)]
               prose-hr:border-[var(--rv-border)]"
-            style={{ fontFamily: "var(--font-body)" }}
-            dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(post.content) }}
           />
         </article>
 

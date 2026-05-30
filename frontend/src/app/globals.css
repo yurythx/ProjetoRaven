@@ -573,3 +573,45 @@ html[data-theme="light"] .prose :where(h1,h2,h3,h4,h5,h6):not(:where([class~=not
 html[data-theme="light"] .prose :where(strong):not(:where([class~=not-prose] *)) {
   color: var(--rv-text-primary);
 }
+
+/* ===================================================================
+   TIPOGRAFIA DE ARTIGOS — fonte body (Inter), entrelinhamento generoso
+   Usado no corpo do post (público + preview) e no editor TipTap.
+   Controla margem apenas pelo bottom para evitar espaço duplo.
+=================================================================== */
+.rv-article-body {
+  font-family: var(--font-body);
+  line-height: 1.85;
+  letter-spacing: 0.01em;
+}
+
+.rv-article-body p,
+.rv-article-body li {
+  line-height: 1.85;
+  letter-spacing: 0.01em;
+  margin-top: 0;
+  margin-bottom: 1.25em;
+}
+
+.rv-article-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Títulos: fonte display, espaço generoso acima */
+.rv-article-body h1,
+.rv-article-body h2,
+.rv-article-body h3 {
+  font-family: var(--font-display);
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+/* Imagens: cursor zoom-in sinaliza que são clicáveis */
+.rv-article-body img {
+  cursor: zoom-in;
+  border-radius: 0.75rem;
+  border: 1px solid var(--rv-border);
+  max-width: 100%;
+  height: auto;
+}
