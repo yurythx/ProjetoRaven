@@ -11,17 +11,6 @@ const isDev = process.env.NODE_ENV === "development";
 const INTERNAL_MEDIA_ORIGIN = "http://django:8000";
 const INTERNAL_API_ORIGIN = process.env.INTERNAL_API_BASE_URL || process.env.API_BASE_URL || "http://django:8000";
 
-// Public-facing API origin for CSP img-src (media files served by Django)
-function getApiOrigin(): string {
-  const raw = process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (!raw) return "";
-  try {
-    return new URL(raw).origin;
-  } catch {
-    return "";
-  }
-}
-
 function tryParseRemotePatternFromEnv(): { protocol: "http" | "https"; hostname: string; port?: string; pathname: string } | null {
   const raw = process.env.NEXT_PUBLIC_API_BASE_URL;
   if (!raw) return null;
@@ -41,40 +30,9 @@ function tryParseRemotePatternFromEnv(): { protocol: "http" | "https"; hostname:
 }
 
 // ── Security headers ──────────────────────────────────────────────────────────
-//
-// CSP notes:
-//   script-src  'unsafe-inline' — Next.js App Router injects inline hydration
-//               scripts that cannot be removed without nonces (future work).
-//               'unsafe-eval' is added only in dev (react-refresh hot-loader).
-//   style-src   'unsafe-inline' — Next.js injects critical CSS as inline <style>.
-//   img-src     includes the API origin so unoptimized <Image> tags that point
-//               to Django media files load correctly.
-//   connect-src 'self' covers all fetch() calls going through /api/* proxy.
-//
-function buildCsp(): string {
-  const apiOrigin = getApiOrigin();
-  const extraImg = apiOrigin ? ` ${apiOrigin}` : "";
-  const extraScript = isDev ? " 'unsafe-eval'" : "";
-
-  const directives = [
-    "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com${extraScript}`,
-    "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob: http://django:8000 https://django:8000${extraImg}`,
-    "font-src 'self'",
-    "connect-src 'self' https://cloudflareinsights.com",
-    "media-src 'self'",
-    "object-src 'none'",
-    "frame-src 'self'",
-    "frame-ancestors 'self'",
-    "base-uri 'self'",
-    "form-action 'self'",
-    ...(!isDev ? ["upgrade-insecure-requests"] : []),
-  ];
-
-  return directives.join("; ");
-}
-
+// CSP is intentionally omitted here — it is set at runtime in src/middleware.ts
+// so that env vars (e.g. NEXT_PUBLIC_WS_BASE_URL) are read from the running
+// container rather than being baked in at build time.
 const securityHeaders = [
   // Prevent MIME-type sniffing
   { key: "X-Content-Type-Options", value: "nosniff" },
@@ -90,7 +48,6 @@ const securityHeaders = [
   ...(!isDev
     ? [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }]
     : []),
-  { key: "Content-Security-Policy", value: buildCsp() },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

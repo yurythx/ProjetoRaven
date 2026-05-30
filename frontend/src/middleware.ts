@@ -8,6 +8,46 @@ type MeResponse = {
   is_forum_moderator?: boolean;
 };
 
+// Computed once at module load — env vars are fixed for the lifetime of the process.
+// Keeping it here (runtime) rather than next.config.ts (build time) means
+// NEXT_PUBLIC_WS_BASE_URL and NEXT_PUBLIC_API_BASE_URL are read from the
+// container environment, not baked in during docker build.
+const CSP_HEADER = (() => {
+  const dev = process.env.NODE_ENV !== "production";
+
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  let apiOrigin = "";
+  try {
+    if (apiBaseUrl) apiOrigin = new URL(apiBaseUrl).origin;
+  } catch {}
+
+  const wsUrl = process.env.NEXT_PUBLIC_WS_BASE_URL || "";
+  const connectExtra = dev
+    ? " ws://localhost:8000 ws://django:8000"
+    : wsUrl
+      ? ` ${wsUrl}`
+      : "";
+
+  const extraImg = apiOrigin ? ` ${apiOrigin}` : "";
+  const extraScript = dev ? " 'unsafe-eval'" : "";
+
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com${extraScript}`,
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: blob: http://django:8000 https://django:8000${extraImg}`,
+    "font-src 'self'",
+    `connect-src 'self' https://cloudflareinsights.com${connectExtra}`,
+    "media-src 'self'",
+    "object-src 'none'",
+    "frame-src 'self'",
+    "frame-ancestors 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    ...(dev ? [] : ["upgrade-insecure-requests"]),
+  ].join("; ");
+})();
+
 async function fetchMe(accessToken: string) {
   const baseUrl = getApiBaseUrl();
   return fetch(`${baseUrl}/api/v1/accounts/me/`, {
@@ -39,6 +79,11 @@ function redirectToLogin(req: NextRequest) {
   return res;
 }
 
+function withCsp(res: NextResponse): NextResponse {
+  res.headers.set("Content-Security-Policy", CSP_HEADER);
+  return res;
+}
+
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
@@ -50,7 +95,7 @@ export async function middleware(req: NextRequest) {
   if (isBlogEditorRoute) {
     const access = req.cookies.get("raven_access")?.value ?? null;
     const refresh = req.cookies.get("raven_refresh")?.value ?? null;
-    if (!access && !refresh) return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url));
+    if (!access && !refresh) return withCsp(NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url)));
 
     let nextAccess = access;
     let me: MeResponse | null = null;
@@ -62,39 +107,39 @@ export async function middleware(req: NextRequest) {
       } else if (meRes.status === 401 && refresh) {
         nextAccess = null;
       } else {
-        return NextResponse.redirect(new URL("/blog", req.url));
+        return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
       }
     }
 
     if (!me && refresh) {
       const r = await refreshAccess(refresh);
-      if (!r.ok) return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url));
+      if (!r.ok) return withCsp(NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url)));
       const body = (await r.json().catch(() => null)) as { access?: unknown } | null;
       const newAccess = body && typeof body.access === "string" ? body.access : null;
-      if (!newAccess) return NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url));
+      if (!newAccess) return withCsp(NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url)));
       nextAccess = newAccess;
       const meRes2 = await fetchMe(newAccess);
-      if (!meRes2.ok) return NextResponse.redirect(new URL("/blog", req.url));
+      if (!meRes2.ok) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
       me = (await meRes2.json().catch(() => null)) as MeResponse | null;
 
-      if (!me?.is_admin && !me?.is_blog_editor) return NextResponse.redirect(new URL("/blog", req.url));
+      if (!me?.is_admin && !me?.is_blog_editor) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
       const res = NextResponse.next();
       res.cookies.set("raven_access", newAccess, { httpOnly: true, secure: isProd(), sameSite: "lax", path: "/" });
-      return res;
+      return withCsp(res);
     }
 
-    if (!me?.is_admin && !me?.is_blog_editor) return NextResponse.redirect(new URL("/blog", req.url));
-    return NextResponse.next();
+    if (!me?.is_admin && !me?.is_blog_editor) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
+    return withCsp(NextResponse.next());
   }
 
   const needsAdmin = path.startsWith("/dashboard");
   const needsStrictAdmin = path.startsWith("/dashboard/usuarios");
   const needsAuth = needsAdmin || path.startsWith("/forum/new") || path === "/me";
-  if (!needsAuth) return NextResponse.next();
+  if (!needsAuth) return withCsp(NextResponse.next());
 
   const access = req.cookies.get("raven_access")?.value ?? null;
   const refresh = req.cookies.get("raven_refresh")?.value ?? null;
-  if (!access && !refresh) return redirectToLogin(req);
+  if (!access && !refresh) return withCsp(redirectToLogin(req));
 
   const secure = isProd();
   let nextAccess = access;
@@ -107,20 +152,20 @@ export async function middleware(req: NextRequest) {
     } else if (meRes.status === 401 && refresh) {
       nextAccess = null;
     } else {
-      return redirectToLogin(req);
+      return withCsp(redirectToLogin(req));
     }
   }
 
   if (!me && refresh) {
     const r = await refreshAccess(refresh);
-    if (!r.ok) return redirectToLogin(req);
+    if (!r.ok) return withCsp(redirectToLogin(req));
     const body = (await r.json().catch(() => null)) as { access?: unknown } | null;
     const newAccess = body && typeof body.access === "string" ? body.access : null;
-    if (!newAccess) return redirectToLogin(req);
+    if (!newAccess) return withCsp(redirectToLogin(req));
 
     nextAccess = newAccess;
     const meRes2 = await fetchMe(newAccess);
-    if (!meRes2.ok) return redirectToLogin(req);
+    if (!meRes2.ok) return withCsp(redirectToLogin(req));
     me = (await meRes2.json().catch(() => null)) as MeResponse | null;
 
     const isDashboardRoot = path === "/dashboard";
@@ -143,21 +188,22 @@ export async function middleware(req: NextRequest) {
       sameSite: "lax",
       path: "/",
     });
-    return res;
+    return withCsp(res);
   }
 
-  if (!me) return redirectToLogin(req);
+  if (!me) return withCsp(redirectToLogin(req));
   const isDashboardRoot = path === "/dashboard";
   const isBlogArea = path.startsWith("/dashboard/blog");
   const isForumArea = path.startsWith("/dashboard/forum");
-  if (needsStrictAdmin && !me.is_admin) return NextResponse.redirect(new URL("/blog", req.url));
-  if (isBlogArea && !me.is_admin && !me.is_blog_editor) return NextResponse.redirect(new URL("/blog", req.url));
-  if (isForumArea && !me.is_admin && !me.is_forum_moderator) return NextResponse.redirect(new URL("/blog", req.url));
-  if (isDashboardRoot && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return NextResponse.redirect(new URL("/blog", req.url));
-  if (needsAdmin && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return NextResponse.redirect(new URL("/blog", req.url));
-  return NextResponse.next();
+  if (needsStrictAdmin && !me.is_admin) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
+  if (isBlogArea && !me.is_admin && !me.is_blog_editor) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
+  if (isForumArea && !me.is_admin && !me.is_forum_moderator) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
+  if (isDashboardRoot && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
+  if (needsAdmin && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
+  return withCsp(NextResponse.next());
 }
 
 export const config = {
-  matcher: ["/me", "/blog/novo", "/blog/comentarios", "/blog/:slug/editar", "/dashboard/:path*", "/forum/new/:path*"],
+  // Match all routes except Next.js internals and static assets
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico).*)"],
 };
