@@ -160,7 +160,8 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-6 py-8 scroll-smooth selection:bg-primary/20',
+                class: 'prose prose-sm sm:prose-base dark:prose-invert max-w-none focus:outline-none min-h-[400px] px-6 py-8 scroll-smooth selection:bg-primary/20 [&_p]:leading-[1.85] [&_p]:tracking-[0.01em] [&_p]:mb-6 [&_li]:leading-[1.85]',
+                style: 'font-family: var(--font-body)',
             },
             handlePaste(_view, event) {
                 const text = event.clipboardData?.getData('text/plain')

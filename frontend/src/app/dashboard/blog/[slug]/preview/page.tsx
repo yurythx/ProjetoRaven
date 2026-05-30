@@ -175,7 +175,7 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
         {/* Excerpt */}
         {post.excerpt && (
           <p
-            className="text-[var(--rv-text-muted)] text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-[var(--rv-accent)] pl-4"
+            className="text-[var(--rv-text-muted)] text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-[var(--rv-accent)] pl-4 whitespace-pre-line"
             style={{ fontFamily: "var(--font-body)" }}
           >
             {post.excerpt}
@@ -186,17 +186,19 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
         <article className="rv-card p-6 sm:p-10 mb-10">
           <div
             className="prose prose-base sm:prose-lg prose-invert max-w-none
-              prose-p:text-[var(--rv-text-muted)] prose-p:leading-relaxed
-              prose-headings:text-[var(--rv-text-primary)] prose-headings:font-black
+              prose-p:text-[var(--rv-text-muted)] prose-p:leading-[1.85] prose-p:tracking-[0.01em] prose-p:mb-6
+              prose-li:text-[var(--rv-text-muted)] prose-li:leading-[1.85] prose-li:tracking-[0.01em]
+              prose-headings:text-[var(--rv-text-primary)] prose-headings:font-black prose-headings:tracking-tight prose-headings:mt-10 prose-headings:mb-4
               prose-h2:rv-display prose-h3:rv-display
               prose-a:text-[var(--rv-accent)] prose-a:no-underline hover:prose-a:underline
               prose-code:text-[var(--rv-cyan)] prose-code:bg-[var(--rv-surface-2)] prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm
               prose-pre:bg-[var(--rv-surface-2)] prose-pre:border prose-pre:border-[var(--rv-border)] prose-pre:rounded-xl
-              prose-blockquote:border-l-[var(--rv-accent)] prose-blockquote:text-[var(--rv-text-muted)] prose-blockquote:not-italic
+              prose-blockquote:border-l-[var(--rv-accent)] prose-blockquote:text-[var(--rv-text-muted)] prose-blockquote:not-italic prose-blockquote:pl-4
               prose-img:rounded-xl prose-img:border prose-img:border-[var(--rv-border)]
-              prose-strong:text-[var(--rv-text-primary)]
+              prose-strong:text-[var(--rv-text-primary)] prose-em:text-[var(--rv-accent)]
               prose-ul:text-[var(--rv-text-muted)] prose-ol:text-[var(--rv-text-muted)]
               prose-hr:border-[var(--rv-border)]"
+            style={{ fontFamily: "var(--font-body)" }}
             dangerouslySetInnerHTML={{ __html: sanitizeRichTextHtml(post.content) }}
           />
         </article>
