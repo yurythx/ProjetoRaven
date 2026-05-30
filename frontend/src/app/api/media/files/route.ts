@@ -4,7 +4,7 @@ import { backendFetch } from "@/lib/backend";
 import { getApiBaseUrl } from "@/lib/env";
 
 async function ensureAccess(): Promise<string | null> {
-  let access = await getAccessToken();
+  const access = await getAccessToken();
   if (access) return access;
 
   const refresh = await getRefreshToken();
