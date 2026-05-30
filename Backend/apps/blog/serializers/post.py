@@ -370,7 +370,7 @@ class PostUpdateSerializer(serializers.ModelSerializer):
         if tag_names is not None:
             validated_data["tag_names"] = tag_names
         if tag_ids is not None:
-            validated_data["tag_ids"] = tag_ids
+            validated_data["tags"] = tag_ids
 
         updated_by = self.context["request"].user
         service = PostService(DjangoPostRepository(), DjangoTagRepository())

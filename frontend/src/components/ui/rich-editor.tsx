@@ -170,7 +170,7 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
                 const ed = editorRef.current
                 if (!ed) return false
                 ed.commands.insertContent(parsePlainTextToHtml(text), {
-                    parseOptions: { preserveWhitespace: false },
+                    parseOptions: { preserveWhitespace: 'full' },
                 })
                 return true
             },

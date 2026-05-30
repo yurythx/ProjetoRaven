@@ -208,6 +208,8 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
     },
     onSuccess: (_, { action }) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] })
+      queryClient.invalidateQueries({ queryKey: ['articles-moderation'] })
+      queryClient.invalidateQueries({ queryKey: ['dashboard-articles-grid'] })
       const messages = { submit: "Post enviado para revisão", publish: "Post publicado com sucesso", reject: "Post rejeitado" }
       notify.success(messages[action], "Status atualizado.")
       onSuccess()
@@ -239,6 +241,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] })
+      queryClient.invalidateQueries({ queryKey: ['blog-article-edit'] })
       if (previewAfterSaveRef.current) {
         previewAfterSaveRef.current = false
         setCreatedSlug(data.slug)
@@ -312,6 +315,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
   // ── Checklist ───────────────────────────────────────────────────────────────
 
   const wordCount = (watchedContent ?? "").trim() ? (watchedContent ?? "").trim().split(/\s+/).length : 0;
+  const charCount = (watchedContent ?? "").length;
 
   const requiredChecks = {
     title: (watchedTitle ?? "").trim().length >= 5,

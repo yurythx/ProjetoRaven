@@ -36,6 +36,9 @@ export default function BlogEditarPage() {
       return res.json();
     },
     enabled: Boolean(slug) && canEdit,
+    // Discard cached data when the component unmounts so the form always
+    // initialises from a fresh fetch when the user navigates back to this page.
+    gcTime: 0,
   });
 
   React.useEffect(() => {

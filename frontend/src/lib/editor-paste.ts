@@ -59,8 +59,9 @@ export function parsePlainTextToHtml(text: string): string {
             if (h2) { html.push(`<h2>${escapeHtml(h2[1])}</h2>`); continue }
             if (h1) { html.push(`<h1>${escapeHtml(h1[1])}</h1>`); continue }
         }
-        // Regular paragraph — join soft-wrapped lines into a single block
-        html.push(`<p>${escapeHtml(blockLines.map(l => l.trim()).filter(Boolean).join(' '))}</p>`)
+        // Regular paragraph — preserve line breaks and leading spaces within the block
+        const lines = blockLines.map(l => l.trimEnd()).filter(l => l.trim() !== '')
+        html.push(`<p>${lines.map(l => escapeHtml(l)).join('<br>')}</p>`)
     }
 
     return html.join('') || `<p>${escapeHtml(text.trim())}</p>`

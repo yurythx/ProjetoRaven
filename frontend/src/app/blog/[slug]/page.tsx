@@ -215,7 +215,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
         {/* ── Excerpt ── */}
         {post.excerpt && (
-          <p className="text-[var(--rv-text-muted)] text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-[var(--rv-accent)] pl-4"
+          <p className="text-[var(--rv-text-muted)] text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-[var(--rv-accent)] pl-4 whitespace-pre-line"
             style={{ fontFamily: "var(--font-body)" }}>
             {post.excerpt}
           </p>
