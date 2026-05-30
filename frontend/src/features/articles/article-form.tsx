@@ -315,7 +315,6 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
   // ── Checklist ───────────────────────────────────────────────────────────────
 
   const wordCount = (watchedContent ?? "").trim() ? (watchedContent ?? "").trim().split(/\s+/).length : 0;
-  const charCount = (watchedContent ?? "").length;
 
   const requiredChecks = {
     title: (watchedTitle ?? "").trim().length >= 5,
