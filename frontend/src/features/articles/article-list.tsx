@@ -251,7 +251,6 @@ export function ArticleList({ onEdit, onCreate }: ArticleListProps) {
                       alt={article.title || "Capa"}
                       fill
                       className="object-cover transition-transform duration-1000 group-hover:scale-110 group-hover:brightness-50"
-                      unoptimized
                     />
                   ) : (
                     <div className="flex items-center justify-center h-full w-full bg-gradient-to-br from-slate-950 to-blue-900/20">

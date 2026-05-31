@@ -25,20 +25,32 @@ ALLOWED_TAGS = [
     "span",
     "div",
     "img",
+    "table",
+    "thead",
+    "tbody",
+    "tfoot",
+    "tr",
+    "th",
+    "td",
+    "colgroup",
+    "col",
 ]
 
 ALLOWED_ATTRIBUTES = {
-    "a": ["href", "title", "target", "rel"],
+    "a": ["href", "name", "title", "target", "rel"],
     "img": ["src", "alt", "title", "width", "height"],
-    "span": ["style"],
-    "div": ["style"],
-    "*": ["class"],
+    "td": ["colspan", "rowspan", "title"],
+    "th": ["colspan", "rowspan", "scope", "title"],
+    "col": ["span", "title"],
+    "*": ["class", "style", "title"],
 }
 
 ALLOWED_CSS_PROPERTIES = [
     "color",
     "background-color",
     "text-align",
+    "width",
+    "min-width",
 ]
 
 ALLOWED_PROTOCOLS = ["http", "https", "mailto"]
@@ -64,4 +76,3 @@ def sanitize_plain_text(value: str) -> str:
     if not value:
         return ""
     return bleach.clean(value, tags=[], attributes={}, strip=True)
-

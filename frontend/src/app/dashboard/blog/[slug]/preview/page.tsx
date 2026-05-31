@@ -95,11 +95,6 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
         </div>
       </div>
 
-      {/* Ambient */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "500px", height: "500px", top: "-10%", left: "-10%", background: "var(--rv-accent)", opacity: 0.12 }} />
-      </div>
-
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">
         {/* Tags / category */}
         <div className="flex flex-wrap items-center gap-2 mb-6">
@@ -127,7 +122,6 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
                   alt={post.author_name}
                   fill sizes="40px"
                   className="object-cover"
-                  unoptimized
                 />
               ) : (
                 <span className="absolute inset-0 flex items-center justify-center text-white font-black text-sm">
@@ -168,7 +162,6 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
               sizes="(max-width: 896px) 100vw, 896px"
               className="object-cover"
               priority
-              unoptimized
             />
           </div>
         )}

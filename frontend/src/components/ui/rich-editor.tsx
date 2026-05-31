@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useEditor, EditorContent, type Editor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
+import Blockquote from '@tiptap/extension-blockquote'
 import TextAlign from '@tiptap/extension-text-align'
 import Placeholder from '@tiptap/extension-placeholder'
 import { TextStyle } from '@tiptap/extension-text-style'
@@ -58,6 +59,29 @@ import { cleanPastedHtml, parsePlainTextToHtml } from "@/lib/editor-paste"
 import { notify } from "@/lib/notifications"
 
 const lowlight = createLowlight(common)
+const CalloutBlockquote = Blockquote.extend({
+    addAttributes() {
+        return {
+            ...this.parent?.(),
+            callout: {
+                default: null,
+                parseHTML: element => {
+                    const className = element.getAttribute('class') || ''
+                    if (className.includes('rv-callout-note')) return 'note'
+                    if (className.includes('rv-callout-warning')) return 'warning'
+                    if (className.includes('rv-callout-example')) return 'example'
+                    return null
+                },
+                renderHTML: attributes => {
+                    const callout = attributes.callout
+                    if (!callout) return {}
+                    const cls = `rv-callout rv-callout-${callout}`
+                    return { class: cls }
+                },
+            },
+        }
+    },
+})
 
 interface RichEditorProps {
     content: string
@@ -112,7 +136,9 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
                 levels: [1, 2, 3],
             },
             codeBlock: false, // Desabilitar o padrão para usar lowlight
+            blockquote: false,
         }),
+        CalloutBlockquote,
         Image.configure({
             HTMLAttributes: {
                 class: 'rounded-lg border border-border shadow-sm max-w-full h-auto my-4',
@@ -236,6 +262,17 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
 
     const wordCount = editor.storage.characterCount.words()
     const charCount = editor.storage.characterCount.characters()
+    const applyCallout = (callout: 'note' | 'warning' | 'example') => {
+        const chain = editor.chain().focus()
+        if (!editor.isActive('blockquote')) {
+            chain.toggleBlockquote()
+        }
+        chain.updateAttributes('blockquote', { callout }).run()
+    }
+    const clearCallout = () => {
+        if (!editor.isActive('blockquote')) return
+        editor.chain().focus().updateAttributes('blockquote', { callout: null }).run()
+    }
 
     return (
         <TooltipProvider delayDuration={400}>
@@ -366,6 +403,29 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
                         isActive={editor.isActive('blockquote')}
                         onClick={() => editor.chain().focus().toggleBlockquote().run()}
                     />
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="h-8 px-2 flex items-center gap-1.5 text-xs font-medium hover:bg-muted rounded transition-colors">
+                                <Plus className="h-4 w-4" />
+                                Callout
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem onClick={() => applyCallout('note')}>
+                                Nota
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => applyCallout('warning')}>
+                                Aviso
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => applyCallout('example')}>
+                                Exemplo
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={clearCallout}>
+                                Remover callout
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
                     <Separator orientation="vertical" className="h-6 mx-1 bg-border/60" />
 

@@ -28,6 +28,14 @@ import { MediaDialog } from "@/features/media/media-dialog"
 import { notify } from "@/lib/notifications"
 import { ArticleHistory } from "@/features/articles/article-history"
 import { ArticleComments } from "@/features/articles/article-comments"
+
+function clearEditorDraft(id: string | number | undefined) {
+  if (id === undefined || id === null) return
+  try {
+    localStorage.removeItem(`rv-editor-draft-${id}`)
+  } catch {
+  }
+}
 import { useAuth } from "@/hooks/use-auth"
 import { slugify, fixImageUrl } from "@/lib/utils"
 import { ConfirmDialog } from "@/components/rv-confirm-dialog"
@@ -240,6 +248,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
       return res.json() as Promise<Article>
     },
     onSuccess: (data) => {
+      clearEditorDraft(initialData?.id ?? "new-article")
       queryClient.invalidateQueries({ queryKey: ['articles'] })
       queryClient.invalidateQueries({ queryKey: ['blog-article-edit'] })
       if (previewAfterSaveRef.current) {
@@ -991,7 +1000,6 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
                   alt="Imagem de capa selecionada"
                   fill
                   className="object-cover transition-transform group-hover:scale-105"
-                  unoptimized
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <button

@@ -100,12 +100,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   return (
     <div className="relative min-h-screen">
       <JsonLd data={articleSchema} />
-      {/* Ambient */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "500px", height: "500px", top: "-10%", left: "-10%", background: "var(--rv-accent)", opacity: 0.14 }} />
-        <div className="rv-orb" style={{ width: "280px", height: "280px", bottom: "10%", right: "-5%", background: "var(--rv-cyan)", opacity: 0.08 }} />
-      </div>
-
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:py-14 sm:px-6 lg:px-8">
         {/* ── Breadcrumb ── */}
         <nav className="flex items-center gap-2 mb-8 rv-label text-[9px] text-[var(--rv-text-dim)] flex-wrap">
@@ -158,7 +152,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   fill
                   sizes="40px"
                   className="object-cover"
-                  unoptimized
                 />
               ) : (
                 <span className="absolute inset-0 flex items-center justify-center text-white font-black text-sm">
@@ -209,7 +202,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               sizes="(max-width: 896px) 100vw, 896px"
               className="object-cover"
               priority
-              unoptimized
             />
           </div>
         )}
@@ -285,7 +277,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 >
                   {r.image && (
                     <div className="relative h-32 rounded-lg overflow-hidden">
-                      <Image src={fixImageUrl(r.image) ?? ""} alt={r.title} fill sizes="(max-width: 640px) 100vw, 33vw" unoptimized className="object-cover" />
+                      <Image src={fixImageUrl(r.image) ?? ""} alt={r.title} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover" />
                     </div>
                   )}
                   <div className="flex-1">

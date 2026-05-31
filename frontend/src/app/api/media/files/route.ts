@@ -3,6 +3,8 @@ import { getAccessToken, getRefreshToken, setAuthCookies } from "@/lib/auth-cook
 import { backendFetch } from "@/lib/backend";
 import { getApiBaseUrl } from "@/lib/env";
 
+export const dynamic = "force-dynamic";
+
 async function ensureAccess(): Promise<string | null> {
   const access = await getAccessToken();
   if (access) return access;
@@ -22,7 +24,7 @@ async function ensureAccess(): Promise<string | null> {
 
 async function forward(req: NextRequest): Promise<NextResponse> {
   const access = await ensureAccess();
-  if (!access) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  if (!access) return NextResponse.json({ error: "Não autenticado." }, { status: 401, headers: { "Cache-Control": "no-store" } });
 
   const base = getApiBaseUrl().replace(/\/+$/, "");
   const url = new URL(req.url);
@@ -49,7 +51,7 @@ async function forward(req: NextRequest): Promise<NextResponse> {
     });
 
     const data = await res.json().catch(() => null);
-    return NextResponse.json(data ?? {}, { status: res.status });
+    return NextResponse.json(data ?? {}, { status: res.status, headers: { "Cache-Control": "no-store" } });
   }
 
   // GET and other non-multipart requests — generic proxy via backendFetch
@@ -58,8 +60,8 @@ async function forward(req: NextRequest): Promise<NextResponse> {
     accessToken: access,
   });
 
-  if (!result.ok) return NextResponse.json(result.error.data, { status: result.error.status });
-  return NextResponse.json(result.data);
+  if (!result.ok) return NextResponse.json(result.error.data, { status: result.error.status, headers: { "Cache-Control": "no-store" } });
+  return NextResponse.json(result.data, { headers: { "Cache-Control": "no-store" } });
 }
 
 export async function GET(req: NextRequest) { return forward(req); }

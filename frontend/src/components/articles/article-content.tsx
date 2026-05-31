@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { X } from "lucide-react"
+import { slugify, stripHtml } from "@/lib/utils"
 
 interface ArticleContentProps {
   /** HTML já sanitizado no servidor */
@@ -11,11 +12,48 @@ interface ArticleContentProps {
 }
 
 export function ArticleContent({ html, className, style }: ArticleContentProps) {
+  const [processedHtml, setProcessedHtml] = useState(html)
+  const [toc, setToc] = useState<Array<{ id: string; text: string; level: 2 | 3 }>>([])
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
   const [lightboxAlt, setLightboxAlt] = useState("")
   const containerRef = useRef<HTMLDivElement>(null)
   // Timestamp de abertura — evita "ghost click" em mobile que fecha imediatamente
   const openedAtRef = useRef(0)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    try {
+      const doc = new DOMParser().parseFromString(html, "text/html")
+      const headings = Array.from(doc.querySelectorAll("h2, h3"))
+      const used = new Set<string>()
+      const nextToc: Array<{ id: string; text: string; level: 2 | 3 }> = []
+
+      for (const h of headings) {
+        const level = h.tagName === "H2" ? 2 : 3
+        const text = stripHtml(h.textContent ?? "").trim()
+        if (!text) continue
+
+        let id = (h.getAttribute("id") ?? "").trim()
+        if (!id) id = slugify(text)
+        if (!id) continue
+        let candidate = id
+        let i = 2
+        while (used.has(candidate)) {
+          candidate = `${id}-${i}`
+          i += 1
+        }
+        used.add(candidate)
+        h.setAttribute("id", candidate)
+        nextToc.push({ id: candidate, text, level })
+      }
+
+      setProcessedHtml(doc.body.innerHTML)
+      setToc(nextToc)
+    } catch {
+      setProcessedHtml(html)
+      setToc([])
+    }
+  }, [html])
 
   useEffect(() => {
     const container = containerRef.current
@@ -28,13 +66,13 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
       e.stopPropagation()
       const img = target as HTMLImageElement
       openedAtRef.current = Date.now()
-      setLightboxSrc(img.src)
+      setLightboxSrc(img.currentSrc || img.src)
       setLightboxAlt(img.alt ?? "")
     }
 
     container.addEventListener("click", handleClick)
     return () => container.removeEventListener("click", handleClick)
-  }, [html])
+  }, [processedHtml])
 
   const close = useCallback(() => {
     // Ignora eventos de fechamento nos primeiros 250ms — previne ghost click mobile
@@ -67,11 +105,28 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
 
   return (
     <>
+      {toc.length > 0 && (
+        <nav className="mb-6 rounded-2xl border border-[var(--rv-border)] bg-[var(--rv-surface-2)] px-5 py-4">
+          <div className="rv-label text-[9px] text-[var(--rv-text-dim)] mb-3">Sumário</div>
+          <ul className="space-y-2">
+            {toc.map((item) => (
+              <li key={item.id} className={item.level === 3 ? "pl-3" : ""}>
+                <a
+                  href={`#${item.id}`}
+                  className="text-sm text-[var(--rv-text-muted)] hover:text-[var(--rv-accent)] transition-colors"
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
       <div
         ref={containerRef}
         className={className}
         style={style}
-        dangerouslySetInnerHTML={{ __html: html }}
+        dangerouslySetInnerHTML={{ __html: processedHtml }}
       />
 
       {lightboxSrc && (
@@ -79,7 +134,7 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
           role="dialog"
           aria-modal="true"
           aria-label="Imagem ampliada"
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-4"
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/95 p-4"
           style={{ touchAction: "none" }}
           onClick={close}
         >

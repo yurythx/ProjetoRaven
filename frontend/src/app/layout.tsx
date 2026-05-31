@@ -72,7 +72,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get("raven.theme")?.value;
-  const dataTheme = themeCookie === "light" ? "light" : "dark";
+  const dataTheme = themeCookie === "light" ? "light" : themeCookie === "dark" ? "dark" : undefined;
 
   return (
     <html
@@ -89,12 +89,11 @@ export default async function RootLayout({
         <PwaRegister />
         {/* Global Ambient Background */}
         <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-          <div className="rv-orb rv-animate-pulse-glow" style={{ width: "900px", height: "900px", top: "-15%", right: "-12%", background: "var(--rv-accent)", opacity: 0.22 }} />
-          <div className="rv-orb" style={{ width: "700px", height: "700px", bottom: "-15%", left: "-12%", background: "var(--rv-cyan)", opacity: 0.16 }} />
-          <div className="rv-orb rv-animate-float" style={{ width: "400px", height: "400px", top: "35%", left: "40%", background: "var(--rv-accent-2)", opacity: 0.08 }} />
+          <div className="rv-orb" style={{ width: "900px", height: "900px", top: "-15%", right: "-12%", background: "var(--rv-accent)", opacity: 0.10 }} />
+          <div className="rv-orb" style={{ width: "700px", height: "700px", bottom: "-15%", left: "-12%", background: "var(--rv-cyan)", opacity: 0.08 }} />
         </div>
 
-        <ThemeProvider>
+        <ThemeProvider initialTheme={dataTheme}>
           <AuthProvider>
             <QueryProvider>
               <NotificationProvider>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from "react";
 
 export type ThemePreference = "light" | "dark" | "system";
 
@@ -17,7 +17,8 @@ const STORAGE_KEY = "raven.theme";
 
 function getSystemTheme(): "light" | "dark" {
   if (typeof window === "undefined") return "dark";
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  const mql = typeof window.matchMedia === "function" ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+  return mql?.matches ? "dark" : "light";
 }
 
 function applyTheme(pref: ThemePreference) {
@@ -27,18 +28,27 @@ function applyTheme(pref: ThemePreference) {
   document.cookie = `raven.theme=${resolved};path=/;max-age=31536000;SameSite=Lax`;
 }
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<ThemePreference>("dark");
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">("dark");
+export function ThemeProvider({
+  children,
+  initialTheme,
+}: {
+  children: React.ReactNode;
+  initialTheme?: "light" | "dark";
+}) {
+  const initialPref: ThemePreference = initialTheme === "light" || initialTheme === "dark" ? initialTheme : "system";
+  const [theme, setThemeState] = useState<ThemePreference>(initialPref);
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(
+    initialPref === "system" ? getSystemTheme() : initialPref
+  );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY) as ThemePreference | null;
-    const pref = (saved === "light" || saved === "dark" || saved === "system") ? saved : "dark";
+    const pref = (saved === "light" || saved === "dark" || saved === "system") ? saved : initialPref;
     const resolved = pref === "system" ? getSystemTheme() : pref;
     setThemeState(pref);
     setResolvedTheme(resolved);
     applyTheme(pref);
-  }, []);
+  }, [initialPref]);
 
   useEffect(() => {
     if (theme !== "system") return;

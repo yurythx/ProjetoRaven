@@ -57,7 +57,6 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
                   src={fixImageUrl(p.image) ?? ""}
                   alt={p.title}
                   fill
-                  unoptimized
                   priority={idx === 0}
                   className="object-cover group-hover:scale-110 transition-transform duration-700"
                 />

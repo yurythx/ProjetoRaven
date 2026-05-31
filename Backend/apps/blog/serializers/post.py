@@ -258,6 +258,10 @@ class PostCreateSerializer(serializers.ModelSerializer):
                 return value[len(media_url):]
         return value
 
+    def validate_content(self, value):
+        from apps.common.html_sanitizer import sanitize_html
+        return sanitize_html(value)
+
     def validate_slug(self, value):
         if Post.objects.filter(slug=value).exists():
             raise serializers.ValidationError("A post with this slug already exists.")
@@ -346,6 +350,10 @@ class PostUpdateSerializer(serializers.ModelSerializer):
             if value.startswith(media_url):
                 return value[len(media_url):]
         return value
+
+    def validate_content(self, value):
+        from apps.common.html_sanitizer import sanitize_html
+        return sanitize_html(value)
 
     def validate_slug(self, value):
         if Post.objects.filter(slug=value).exclude(id=self.instance.id).exists():

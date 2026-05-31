@@ -114,7 +114,6 @@ export function PublicProfileClient({ username }: { username: string }) {
                   alt={profile.display_name}
                   width={74}
                   height={74}
-                  unoptimized
                   className="w-full h-full object-cover"
                   onError={() => setAvatarError(true)}
                 />

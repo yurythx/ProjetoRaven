@@ -11,8 +11,8 @@ class MediaFileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MediaFile
-        fields = ["id", "image", "url", "alt_text", "original_filename", "uploaded_by_name", "created_at"]
-        read_only_fields = ["id", "original_filename", "uploaded_by_name", "created_at"]
+        fields = ["id", "image", "url", "alt_text", "original_filename", "width", "height", "uploaded_by_name", "created_at"]
+        read_only_fields = ["id", "original_filename", "width", "height", "uploaded_by_name", "created_at"]
 
     def get_url(self, obj):
         if not obj.image:
@@ -27,4 +27,16 @@ class MediaFileSerializer(serializers.ModelSerializer):
         image = validated_data.get("image")
         if image and hasattr(image, "name"):
             validated_data["original_filename"] = image.name
+            try:
+                from PIL import Image as PilImage
+
+                pos = image.tell() if hasattr(image, "tell") else None
+                if hasattr(image, "seek"):
+                    image.seek(0)
+                with PilImage.open(image) as img:
+                    validated_data["width"], validated_data["height"] = img.size
+                if pos is not None and hasattr(image, "seek"):
+                    image.seek(pos)
+            except Exception:
+                pass
         return super().create(validated_data)

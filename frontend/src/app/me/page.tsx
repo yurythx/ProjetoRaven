@@ -190,12 +190,6 @@ export default function MePage() {
 
   return (
     <div className="relative min-h-screen pb-20">
-      {/* Ambient */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "500px", height: "500px", top: "-15%", left: "-10%", background: "var(--rv-accent)" }} />
-        <div className="rv-orb" style={{ width: "350px", height: "350px", bottom: "-5%", right: "-5%", background: "var(--rv-cyan)", opacity: 0.2, animationDelay: "2s" }} />
-      </div>
-
       <div className="relative z-10 mx-auto max-w-5xl px-4 py-6 sm:py-12 sm:px-6 lg:px-8">
         {/* Header */}
         <header className="mb-8 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
@@ -211,7 +205,7 @@ export default function MePage() {
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] rv-glow-purple" />
               <div className="absolute inset-[2px] rounded-[14px] bg-[var(--rv-surface)] overflow-hidden flex items-center justify-center">
                 {avatarUrl ? (
-                  <Image src={avatarUrl} alt={shownName} fill unoptimized className="object-cover" />
+                  <Image src={avatarUrl} alt={shownName} fill className="object-cover" />
                 ) : (
                   <span className="rv-display text-2xl text-[var(--rv-accent)]">{initial}</span>
                 )}

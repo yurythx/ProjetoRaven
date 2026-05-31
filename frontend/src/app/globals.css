@@ -157,10 +157,9 @@ html {
 body {
   background-color: var(--background);
   color: var(--rv-text-primary);
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   min-height: 100dvh;
   overflow-x: hidden;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ===================================================================
@@ -172,13 +171,12 @@ body::before {
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
   pointer-events: none;
-  z-index: 9999;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
+  z-index: 0;
+  opacity: 0.25;
 }
 
 html[data-theme="light"] body::before {
-  opacity: 0.2;
+  opacity: 0.12;
 }
 
 /* ===================================================================
@@ -521,13 +519,13 @@ html[data-theme="light"] .rv-orb {
    ANIMATIONS
 =================================================================== */
 @keyframes rv-pulse-glow {
-  0%, 100% { opacity: 0.42; }
-  50%       { opacity: 0.72; }
+  0%, 100% { opacity: 0.18; }
+  50%       { opacity: 0.26; }
 }
 
 @keyframes rv-float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-8px); }
+  50%       { transform: translateY(-4px); }
 }
 
 @keyframes rv-scanline {
@@ -535,8 +533,11 @@ html[data-theme="light"] .rv-orb {
   100% { transform: translateY(100vh); }
 }
 
-.rv-animate-pulse-glow { animation: rv-pulse-glow 3s ease-in-out infinite; }
-.rv-animate-float      { animation: rv-float 4s ease-in-out infinite; }
+.rv-animate-pulse-glow { animation: rv-pulse-glow 12s ease-in-out infinite; }
+.rv-animate-float      { animation: rv-float 10s ease-in-out infinite; }
+
+html[data-theme="light"] .rv-animate-pulse-glow { animation: none; }
+html[data-theme="light"] .rv-animate-float { animation: none; }
 
 /* ===================================================================
    LIGHT MODE — overrides de branco hardcoded
@@ -605,6 +606,38 @@ html[data-theme="light"] .prose :where(strong):not(:where([class~=not-prose] *))
   margin-top: 2em;
   margin-bottom: 0.5em;
   line-height: 1.2;
+  scroll-margin-top: 96px;
+}
+
+.rv-callout {
+  border: 1px solid var(--rv-border);
+  background: rgba(68, 183, 139, 0.08);
+  border-left: 4px solid var(--rv-accent);
+  border-radius: 1rem;
+  padding: 1rem 1rem;
+  margin: 1.5rem 0;
+}
+
+html[data-theme="light"] .rv-callout {
+  background: rgba(9, 46, 32, 0.06);
+}
+
+.rv-callout.rv-callout-warning {
+  border-left-color: var(--rv-gold);
+  background: rgba(245, 158, 11, 0.10);
+}
+
+html[data-theme="light"] .rv-callout.rv-callout-warning {
+  background: rgba(146, 64, 14, 0.08);
+}
+
+.rv-callout.rv-callout-example {
+  border-left-color: var(--rv-cyan);
+  background: rgba(94, 207, 165, 0.08);
+}
+
+html[data-theme="light"] .rv-callout.rv-callout-example {
+  background: rgba(10, 102, 69, 0.08);
 }
 
 /* Imagens: cursor zoom-in sinaliza que são clicáveis */

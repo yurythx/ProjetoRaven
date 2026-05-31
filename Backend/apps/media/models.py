@@ -14,6 +14,8 @@ class MediaFile(UUIDModel):
     image = models.ImageField(upload_to=_upload_path)
     alt_text = models.CharField(max_length=255, blank=True)
     original_filename = models.CharField(max_length=255, blank=True)
+    width = models.PositiveIntegerField(null=True, blank=True)
+    height = models.PositiveIntegerField(null=True, blank=True)
     uploaded_by = models.ForeignKey(
         "accounts.User",
         null=True,
