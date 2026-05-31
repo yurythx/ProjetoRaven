@@ -19,7 +19,7 @@ def _fill_media_dimensions(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("media", "0003_alter_mediafile_image"),
+        ("media", "0004_alter_mediafile_image"),
     ]
 
     operations = [
@@ -35,3 +35,4 @@ class Migration(migrations.Migration):
         ),
         migrations.RunPython(_fill_media_dimensions, migrations.RunPython.noop),
     ]
+
