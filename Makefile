@@ -35,6 +35,13 @@ prod-up: prod-check
 prod-deploy: prod-check prod-build prod-up
 	$(COMPOSE_PROD) exec django python manage.py migrate --noinput
 	$(COMPOSE_PROD) exec django python manage.py seed_prod
+
+.PHONY: prod-reset
+prod-reset:
+	$(COMPOSE_PROD) down -v --remove-orphans
+
+.PHONY: prod-redeploy
+prod-redeploy: prod-reset prod-deploy
 	@echo "Deploy complete."
 
 .PHONY: seed-prod

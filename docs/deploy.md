@@ -70,6 +70,7 @@ O script faz as perguntas abaixo e configura tudo automaticamente:
 | Gerar chaves VAPID? | S |
 | IPs restritos para /admin/ | (opcional) |
 | Sentry DSN | (opcional) |
+| Criar usuário suporte? | N |
 
 O que o `setup.sh` executa automaticamente:
 
@@ -108,6 +109,15 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 
+Flags úteis:
+
+```bash
+./deploy.sh --yes                  # sem prompts
+./deploy.sh --reset-volumes        # DESTRUTIVO: down -v antes do deploy
+./deploy.sh --no-pull              # não faz pull de imagens base
+./deploy.sh --no-build             # só reinicia containers (usa imagens existentes)
+```
+
 O script executa:
 1. Verifica Docker, docker compose e openssl
 2. Valida os arquivos `.env.prod` (detecta `CHANGE_ME` não preenchidos)
@@ -119,6 +129,17 @@ O script executa:
 8. Aguarda cada container ficar `healthy`
 9. Testa os endpoints HTTP de health check
 10. Exibe o status final de todos os containers
+
+### Observação: bootstrap no container Django
+
+O container `django` executa automaticamente as tarefas de bootstrap na inicialização via `python manage.py bootstrap_prod`:
+- `migrate` (controlado por `RUN_MIGRATE=true|false`)
+- `seed_prod` (controlado por `RUN_SEED_PROD=true|false`)
+- `collectstatic` (controlado por `RUN_COLLECTSTATIC=true|false`)
+
+Em PostgreSQL, o bootstrap usa um advisory lock (`BOOTSTRAP_LOCK_ID`) para evitar concorrência quando houver mais de um container Django subindo ao mesmo tempo.
+
+> Dica: após o primeiro deploy, defina `RUN_SEED_PROD=false` para evitar rodar seed em todo restart.
 
 ### Opção B — Manual
 
@@ -167,6 +188,18 @@ docker compose -f docker-compose.prod.yml logs -f frontend
 ## Passo 6 — Primeiro administrador
 
 O `setup.sh` já configura as variáveis `DJANGO_ADMIN_*` — o admin é criado automaticamente no primeiro boot pelo `seed_prod`. Nenhuma ação necessária.
+
+### Usuário de suporte (opcional)
+
+O deploy pode criar um usuário de suporte automaticamente no boot, mas ele vem **desativado por padrão**.
+
+Para habilitar, configure no `Backend/.env.prod`:
+- `CREATE_SUPPORT_USER=true`
+- `SUPPORT_USER_EMAIL=...`
+- `SUPPORT_USER_USERNAME=...`
+- `SUPPORT_USER_PASSWORD=...` (senha forte)
+
+> Se o `DJANGO_ADMIN_USERNAME` colidir com o username do suporte (ou qualquer usuário existente), o `seed_prod` gera automaticamente um username alternativo para o admin (ex.: `suporte-admin`) para evitar falha no boot.
 
 Se precisar promover manualmente um usuário já registrado:
 

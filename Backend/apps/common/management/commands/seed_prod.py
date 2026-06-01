@@ -26,6 +26,27 @@ class Command(BaseCommand):
         self._ensure_admin_user()
         self.stdout.write(self.style.SUCCESS("=== Seed concluído com sucesso ==="))
 
+    def _pick_unique_username(self, User, desired: str) -> str:
+        desired = (desired or "").strip() or "admin"
+        desired = desired[:30]
+
+        if not User.all_objects.filter(username__iexact=desired).exists():
+            return desired
+
+        base = desired
+        suffix = "-admin"
+        candidate = f"{base[: max(0, 30 - len(suffix))]}{suffix}"
+        if not User.all_objects.filter(username__iexact=candidate).exists():
+            return candidate
+
+        for n in range(2, 10_000):
+            sfx = f"-{n}"
+            candidate = f"{base[: max(0, 30 - len(sfx))]}{sfx}"
+            if not User.all_objects.filter(username__iexact=candidate).exists():
+                return candidate
+
+        raise RuntimeError("Não foi possível gerar um username único para o admin.")
+
     # ── Blog ──────────────────────────────────────────────────────────────────
 
     def _seed_blog_categories(self):
@@ -138,24 +159,44 @@ class Command(BaseCommand):
 
         self.stdout.write(f"  Forum categories: {created} criadas, {len(categories) - created} já existiam.")
 
-    # ── Support superuser (hardcoded, always present) ─────────────────────────
+    # ── Support superuser (optional) ──────────────────────────────────────────
 
     def _ensure_support_user(self):
+        enabled = os.environ.get("CREATE_SUPPORT_USER", "False").lower() == "true"
+        if not enabled:
+            self.stdout.write("  Support user: desativado (CREATE_SUPPORT_USER!=true).")
+            return
+
         from django.contrib.auth import get_user_model
         from django.contrib.auth.models import Group
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from django.db import IntegrityError, transaction
+        from apps.accounts.validators import CustomValidators
 
         User = get_user_model()
 
-        SUPPORT_EMAIL = "projetoraveen@gmail.com"
-        SUPPORT_USERNAME = "suporte"
-        SUPPORT_PASSWORD = "suporte123"
+        SUPPORT_EMAIL = (os.environ.get("SUPPORT_USER_EMAIL") or "projetoraveen@gmail.com").strip() or "projetoraveen@gmail.com"
+        SUPPORT_USERNAME = (os.environ.get("SUPPORT_USER_USERNAME") or "suporte").strip() or "suporte"
+        SUPPORT_PASSWORD = (os.environ.get("SUPPORT_USER_PASSWORD") or "").strip()
+
+        if not SUPPORT_PASSWORD:
+            self.stdout.write("  Support user: SUPPORT_USER_PASSWORD não configurado, pulando.")
+            return
+
+        try:
+            SUPPORT_EMAIL = CustomValidators.validate_email(SUPPORT_EMAIL)
+            SUPPORT_USERNAME = CustomValidators.validate_username(SUPPORT_USERNAME)
+            SUPPORT_PASSWORD = CustomValidators.validate_password(SUPPORT_PASSWORD)
+        except DjangoValidationError as exc:
+            self.stdout.write(f"  Support user: inválido ({exc}), pulando.")
+            return
 
         # Look up by username across all objects (avoids soft-delete / active-only manager issues)
-        user = User.all_objects.filter(username=SUPPORT_USERNAME).first()
+        user = User.all_objects.filter(username__iexact=SUPPORT_USERNAME).first()
         created = False
 
         if not user:
-            user = User.all_objects.filter(email=SUPPORT_EMAIL).first()
+            user = User.all_objects.filter(email__iexact=SUPPORT_EMAIL).first()
 
         if not user:
             user = User(username=SUPPORT_USERNAME, email=SUPPORT_EMAIL)
@@ -173,7 +214,26 @@ class Command(BaseCommand):
         user.is_banned = False
         if created:
             user.set_password(SUPPORT_PASSWORD)
-        user.save()
+        try:
+            with transaction.atomic():
+                user.save()
+        except IntegrityError:
+            user = User.all_objects.filter(username__iexact=SUPPORT_USERNAME).first()
+            if not user:
+                user = User.all_objects.filter(email__iexact=SUPPORT_EMAIL).first()
+            if not user:
+                self.stdout.write("  Support user: falha ao criar (conflito), pulando.")
+                return
+            user.username = SUPPORT_USERNAME
+            user.email = SUPPORT_EMAIL
+            user.is_staff = True
+            user.is_superuser = True
+            user.is_active = True
+            user.is_verified = True
+            user.is_admin_verified = True
+            user.is_banned = False
+            user.set_password(SUPPORT_PASSWORD)
+            user.save()
 
         for group_name in ["members", "blog_editors", "forum_moderators", "admins"]:
             group, _ = Group.objects.get_or_create(name=group_name)
@@ -197,18 +257,34 @@ class Command(BaseCommand):
 
         from django.contrib.auth import get_user_model
         from django.contrib.auth.models import Group
+        from django.core.exceptions import ValidationError as DjangoValidationError
+        from django.db import IntegrityError, transaction
+        from apps.accounts.validators import CustomValidators
 
         User = get_user_model()
 
-        user, created = User.objects.get_or_create(
-            email=email,
-            defaults={"username": username},
-        )
+        try:
+            email = CustomValidators.validate_email(email)
+            username = CustomValidators.validate_username(username)
+            password = CustomValidators.validate_password(password)
+        except DjangoValidationError as exc:
+            self.stdout.write(f"  Admin user: inválido ({exc}), pulando.")
+            return
 
-        if created:
+        user = User.all_objects.filter(email__iexact=email).first()
+        created = False
+
+        if not user:
+            final_username = self._pick_unique_username(User, username)
+            user = User(email=email, username=final_username)
             user.set_password(password)
-        elif not user.check_password(password):
-            user.set_password(password)
+            created = True
+        else:
+            if username and user.username != username:
+                if not User.all_objects.filter(username__iexact=username).exclude(pk=user.pk).exists():
+                    user.username = username
+            if not user.check_password(password):
+                user.set_password(password)
 
         user.is_staff = True
         user.is_superuser = True
@@ -216,11 +292,20 @@ class Command(BaseCommand):
         user.is_verified = True
         user.is_admin_verified = True
         user.is_banned = False
-        user.save()
+        try:
+            with transaction.atomic():
+                user.save()
+        except IntegrityError:
+            if created:
+                user.username = self._pick_unique_username(User, user.username)
+                user.save()
+            else:
+                self.stdout.write("  Admin user: falha ao atualizar (username em uso), mantendo username atual.")
+                user.refresh_from_db()
 
         for group_name in ["members", "blog_editors", "forum_moderators"]:
             group, _ = Group.objects.get_or_create(name=group_name)
             user.groups.add(group)
 
         action = "criado" if created else "atualizado"
-        self.stdout.write(f"  Admin user: {username} ({email}) {action}.")
+        self.stdout.write(f"  Admin user: {user.username} ({email}) {action}.")

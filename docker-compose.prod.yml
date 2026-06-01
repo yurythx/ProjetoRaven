@@ -80,13 +80,16 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8000/api/health/ready/ >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     command: >
       sh -c "mkdir -p /app/keys &&
              ([ -f /app/keys/private.pem ] || (openssl genrsa -out /app/keys/private.pem 2048 &&
              openssl rsa -in /app/keys/private.pem -pubout -out /app/keys/public.pem)) &&
-             python manage.py migrate --noinput &&
-             python manage.py seed_prod &&
-             python manage.py collectstatic --noinput &&
+             python manage.py bootstrap_prod &&
              daphne -b 0.0.0.0 -p 8000 core.asgi:application"
 
   # ── Frontend (exposto ao cloudflared via host) ────────────────────────────────
@@ -108,6 +111,17 @@ services:
       - "127.0.0.1:${FRONTEND_PORT:-3100}:3000"
     depends_on:
       - django
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "const http=require('http');const req=http.request({host:'127.0.0.1',port:3000,path:'/',timeout:4000},res=>process.exit(res.statusCode?0:1));req.on('error',()=>process.exit(1));req.on('timeout',()=>{req.destroy();process.exit(1)});req.end();"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   postgres_data:

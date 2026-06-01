@@ -284,6 +284,15 @@ chmod +x deploy.sh
 ./deploy.sh
 ```
 
+Flags úteis:
+
+```bash
+./deploy.sh --yes                  # sem prompts
+./deploy.sh --reset-volumes        # DESTRUTIVO: down -v antes do deploy
+./deploy.sh --no-pull              # não faz pull de imagens base
+./deploy.sh --no-build             # só reinicia containers (usa imagens existentes)
+```
+
 O `deploy.sh` executa automaticamente:
 1. Verifica Docker, docker compose e openssl
 2. Valida os arquivos `.env.prod`
@@ -295,6 +304,15 @@ O `deploy.sh` executa automaticamente:
 8. Aguarda cada container ficar `healthy`
 9. Testa os endpoints de health check
 10. Exibe o status final
+
+### Bootstrap do Django (migrate/seed/collectstatic)
+
+O container `django` executa `python manage.py bootstrap_prod` no boot:
+- `migrate` (`RUN_MIGRATE=true|false`)
+- `seed_prod` (`RUN_SEED_PROD=true|false`)
+- `collectstatic` (`RUN_COLLECTSTATIC=true|false`)
+
+Em PostgreSQL, o bootstrap usa advisory lock (`BOOTSTRAP_LOCK_ID`) para evitar concorrência se você subir mais de um container Django ao mesmo tempo.
 
 ### Verificar o deploy
 
@@ -353,6 +371,11 @@ git pull
 | `VAPID_PUBLIC_KEY` | — | Chave pública VAPID para Web Push |
 | `VAPID_PRIVATE_KEY` | — | Chave privada VAPID |
 | `VAPID_ADMIN_EMAIL` | — | E-mail de contato VAPID |
+| `RUN_MIGRATE` | — | `True/False` — roda `migrate` no boot (via `bootstrap_prod`) |
+| `RUN_SEED_PROD` | — | `True/False` — roda `seed_prod` no boot (via `bootstrap_prod`) |
+| `RUN_COLLECTSTATIC` | — | `True/False` — roda `collectstatic` no boot (via `bootstrap_prod`) |
+| `BOOTSTRAP_USE_DB_LOCK` | — | `True/False` — usa advisory lock no Postgres no boot |
+| `BOOTSTRAP_LOCK_ID` | — | Inteiro do advisory lock (evita concorrência em multi-replica) |
 | `FRONTEND_PORT` | — | Porta do frontend no host (padrão: `3100`) |
 | `DJANGO_PORT` | — | Porta do Django no host (padrão: `8100`) |
 | `SECURE_SSL_REDIRECT` | — | `False` quando Cloudflare termina TLS |

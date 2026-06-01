@@ -113,6 +113,29 @@ prompt_password() {
   eval "$varname='$input'"
 }
 
+validate_username() {
+  local u="$1"
+  [ "${#u}" -ge 3 ] || return 1
+  [ "${#u}" -le 30 ] || return 1
+  [[ "$u" =~ ^[a-zA-Z0-9_-]+$ ]] || return 1
+  return 0
+}
+
+validate_password() {
+  local p="$1"
+  [ "${#p}" -ge 12 ] || return 1
+  [[ "$p" =~ [A-Z] ]] || return 1
+  [[ "$p" =~ [a-z] ]] || return 1
+  [[ "$p" =~ [0-9] ]] || return 1
+  [[ "$p" =~ [\!\@\#\$\%\^\&\*\(\)\-\_\=\+\[\]\{\}\;\:\'\"\,\.\<\>\/\?\\\|\`\~] ]] || return 1
+  local lower
+  lower="$(printf '%s' "$p" | tr '[:upper:]' '[:lower:]')"
+  case "$lower" in
+    password|12345678|qwerty|abc123|password123|admin123|letmein|welcome|monkey|dragon|senha@123|pass@word1) return 1 ;;
+  esac
+  return 0
+}
+
 # Geração de string aleatória
 gen_secret()  { python3 -c "import secrets; print(secrets.token_urlsafe($1))" 2>/dev/null; }
 gen_hex()     { openssl rand -hex "$1" 2>/dev/null; }
@@ -223,10 +246,48 @@ prompt          "E-mail do admin"   "admin@${DOMAIN}" ADMIN_EMAIL
 prompt          "Username do admin" "admin"            ADMIN_USERNAME
 prompt_password "Senha do admin (mínimo 12 chars)"    ADMIN_PASSWORD
 
+while ! validate_username "$ADMIN_USERNAME"; do
+  warn "Username inválido. Use 3–30 caracteres e apenas letras, números, _ ou -."
+  prompt "Username do admin" "admin" ADMIN_USERNAME
+done
+
 while [ ${#ADMIN_PASSWORD} -lt 12 ]; do
   warn "Senha muito curta. Digite pelo menos 12 caracteres."
   prompt_password "Senha do admin" ADMIN_PASSWORD
 done
+
+while ! validate_password "$ADMIN_PASSWORD"; do
+  warn "Senha inválida. Use 12+ chars com maiúscula, minúscula, número e caractere especial."
+  prompt_password "Senha do admin" ADMIN_PASSWORD
+done
+
+echo
+printf "${W}  Usuário de suporte (opcional)${RS}\n"
+printf "${D}  Recomendado manter desativado em produção. Se ativar, configure senha forte.${RS}\n"
+printf "${G}  Criar usuário suporte agora? [s/N] ${RS}"
+read -r support_answer
+CREATE_SUPPORT_USER=false
+SUPPORT_USER_USERNAME=""
+SUPPORT_USER_EMAIL=""
+SUPPORT_USER_PASSWORD=""
+case "$support_answer" in
+  [sS]|[sS][iI][mM])
+    CREATE_SUPPORT_USER=true
+    prompt "E-mail do suporte" "suporte@${DOMAIN}" SUPPORT_USER_EMAIL
+    prompt "Username do suporte" "suporte" SUPPORT_USER_USERNAME
+    prompt_password "Senha do suporte (mínimo 12 chars)" SUPPORT_USER_PASSWORD
+
+    while ! validate_username "$SUPPORT_USER_USERNAME"; do
+      warn "Username inválido. Use 3–30 caracteres e apenas letras, números, _ ou -."
+      prompt "Username do suporte" "suporte" SUPPORT_USER_USERNAME
+    done
+
+    while ! validate_password "$SUPPORT_USER_PASSWORD"; do
+      warn "Senha inválida. Use 12+ chars com maiúscula, minúscula, número e caractere especial."
+      prompt_password "Senha do suporte" SUPPORT_USER_PASSWORD
+    done
+    ;;
+esac
 
 # VAPID
 echo
@@ -415,8 +476,8 @@ FRONTEND_PORT=${FRONTEND_PORT}
 DJANGO_PORT=${DJANGO_PORT}
 
 # ── CORS / CSRF ────────────────────────────────────────────────────────────────
-CORS_ALLOWED_ORIGINS=${SITE_URL}
-CSRF_TRUSTED_ORIGINS=${SITE_URL}
+CORS_ALLOWED_ORIGINS=${SITE_URL},https://www.${DOMAIN}
+CSRF_TRUSTED_ORIGINS=${SITE_URL},https://www.${DOMAIN}
 
 # ── Email ──────────────────────────────────────────────────────────────────────
 # Configure o provedor SMTP pelo painel admin após o primeiro login.
@@ -479,7 +540,15 @@ SECURE_SSL_REDIRECT=False
 # ── Misc ──────────────────────────────────────────────────────────────────────
 DJANGO_LOG_LEVEL=WARNING
 LOG_FORMAT=json
-CREATE_DEFAULT_SUPPORT_USER=False
+RUN_SEED_PROD=true
+RUN_MIGRATE=true
+RUN_COLLECTSTATIC=true
+BOOTSTRAP_USE_DB_LOCK=true
+BOOTSTRAP_LOCK_ID=9034212341234
+CREATE_SUPPORT_USER=${CREATE_SUPPORT_USER}
+SUPPORT_USER_USERNAME=${SUPPORT_USER_USERNAME}
+SUPPORT_USER_EMAIL=${SUPPORT_USER_EMAIL}
+SUPPORT_USER_PASSWORD=${SUPPORT_USER_PASSWORD}
 EOF
 
 stop_spin "ok"

@@ -11,6 +11,21 @@
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
+AUTO_YES=false
+RESET_VOLUMES=false
+NO_BUILD=false
+NO_PULL=false
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -y|--yes) AUTO_YES=true; shift ;;
+    --reset|--reset-volumes) RESET_VOLUMES=true; shift ;;
+    --no-build) NO_BUILD=true; shift ;;
+    --no-pull) NO_PULL=true; shift ;;
+    *) break ;;
+  esac
+done
+
 # ── ANSI ──────────────────────────────────────────────────────────────────────
 G='\033[0;32m'    # green
 BG='\033[1;32m'   # bright green
@@ -288,37 +303,94 @@ source "$BACKEND_ENV"
 source "$FRONTEND_ENV"
 set +a
 
+require_var() {
+  local name="$1"
+  local val="${!name:-}"
+  if [ -z "$val" ]; then
+    fatal "Variável obrigatória vazia: $name"
+  fi
+  if printf '%s' "$val" | grep -q "CHANGE_ME"; then
+    fatal "Variável ainda contém CHANGE_ME: $name"
+  fi
+}
+
+require_var DJANGO_SECRET_KEY
+require_var POSTGRES_PASSWORD
+require_var REDIS_PASSWORD
+require_var EMAIL_SETTINGS_ENCRYPTION_SALT
+require_var JWT_PRIVATE_KEY_PATH
+require_var JWT_PUBLIC_KEY_PATH
+
+CREATE_SUPPORT_USER="${CREATE_SUPPORT_USER:-False}"
+if [ "$(printf '%s' "$CREATE_SUPPORT_USER" | tr '[:upper:]' '[:lower:]')" = "true" ]; then
+  if [ -z "${SUPPORT_USER_PASSWORD:-}" ]; then
+    fatal "CREATE_SUPPORT_USER=true mas SUPPORT_USER_PASSWORD está vazio"
+  fi
+  if [ -z "${SUPPORT_USER_EMAIL:-}" ] || [ -z "${SUPPORT_USER_USERNAME:-}" ]; then
+    fatal "CREATE_SUPPORT_USER=true mas SUPPORT_USER_EMAIL/USERNAME está vazio"
+  fi
+fi
+
 # Confirmação antes de continuar
 printf "${Y}  ⚠  Pronto para fazer o deploy em PRODUÇÃO.${RS}\n"
 printf "${W}     Este comando irá reconstruir e reiniciar todos os containers.${RS}\n"
 echo
-printf "${G}  Continuar? [s/N] ${RS}"
-read -r CONFIRM
-case "$CONFIRM" in
-  [sS]|[sS][iI][mM]) ;;
-  *) printf "${Y}  Deploy cancelado.${RS}\n"; exit 0 ;;
-esac
+if [ "$AUTO_YES" = true ]; then
+  ok "Modo automático (--yes) — pulando confirmação"
+else
+  printf "${G}  Continuar? [s/N] ${RS}"
+  read -r CONFIRM
+  case "$CONFIRM" in
+    [sS]|[sS][iI][mM]) ;;
+    *) printf "${Y}  Deploy cancelado.${RS}\n"; exit 0 ;;
+  esac
+fi
 
 echo
+
+# Reset destrutivo (volumes)
+if [ "$RESET_VOLUMES" = true ]; then
+  warn "Reset de volumes ativado (--reset-volumes) — banco, redis e uploads serão apagados"
+  if [ "$AUTO_YES" = true ]; then
+    ok "Modo automático — executando reset sem confirmação adicional"
+  else
+    printf "${R}  Digite RESET para confirmar: ${RS}"
+    read -r CONFIRM_RESET
+    if [ "$CONFIRM_RESET" != "RESET" ]; then
+      fatal "Reset cancelado"
+    fi
+  fi
+  start_spin "Parando containers e removendo volumes..."
+  docker compose -f docker-compose.prod.yml down -v --remove-orphans >/dev/null 2>&1 || true
+  stop_spin "ok"
+fi
 
 # Pull de imagens base antes do build
-start_spin "Atualizando imagens base (postgres, redis)..."
-docker compose -f docker-compose.prod.yml pull postgres redis --quiet 2>/dev/null || true
-stop_spin "ok"
+if [ "$NO_PULL" = true ]; then
+  warn "Pull desativado (--no-pull)"
+else
+  start_spin "Atualizando imagens base (postgres, redis)..."
+  docker compose -f docker-compose.prod.yml pull postgres redis --quiet 2>/dev/null || true
+  stop_spin "ok"
+fi
 
 # Build das imagens (backend + frontend)
-echo
-printf "${G}  ◈ Construindo imagens Docker...${RS}\n"
-divider
-docker compose -f docker-compose.prod.yml build --progress=plain 2>&1 | \
-  while IFS= read -r line; do
-    if printf '%s' "$line" | grep -qiE 'error:|failed|fatal|exception'; then
-      printf "${R}    %s${RS}\n" "$line"
-    else
-      printf "${DG}    %s${RS}\n" "$line"
-    fi
-  done
-divider
+if [ "$NO_BUILD" = true ]; then
+  warn "Build desativado (--no-build)"
+else
+  echo
+  printf "${G}  ◈ Construindo imagens Docker...${RS}\n"
+  divider
+  docker compose -f docker-compose.prod.yml build --progress=plain 2>&1 | \
+    while IFS= read -r line; do
+      if printf '%s' "$line" | grep -qiE 'error:|failed|fatal|exception'; then
+        printf "${R}    %s${RS}\n" "$line"
+      else
+        printf "${DG}    %s${RS}\n" "$line"
+      fi
+    done
+  divider
+fi
 
 # Subir serviços
 echo
@@ -355,8 +427,9 @@ wait_healthy() {
 
       case "$container_state" in
         exited|dead)
-          printf "${CL}${R}  ✗ %s encerrou com erro — veja: docker logs %s${RS}\n" "$name" "$name"
-          return 0 ;;
+          printf "${CL}${R}  ✗ %s encerrou com erro${RS}\n" "$name"
+          docker compose -f docker-compose.prod.yml logs --tail=200 "$name" 2>/dev/null || true
+          fatal "$name encerrou com erro" ;;
       esac
 
       case "$health_state" in
