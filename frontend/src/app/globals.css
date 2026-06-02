@@ -162,6 +162,120 @@ body {
   overflow-x: hidden;
 }
 
+body.rv-scroll-lock {
+  overflow: hidden;
+}
+
+body.rv-touch-lock {
+  touch-action: none;
+}
+
+.rv-progress-indicator {
+  transform: translateX(-100%);
+}
+
+.rv-progress[data-value="0"] .rv-progress-indicator { transform: translateX(-100%); }
+.rv-progress[data-value="1"] .rv-progress-indicator { transform: translateX(-99%); }
+.rv-progress[data-value="2"] .rv-progress-indicator { transform: translateX(-98%); }
+.rv-progress[data-value="3"] .rv-progress-indicator { transform: translateX(-97%); }
+.rv-progress[data-value="4"] .rv-progress-indicator { transform: translateX(-96%); }
+.rv-progress[data-value="5"] .rv-progress-indicator { transform: translateX(-95%); }
+.rv-progress[data-value="6"] .rv-progress-indicator { transform: translateX(-94%); }
+.rv-progress[data-value="7"] .rv-progress-indicator { transform: translateX(-93%); }
+.rv-progress[data-value="8"] .rv-progress-indicator { transform: translateX(-92%); }
+.rv-progress[data-value="9"] .rv-progress-indicator { transform: translateX(-91%); }
+.rv-progress[data-value="10"] .rv-progress-indicator { transform: translateX(-90%); }
+.rv-progress[data-value="11"] .rv-progress-indicator { transform: translateX(-89%); }
+.rv-progress[data-value="12"] .rv-progress-indicator { transform: translateX(-88%); }
+.rv-progress[data-value="13"] .rv-progress-indicator { transform: translateX(-87%); }
+.rv-progress[data-value="14"] .rv-progress-indicator { transform: translateX(-86%); }
+.rv-progress[data-value="15"] .rv-progress-indicator { transform: translateX(-85%); }
+.rv-progress[data-value="16"] .rv-progress-indicator { transform: translateX(-84%); }
+.rv-progress[data-value="17"] .rv-progress-indicator { transform: translateX(-83%); }
+.rv-progress[data-value="18"] .rv-progress-indicator { transform: translateX(-82%); }
+.rv-progress[data-value="19"] .rv-progress-indicator { transform: translateX(-81%); }
+.rv-progress[data-value="20"] .rv-progress-indicator { transform: translateX(-80%); }
+.rv-progress[data-value="21"] .rv-progress-indicator { transform: translateX(-79%); }
+.rv-progress[data-value="22"] .rv-progress-indicator { transform: translateX(-78%); }
+.rv-progress[data-value="23"] .rv-progress-indicator { transform: translateX(-77%); }
+.rv-progress[data-value="24"] .rv-progress-indicator { transform: translateX(-76%); }
+.rv-progress[data-value="25"] .rv-progress-indicator { transform: translateX(-75%); }
+.rv-progress[data-value="26"] .rv-progress-indicator { transform: translateX(-74%); }
+.rv-progress[data-value="27"] .rv-progress-indicator { transform: translateX(-73%); }
+.rv-progress[data-value="28"] .rv-progress-indicator { transform: translateX(-72%); }
+.rv-progress[data-value="29"] .rv-progress-indicator { transform: translateX(-71%); }
+.rv-progress[data-value="30"] .rv-progress-indicator { transform: translateX(-70%); }
+.rv-progress[data-value="31"] .rv-progress-indicator { transform: translateX(-69%); }
+.rv-progress[data-value="32"] .rv-progress-indicator { transform: translateX(-68%); }
+.rv-progress[data-value="33"] .rv-progress-indicator { transform: translateX(-67%); }
+.rv-progress[data-value="34"] .rv-progress-indicator { transform: translateX(-66%); }
+.rv-progress[data-value="35"] .rv-progress-indicator { transform: translateX(-65%); }
+.rv-progress[data-value="36"] .rv-progress-indicator { transform: translateX(-64%); }
+.rv-progress[data-value="37"] .rv-progress-indicator { transform: translateX(-63%); }
+.rv-progress[data-value="38"] .rv-progress-indicator { transform: translateX(-62%); }
+.rv-progress[data-value="39"] .rv-progress-indicator { transform: translateX(-61%); }
+.rv-progress[data-value="40"] .rv-progress-indicator { transform: translateX(-60%); }
+.rv-progress[data-value="41"] .rv-progress-indicator { transform: translateX(-59%); }
+.rv-progress[data-value="42"] .rv-progress-indicator { transform: translateX(-58%); }
+.rv-progress[data-value="43"] .rv-progress-indicator { transform: translateX(-57%); }
+.rv-progress[data-value="44"] .rv-progress-indicator { transform: translateX(-56%); }
+.rv-progress[data-value="45"] .rv-progress-indicator { transform: translateX(-55%); }
+.rv-progress[data-value="46"] .rv-progress-indicator { transform: translateX(-54%); }
+.rv-progress[data-value="47"] .rv-progress-indicator { transform: translateX(-53%); }
+.rv-progress[data-value="48"] .rv-progress-indicator { transform: translateX(-52%); }
+.rv-progress[data-value="49"] .rv-progress-indicator { transform: translateX(-51%); }
+.rv-progress[data-value="50"] .rv-progress-indicator { transform: translateX(-50%); }
+.rv-progress[data-value="51"] .rv-progress-indicator { transform: translateX(-49%); }
+.rv-progress[data-value="52"] .rv-progress-indicator { transform: translateX(-48%); }
+.rv-progress[data-value="53"] .rv-progress-indicator { transform: translateX(-47%); }
+.rv-progress[data-value="54"] .rv-progress-indicator { transform: translateX(-46%); }
+.rv-progress[data-value="55"] .rv-progress-indicator { transform: translateX(-45%); }
+.rv-progress[data-value="56"] .rv-progress-indicator { transform: translateX(-44%); }
+.rv-progress[data-value="57"] .rv-progress-indicator { transform: translateX(-43%); }
+.rv-progress[data-value="58"] .rv-progress-indicator { transform: translateX(-42%); }
+.rv-progress[data-value="59"] .rv-progress-indicator { transform: translateX(-41%); }
+.rv-progress[data-value="60"] .rv-progress-indicator { transform: translateX(-40%); }
+.rv-progress[data-value="61"] .rv-progress-indicator { transform: translateX(-39%); }
+.rv-progress[data-value="62"] .rv-progress-indicator { transform: translateX(-38%); }
+.rv-progress[data-value="63"] .rv-progress-indicator { transform: translateX(-37%); }
+.rv-progress[data-value="64"] .rv-progress-indicator { transform: translateX(-36%); }
+.rv-progress[data-value="65"] .rv-progress-indicator { transform: translateX(-35%); }
+.rv-progress[data-value="66"] .rv-progress-indicator { transform: translateX(-34%); }
+.rv-progress[data-value="67"] .rv-progress-indicator { transform: translateX(-33%); }
+.rv-progress[data-value="68"] .rv-progress-indicator { transform: translateX(-32%); }
+.rv-progress[data-value="69"] .rv-progress-indicator { transform: translateX(-31%); }
+.rv-progress[data-value="70"] .rv-progress-indicator { transform: translateX(-30%); }
+.rv-progress[data-value="71"] .rv-progress-indicator { transform: translateX(-29%); }
+.rv-progress[data-value="72"] .rv-progress-indicator { transform: translateX(-28%); }
+.rv-progress[data-value="73"] .rv-progress-indicator { transform: translateX(-27%); }
+.rv-progress[data-value="74"] .rv-progress-indicator { transform: translateX(-26%); }
+.rv-progress[data-value="75"] .rv-progress-indicator { transform: translateX(-25%); }
+.rv-progress[data-value="76"] .rv-progress-indicator { transform: translateX(-24%); }
+.rv-progress[data-value="77"] .rv-progress-indicator { transform: translateX(-23%); }
+.rv-progress[data-value="78"] .rv-progress-indicator { transform: translateX(-22%); }
+.rv-progress[data-value="79"] .rv-progress-indicator { transform: translateX(-21%); }
+.rv-progress[data-value="80"] .rv-progress-indicator { transform: translateX(-20%); }
+.rv-progress[data-value="81"] .rv-progress-indicator { transform: translateX(-19%); }
+.rv-progress[data-value="82"] .rv-progress-indicator { transform: translateX(-18%); }
+.rv-progress[data-value="83"] .rv-progress-indicator { transform: translateX(-17%); }
+.rv-progress[data-value="84"] .rv-progress-indicator { transform: translateX(-16%); }
+.rv-progress[data-value="85"] .rv-progress-indicator { transform: translateX(-15%); }
+.rv-progress[data-value="86"] .rv-progress-indicator { transform: translateX(-14%); }
+.rv-progress[data-value="87"] .rv-progress-indicator { transform: translateX(-13%); }
+.rv-progress[data-value="88"] .rv-progress-indicator { transform: translateX(-12%); }
+.rv-progress[data-value="89"] .rv-progress-indicator { transform: translateX(-11%); }
+.rv-progress[data-value="90"] .rv-progress-indicator { transform: translateX(-10%); }
+.rv-progress[data-value="91"] .rv-progress-indicator { transform: translateX(-9%); }
+.rv-progress[data-value="92"] .rv-progress-indicator { transform: translateX(-8%); }
+.rv-progress[data-value="93"] .rv-progress-indicator { transform: translateX(-7%); }
+.rv-progress[data-value="94"] .rv-progress-indicator { transform: translateX(-6%); }
+.rv-progress[data-value="95"] .rv-progress-indicator { transform: translateX(-5%); }
+.rv-progress[data-value="96"] .rv-progress-indicator { transform: translateX(-4%); }
+.rv-progress[data-value="97"] .rv-progress-indicator { transform: translateX(-3%); }
+.rv-progress[data-value="98"] .rv-progress-indicator { transform: translateX(-2%); }
+.rv-progress[data-value="99"] .rv-progress-indicator { transform: translateX(-1%); }
+.rv-progress[data-value="100"] .rv-progress-indicator { transform: translateX(0%); }
+
 /* ===================================================================
    NOISE & SCANLINE TEXTURE (subtle depth effect)
 =================================================================== */
@@ -515,6 +629,28 @@ html[data-theme="light"] .rv-orb {
   opacity: 0.10;
 }
 
+.rv-orb-global-a {
+  width: 900px;
+  height: 900px;
+  top: -15%;
+  right: -12%;
+  background: var(--rv-accent);
+  opacity: 0.10;
+}
+
+.rv-orb-global-b {
+  width: 700px;
+  height: 700px;
+  bottom: -15%;
+  left: -12%;
+  background: var(--rv-cyan);
+  opacity: 0.08;
+}
+
+.rv-hero-grid {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V18L28 2l28 16v32L28 66zm0-2l26-15V19L28 4 2 19v30l26 15z' fill='none' stroke='%238b5cf6' stroke-width='1'/%3E%3C/svg%3E");
+}
+
 /* ===================================================================
    ANIMATIONS
 =================================================================== */
@@ -584,6 +720,39 @@ html[data-theme="light"] .prose :where(strong):not(:where([class~=not-prose] *))
   font-family: var(--font-body);
   line-height: 1.85;
   letter-spacing: 0.01em;
+  color: var(--rv-text-muted);
+}
+
+html[data-theme="dark"] .prose.prose-invert [style*="color:#000"],
+html[data-theme="dark"] .prose.prose-invert [style*="color: #000"],
+html[data-theme="dark"] .prose.prose-invert [style*="color:#000000"],
+html[data-theme="dark"] .prose.prose-invert [style*="color: #000000"],
+html[data-theme="dark"] .prose.prose-invert [style*="color:rgb(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="color: rgb(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="color:rgba(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="color: rgba(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="color:black"],
+html[data-theme="dark"] .prose.prose-invert [style*="color: black"] {
+  color: inherit !important;
+}
+
+html[data-theme="dark"] .prose.prose-invert [style*="background:#000"],
+html[data-theme="dark"] .prose.prose-invert [style*="background: #000"],
+html[data-theme="dark"] .prose.prose-invert [style*="background:#000000"],
+html[data-theme="dark"] .prose.prose-invert [style*="background: #000000"],
+html[data-theme="dark"] .prose.prose-invert [style*="background:rgb(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="background: rgb(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="background:rgba(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="background: rgba(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="background-color:#000"],
+html[data-theme="dark"] .prose.prose-invert [style*="background-color: #000"],
+html[data-theme="dark"] .prose.prose-invert [style*="background-color:#000000"],
+html[data-theme="dark"] .prose.prose-invert [style*="background-color: #000000"],
+html[data-theme="dark"] .prose.prose-invert [style*="background-color:rgb(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="background-color: rgb(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="background-color:rgba(0"],
+html[data-theme="dark"] .prose.prose-invert [style*="background-color: rgba(0"] {
+  background-color: transparent !important;
 }
 
 .rv-article-body p,

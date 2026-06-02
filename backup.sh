@@ -5,7 +5,7 @@
 #  Uso:
 #    ./backup.sh               # backup completo (DB + mediafiles)
 #    ./backup.sh --db-only     # somente banco de dados
-#    ./backup.sh --restore backups/db_20260525_143000.sql.gz
+#    ./backup.sh --restore backups/db_20260525_143000.sql.gz [backups/media_20260525_143000.tar.gz]
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -42,8 +42,12 @@ POSTGRES_DB="${POSTGRES_DB:-projeto_raven}"
 # ── Modo restore ──────────────────────────────────────────────────────────────
 if [ "${1:-}" = "--restore" ]; then
   RESTORE_FILE="${2:-}"
+  MEDIA_RESTORE_FILE="${3:-}"
   [ -z "$RESTORE_FILE" ] && err "Informe o arquivo: ./backup.sh --restore backups/db_YYYYMMDD_HHMMSS.sql.gz"
   [ ! -f "$RESTORE_FILE" ] && err "Arquivo não encontrado: $RESTORE_FILE"
+  if [ -n "${MEDIA_RESTORE_FILE:-}" ] && [ ! -f "$MEDIA_RESTORE_FILE" ]; then
+    err "Arquivo não encontrado: $MEDIA_RESTORE_FILE"
+  fi
 
   printf "${Y}  ⚠  ATENÇÃO: Isso sobrescreve o banco '%s'. Continuar? [s/N] ${RS}" "$POSTGRES_DB"
   read -r CONFIRM
@@ -56,6 +60,20 @@ if [ "${1:-}" = "--restore" ]; then
   gunzip -c "$RESTORE_FILE" | $COMPOSE exec -T postgres \
     psql -U "$POSTGRES_USER" "$POSTGRES_DB"
   ok "Banco restaurado de $RESTORE_FILE"
+
+  if [ -n "${MEDIA_RESTORE_FILE:-}" ]; then
+    printf "${Y}  ⚠  ATENÇÃO: Isso sobrescreve a mídia atual (mediafiles). Continuar? [s/N] ${RS}"
+    read -r CONFIRM_MEDIA
+    case "$CONFIRM_MEDIA" in
+      [sS]|[sS][iI][mM]) ;;
+      *) printf "${Y}  Restore de mídia cancelado.${RS}\n"; exit 0 ;;
+    esac
+
+    printf "${G}  Restaurando mídia %s...${RS}\n" "$MEDIA_RESTORE_FILE"
+    cat "$MEDIA_RESTORE_FILE" | $COMPOSE run --rm --no-deps --entrypoint "" django \
+      sh -c "rm -rf /app/mediafiles/* && tar xzf - -C /app >/dev/null 2>&1"
+    ok "Mídia restaurada de $MEDIA_RESTORE_FILE"
+  fi
   exit 0
 fi
 

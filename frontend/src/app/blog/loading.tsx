@@ -1,4 +1,5 @@
 export default function BlogLoading() {
+  const statWidths = ["w-[100px]", "w-[100px]", "w-[100px]"];
   return (
     <div className="relative min-h-screen animate-pulse">
       {/* Hero skeleton */}
@@ -15,8 +16,8 @@ export default function BlogLoading() {
           </div>
           {/* Stats */}
           <div className="mt-12 flex gap-4">
-            {[100, 100, 100].map((w, i) => (
-              <div key={i} className="h-16 rounded-2xl bg-[var(--rv-surface-2)]" style={{ width: w }} />
+            {statWidths.map((w, i) => (
+              <div key={i} className={`h-16 rounded-2xl bg-[var(--rv-surface-2)] ${w}`} />
             ))}
           </div>
         </div>

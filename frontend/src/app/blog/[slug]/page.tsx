@@ -175,7 +175,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               )}
             </div>
           </div>
-          <div className="rv-divider hidden sm:block" style={{ width: "1px", height: "32px", background: "var(--rv-border)" }} />
+          <div className="rv-divider hidden sm:block w-px h-8 bg-[var(--rv-border)]" />
           <div className="flex flex-wrap gap-4">
             <div>
               <div className="rv-label text-[9px] text-[var(--rv-text-dim)]">Publicado</div>
@@ -208,8 +208,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
         {/* ── Excerpt ── */}
         {post.excerpt && (
-          <p className="text-[var(--rv-text-muted)] text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-[var(--rv-accent)] pl-4 whitespace-pre-line"
-            style={{ fontFamily: "var(--font-body)" }}>
+          <p className="text-[var(--rv-text-muted)] text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-[var(--rv-accent)] pl-4 whitespace-pre-line font-[var(--font-body)]">
             {post.excerpt}
           </p>
         )}
@@ -284,7 +283,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     <h3 className="rv-display text-sm text-[var(--rv-text-primary)] group-hover:text-[var(--rv-accent)] transition-colors line-clamp-2 mb-1">
                       {r.title}
                     </h3>
-                    <p className="text-[10px] text-[var(--rv-text-dim)] line-clamp-2" style={{ fontFamily: "var(--font-body)" }}>
+                    <p className="text-[10px] text-[var(--rv-text-dim)] line-clamp-2 font-[var(--font-body)]">
                       {r.excerpt}
                     </p>
                   </div>

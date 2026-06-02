@@ -8,14 +8,15 @@ interface ArticleContentProps {
   /** HTML já sanitizado no servidor */
   html: string
   className?: string
-  style?: React.CSSProperties
 }
 
-export function ArticleContent({ html, className, style }: ArticleContentProps) {
+export function ArticleContent({ html, className }: ArticleContentProps) {
   const [processedHtml, setProcessedHtml] = useState(html)
   const [toc, setToc] = useState<Array<{ id: string; text: string; level: 2 | 3 }>>([])
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null)
   const [lightboxAlt, setLightboxAlt] = useState("")
+  const [lightboxLoading, setLightboxLoading] = useState(false)
+  const [lightboxError, setLightboxError] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   // Timestamp de abertura — evita "ghost click" em mobile que fecha imediatamente
   const openedAtRef = useRef(0)
@@ -66,6 +67,8 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
       e.stopPropagation()
       const img = target as HTMLImageElement
       openedAtRef.current = Date.now()
+      setLightboxLoading(true)
+      setLightboxError(null)
       setLightboxSrc(img.currentSrc || img.src)
       setLightboxAlt(img.alt ?? "")
     }
@@ -91,16 +94,11 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
   // Bloqueia scroll do body enquanto lightbox está aberto
   useEffect(() => {
     if (lightboxSrc) {
-      document.body.style.overflow = "hidden"
-      document.body.style.touchAction = "none"
+      document.body.classList.add("rv-scroll-lock", "rv-touch-lock")
     } else {
-      document.body.style.overflow = ""
-      document.body.style.touchAction = ""
+      document.body.classList.remove("rv-scroll-lock", "rv-touch-lock")
     }
-    return () => {
-      document.body.style.overflow = ""
-      document.body.style.touchAction = ""
-    }
+    return () => document.body.classList.remove("rv-scroll-lock", "rv-touch-lock")
   }, [lightboxSrc])
 
   return (
@@ -125,7 +123,6 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
       <div
         ref={containerRef}
         className={className}
-        style={style}
         dangerouslySetInnerHTML={{ __html: processedHtml }}
       />
 
@@ -134,8 +131,7 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
           role="dialog"
           aria-modal="true"
           aria-label="Imagem ampliada"
-          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/95 p-4"
-          style={{ touchAction: "none" }}
+          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/95 p-4 touch-none"
           onClick={close}
         >
           {/* Botão fechar — acessível e visível em mobile */}
@@ -155,7 +151,22 @@ export function ArticleContent({ html, className, style }: ArticleContentProps) 
             className="max-h-[90dvh] max-w-[92dvw] select-none rounded-xl object-contain shadow-2xl"
             draggable={false}
             onClick={(e) => e.stopPropagation()}
+            onLoad={() => setLightboxLoading(false)}
+            onError={() => { setLightboxLoading(false); setLightboxError("Não foi possível carregar a imagem."); }}
+            decoding="async"
           />
+
+          {lightboxLoading && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full border-2 border-white/50 border-t-transparent animate-spin" aria-hidden="true" />
+            </div>
+          )}
+
+          {lightboxError && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-xl bg-white/10 px-4 py-2 text-xs text-white">
+              {lightboxError}
+            </div>
+          )}
         </div>
       )}
     </>

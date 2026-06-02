@@ -2,6 +2,7 @@
 
 import { Moon, Sun, Monitor, Check } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
+import { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +17,16 @@ interface ThemeToggleProps {
 
 export function ThemeToggle({ onDark = true }: ThemeToggleProps) {
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const icon =
-    resolvedTheme === "light" ? (
+    !mounted ? (
+      <Monitor className="h-4 w-4" aria-hidden="true" />
+    ) : resolvedTheme === "light" ? (
       <Sun className="h-4 w-4" aria-hidden="true" />
     ) : (
       <Moon className="h-4 w-4" aria-hidden="true" />
@@ -37,12 +45,7 @@ export function ThemeToggle({ onDark = true }: ThemeToggleProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="w-40 p-1"
-        style={{
-          background: "var(--rv-surface)",
-          border: "1px solid var(--rv-border)",
-          color: "var(--rv-text-primary)",
-        }}
+        className="w-40 p-1 bg-[var(--rv-surface)] border border-[var(--rv-border)] text-[var(--rv-text-primary)]"
       >
         <DropdownMenuItem
           onClick={() => setTheme("light")}

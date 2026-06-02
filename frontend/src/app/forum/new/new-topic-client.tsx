@@ -59,7 +59,7 @@ export function NewTopicClient({ initialCategorySlug }: { initialCategorySlug: s
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
         <div className="rv-badge rv-badge-red inline-flex">⚠ Acesso Negado</div>
         <h1 className="rv-display text-4xl text-[var(--rv-text-primary)]">Login Necessário</h1>
-        <p className="text-[var(--rv-text-muted)] max-w-sm" style={{ fontFamily: "var(--font-body)" }}>
+        <p className="text-[var(--rv-text-muted)] max-w-sm font-[var(--font-body)]">
           Você precisa estar logado para criar um tópico.
         </p>
         <div className="flex gap-3">
@@ -76,7 +76,7 @@ export function NewTopicClient({ initialCategorySlug }: { initialCategorySlug: s
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
         <div className="rv-badge rv-badge-purple inline-flex">🔒 Conta Restrita</div>
         <h1 className="rv-display text-4xl text-[var(--rv-text-primary)]">Conta Não Habilitada</h1>
-        <p className="text-[var(--rv-text-muted)] max-w-sm" style={{ fontFamily: "var(--font-body)" }}>
+        <p className="text-[var(--rv-text-muted)] max-w-sm font-[var(--font-body)]">
           Sua conta precisa estar verificada e ativa para criar tópicos no fórum.
         </p>
         <div className="flex gap-3">
@@ -95,8 +95,8 @@ export function NewTopicClient({ initialCategorySlug }: { initialCategorySlug: s
     <div className="relative min-h-screen">
       {/* Ambient */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "450px", height: "450px", top: "-15%", right: "-10%", background: "var(--rv-cyan)", opacity: 0.15 }} />
-        <div className="rv-orb" style={{ width: "350px", height: "350px", bottom: "5%", left: "-10%", background: "var(--rv-accent)", opacity: 0.12 }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[450px] h-[450px] top-[-15%] right-[-10%] bg-[var(--rv-cyan)] opacity-15" />
+        <div className="rv-orb w-[350px] h-[350px] bottom-[5%] left-[-10%] bg-[var(--rv-accent)] opacity-15" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-3xl px-4 py-10 sm:py-16 sm:px-6">
@@ -118,7 +118,7 @@ export function NewTopicClient({ initialCategorySlug }: { initialCategorySlug: s
         <div className="mb-8">
           <span className="rv-badge rv-badge-cyan mb-4 inline-flex">◈ Criar Discussão</span>
           <h1 className="rv-display text-3xl sm:text-4xl text-[var(--rv-text-primary)]">Novo Tópico</h1>
-          <p className="mt-2 text-sm text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+          <p className="mt-2 text-sm text-[var(--rv-text-muted)] font-[var(--font-body)]">
             Inicie uma discussão, tire dúvidas ou compartilhe algo com a comunidade.
           </p>
         </div>
@@ -166,8 +166,7 @@ export function NewTopicClient({ initialCategorySlug }: { initialCategorySlug: s
                 id="nt-category"
                 value={categorySlug}
                 onChange={(e) => setCategorySlug(e.target.value)}
-                className="rv-input"
-                style={{ cursor: "pointer" }}
+                className="rv-input cursor-pointer"
               >
                 {categories.length === 0 && (
                   <option value="">Nenhuma categoria disponível</option>
@@ -248,7 +247,7 @@ export function NewTopicClient({ initialCategorySlug }: { initialCategorySlug: s
               "Mantenha o conteúdo relacionado à categoria escolhida.",
               "Verifique se já existe um tópico semelhante antes de criar.",
             ].map((tip, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+              <li key={i} className="flex items-start gap-2 text-xs text-[var(--rv-text-muted)] font-[var(--font-body)]">
                 <span className="text-[var(--rv-cyan)] flex-shrink-0 font-bold">{i + 1}.</span>
                 {tip}
               </li>

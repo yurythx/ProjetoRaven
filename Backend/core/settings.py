@@ -48,6 +48,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "apps.common.middleware.AdminIPRestrictionMiddleware",
+    "apps.common.middleware.MaintenanceModeMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -168,6 +169,14 @@ else:
         }
     }
 
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", "").strip()
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", CELERY_BROKER_URL).strip() if CELERY_BROKER_URL else ""
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -258,16 +267,14 @@ else:
                 private_key_path.write_bytes(_private_pem)
                 public_key_path.write_bytes(_public_pem)
             except OSError:
-                import logging as _logging
-                _logging.getLogger(__name__).warning(
-                    "JWT keys not found and could not be saved to %s — using ephemeral keys. "
-                    "All tokens will be invalidated on restart. "
-                    "Set JWT_PRIVATE_KEY / JWT_PUBLIC_KEY env vars for persistence.",
-                    private_key_path.parent,
-                )
+                if not DEBUG:
+                    raise RuntimeError(
+                        "JWT keys not found and could not be saved to disk. "
+                        "Set JWT_PRIVATE_KEY_PATH/JWT_PUBLIC_KEY_PATH to a writable volume or set JWT_PRIVATE_KEY/JWT_PUBLIC_KEY."
+                    )
                 SIMPLE_JWT["SIGNING_KEY"] = _private_pem.decode()
                 SIMPLE_JWT["VERIFYING_KEY"] = _public_pem.decode()
-                _private_pem = _public_pem = None  # already set above, skip read below
+                _private_pem = _public_pem = None
 
             if _private_pem is not None:
                 SIMPLE_JWT["SIGNING_KEY"] = private_key_path.read_text()
@@ -280,7 +287,7 @@ else:
 
 CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS",
-    "http://localhost:3000,http://127.0.0.1:3000"
+    "http://localhost:3006,http://127.0.0.1:3006,http://localhost:3000,http://127.0.0.1:3000"
 ).split(",")
 
 CORS_ALLOW_CREDENTIALS = True

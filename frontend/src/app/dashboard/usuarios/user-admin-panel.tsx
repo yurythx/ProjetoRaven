@@ -468,7 +468,7 @@ function EditModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
       <div className="rv-card w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-[var(--rv-border)]">
@@ -541,7 +541,7 @@ function EditModal({
 
       {/* Ban sub-dialog */}
       {banOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.5)" }}>
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50">
           <div className="rv-card p-6 max-w-sm w-full flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <div className="h-8 w-8 rounded-xl bg-red-500/20 flex items-center justify-center">
@@ -631,7 +631,7 @@ function CreateModal({ isOpen, onClose, groupList, isSuperuser, onRefresh }: {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
       <div className="rv-card w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden">
         <div className="flex items-center justify-between p-5 border-b border-[var(--rv-border)]">
           <div className="flex items-center gap-3">

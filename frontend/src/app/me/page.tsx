@@ -271,8 +271,7 @@ export default function MePage() {
             <div>
               <label className="block text-xs text-[var(--rv-text-dim)] uppercase tracking-wider mb-1">Bio</label>
               <textarea
-                className="rv-input resize-none"
-                style={{ minHeight: "6rem", padding: "0.75rem 1rem" }}
+                className="rv-input resize-none min-h-24 py-3 px-4"
                 placeholder="Conte um pouco sobre você..."
                 value={bio}
                 onChange={e => setBio(e.target.value)}

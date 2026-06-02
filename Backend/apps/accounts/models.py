@@ -179,6 +179,14 @@ class AdminAuditEvent(models.Model):
         UPDATE_USER = "update_user", "Update User"
         ADMIN_VERIFIED = "admin_verified", "Admin Verified"
         ADMIN_UNVERIFIED = "admin_unverified", "Admin Unverified"
+        BACKUP_CREATE = "backup_create", "Backup Create"
+        BACKUP_DELETE = "backup_delete", "Backup Delete"
+        BACKUP_PRUNE = "backup_prune", "Backup Prune"
+        BACKUP_PRUNE_JOB = "backup_prune_job", "Backup Prune Job"
+        BACKUP_RESTORE = "backup_restore", "Backup Restore"
+        BACKUP_RESTORE_JOB = "backup_restore_job", "Backup Restore Job"
+        BACKUP_BACKUP_JOB = "backup_backup_job", "Backup Backup Job"
+        BACKUP_JOB_CANCEL = "backup_job_cancel", "Backup Job Cancel"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -233,6 +241,59 @@ class SMTPSettings(models.Model):
 
     class Meta:
         db_table = "accounts_smtp_settings"
+
+
+class BackupJob(models.Model):
+    class Kind(models.TextChoices):
+        BACKUP = "backup", "Backup"
+        RESTORE = "restore", "Restore"
+        PRUNE = "prune", "Prune"
+
+    class Status(models.TextChoices):
+        PENDING = "pending", "Pending"
+        RUNNING = "running", "Running"
+        SUCCESS = "success", "Success"
+        FAILED = "failed", "Failed"
+        CANCELLED = "cancelled", "Cancelled"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    started_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+
+    kind = models.CharField(max_length=16, choices=Kind.choices, db_index=True)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING, db_index=True)
+
+    requested_by = models.ForeignKey(
+        "accounts.User",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="backup_jobs",
+    )
+
+    backup_id = models.CharField(max_length=64, blank=True, db_index=True)
+    include_media = models.BooleanField(default=True)
+    wipe_media = models.BooleanField(default=True)
+    keep_last = models.PositiveIntegerField(null=True, blank=True)
+
+    stage = models.CharField(max_length=32, blank=True, default="", db_index=True)
+    cancel_requested = models.BooleanField(default=False, db_index=True)
+
+    log = models.TextField(blank=True, default="")
+    error = models.TextField(blank=True, default="")
+    result = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        db_table = "accounts_backup_jobs"
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["kind", "-created_at"]),
+            models.Index(fields=["status", "-created_at"]),
+            models.Index(fields=["backup_id", "-created_at"]),
+            models.Index(fields=["stage", "-created_at"]),
+        ]
 
 
 class EmailOneTimeCode(models.Model):

@@ -41,7 +41,7 @@ export default function NotificationsPage() {
   return (
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "400px", height: "400px", top: "-10%", right: "-5%", background: "var(--rv-accent)", opacity: 0.1 }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[400px] h-[400px] top-[-10%] right-[-5%] bg-[var(--rv-accent)] opacity-10" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-2xl px-4 py-10 sm:py-16 sm:px-6">
@@ -74,7 +74,7 @@ export default function NotificationsPage() {
           <div className="rv-card p-12 text-center">
             <BellOff className="h-10 w-10 mx-auto mb-4 text-[var(--rv-text-dim)] opacity-40" />
             <h2 className="rv-display text-xl text-[var(--rv-text-primary)] mb-2">Nenhuma notificação</h2>
-            <p className="text-sm text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+            <p className="text-sm text-[var(--rv-text-muted)] font-[var(--font-body)]">
               Quando alguém responder seus tópicos ou comentar seus artigos, você será notificado aqui.
             </p>
           </div>
@@ -93,7 +93,7 @@ export default function NotificationsPage() {
                       {new Date(n.created_at).toLocaleString("pt-BR")}
                     </span>
                   </div>
-                  <p className="text-sm text-[var(--rv-text-muted)] leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+                  <p className="text-sm text-[var(--rv-text-muted)] leading-relaxed font-[var(--font-body)]">
                     {n.message}
                   </p>
                   {n.target_url && (

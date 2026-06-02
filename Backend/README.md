@@ -13,11 +13,11 @@ API Django REST Framework com suporte a WebSocket (Django Channels), tarefas ass
 ```bash
 # no diretório raiz do repositório
 docker compose up -d
-docker exec raven-django python manage.py seed_dev
+docker compose exec django python manage.py seed
 ```
 
-Acesse a API em `http://localhost:8000/api/v1/`  
-Django Admin em `http://localhost:8000/admin/` (admin@raven.gg / admin123)
+Acesse a API em `http://localhost:8006/api/v1/`  
+Django Admin em `http://localhost:8006/admin/` (admin@raven.gg / changeme)
 
 ### Local (com venv)
 

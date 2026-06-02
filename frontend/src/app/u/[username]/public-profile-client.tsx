@@ -240,10 +240,15 @@ export function PublicProfileClient({ username }: { username: string }) {
                     className="rv-card p-4 flex items-center gap-4 hover:border-[var(--rv-border-hover)] transition-colors block"
                   >
                     {post.cover_image && (
-                      <div
-                        className="h-12 w-16 rounded-lg bg-[var(--rv-surface-2)] flex-shrink-0 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${post.cover_image})` }}
-                      />
+                      <div className="relative h-12 w-16 rounded-lg bg-[var(--rv-surface-2)] flex-shrink-0 overflow-hidden">
+                        <Image
+                          src={fixImageUrl(post.cover_image) ?? post.cover_image}
+                          alt=""
+                          fill
+                          sizes="64px"
+                          className="object-cover"
+                        />
+                      </div>
                     )}
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-[var(--rv-text-primary)] truncate">{post.title}</p>

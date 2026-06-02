@@ -53,8 +53,8 @@ function VerifyEmailForm() {
     <div className="relative flex min-h-[calc(100dvh-4rem)] sm:min-h-[calc(100dvh-5rem)] items-center justify-center px-4 py-8">
       {/* Background orbs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "500px", height: "500px", top: "-15%", left: "-10%", background: "var(--rv-accent)" }} />
-        <div className="rv-orb" style={{ width: "300px", height: "300px", bottom: "0%", right: "-5%", background: "var(--rv-cyan)", opacity: 0.25 }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[500px] h-[500px] top-[-15%] left-[-10%] bg-[var(--rv-accent)]" />
+        <div className="rv-orb w-[300px] h-[300px] bottom-[0%] right-[-5%] bg-[var(--rv-cyan)] opacity-25" />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
@@ -72,7 +72,7 @@ function VerifyEmailForm() {
           <div className="mb-8">
             <span className="rv-badge rv-badge-cyan mb-4 inline-flex">◈ Verificação</span>
             <h1 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Confirmar e-mail</h1>
-            <p className="mt-2 text-sm text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+            <p className="mt-2 text-sm text-[var(--rv-text-muted)] font-[var(--font-body)]">
               Enviamos um código de 6 dígitos para o seu e-mail. Insira-o abaixo para ativar sua conta.
             </p>
           </div>

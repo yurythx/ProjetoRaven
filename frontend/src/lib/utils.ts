@@ -22,12 +22,17 @@ export function stripHtml(value: string) {
 
 export function fixImageUrl(url: string | null | undefined) {
   if (!url) return null;
-  // Strip any server-internal or localhost origin so browsers get a relative
-  // path that goes through the Next.js /media/* rewrite to Django.
-  if (/^https?:\/\/(django|localhost|127\.0\.0\.1)(:\d+)?\//.test(url)) {
-    try { return new URL(url).pathname; } catch { return url; }
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    try {
+      const u = new URL(url);
+      // If it's a MEDIA_URL resource, always force a relative path so it goes
+      // through Next.js /media/* rewrite (works across envs and avoids remotePatterns drift).
+      if (u.pathname.startsWith("/media/")) return `${u.pathname}${u.search}`;
+      return url;
+    } catch {
+      return url;
+    }
   }
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
   // Relative paths stay as-is — Next.js rewrites handle /media/* server-side.
   return url.startsWith("/") ? url : `/${url}`;
 }

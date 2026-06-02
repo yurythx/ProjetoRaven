@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Loader2, Search, Trash2, X } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 import { ConfirmDialog } from "@/components/rv-confirm-dialog";
 import { Badge } from "@/components/ui/badge";

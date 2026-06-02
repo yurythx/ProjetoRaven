@@ -232,7 +232,8 @@ ENV_OK=true
 
 if [ ! -f "$BACKEND_ENV" ]; then
   err_msg "$BACKEND_ENV não encontrado"
-  printf "${Y}    → Crie com: cp Backend/.env.prod.example %s${RS}\n" "$BACKEND_ENV"
+  printf "${Y}    → Gere com: ./setup.sh (recomendado)${RS}\n"
+  printf "${Y}    → Ou crie manualmente copiando: cp Backend/.env.prod.example %s${RS}\n" "$BACKEND_ENV"
   ENV_OK=false
 else
   ok "$BACKEND_ENV presente"
@@ -245,7 +246,8 @@ fi
 
 if [ ! -f "$FRONTEND_ENV" ]; then
   err_msg "$FRONTEND_ENV não encontrado"
-  printf "${Y}    → Crie com: cp frontend/.env.prod.example %s${RS}\n" "$FRONTEND_ENV"
+  printf "${Y}    → Gere com: ./setup.sh (recomendado)${RS}\n"
+  printf "${Y}    → Ou crie manualmente: %s${RS}\n" "$FRONTEND_ENV"
   ENV_OK=false
 else
   ok "$FRONTEND_ENV presente"

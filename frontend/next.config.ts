@@ -53,6 +53,18 @@ const securityHeaders = [
 // ─────────────────────────────────────────────────────────────────────────────
 
 const nextConfig: NextConfig = {
+  ...(isDev
+    ? {
+        devIndicators: false,
+        experimental: {
+          preloadEntriesOnStart: false,
+        },
+        onDemandEntries: {
+          maxInactiveAge: 60 * 1000,
+          pagesBufferLength: 2,
+        },
+      }
+    : {}),
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "django", port: "8000", pathname: "/**" },

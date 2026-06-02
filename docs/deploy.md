@@ -185,6 +185,17 @@ docker compose -f docker-compose.prod.yml logs -f frontend
 
 ---
 
+## Observação — Arquivo frontend/.env.prod
+
+O `frontend/.env.prod` é gerado automaticamente pelo `setup.sh`. Se ele não existir, rode:
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+---
+
 ## Passo 6 — Primeiro administrador
 
 O `setup.sh` já configura as variáveis `DJANGO_ADMIN_*` — o admin é criado automaticamente no primeiro boot pelo `seed_prod`. Nenhuma ação necessária.
@@ -272,7 +283,21 @@ docker image prune -f
 
 ## Backup
 
-Use o script `backup.sh` na raiz do projeto:
+Use o utilitário `ravenctl.sh` na raiz do projeto:
+
+```bash
+chmod +x ravenctl.sh
+
+./ravenctl.sh backup
+./ravenctl.sh list
+./ravenctl.sh verify --from 20260525_143000
+
+./ravenctl.sh restore --from 20260525_143000 --with-media
+```
+
+O script antigo `backup.sh` continua disponível por compatibilidade.
+
+### Backup com backup.sh (compatibilidade)
 
 ```bash
 chmod +x backup.sh

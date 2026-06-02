@@ -12,7 +12,7 @@ const ALLOWED_ATTR = {
   td: ["colspan", "rowspan"],
   th: ["colspan", "rowspan", "scope"],
   col: ["span"],
-  "*": ["class", "style", "title"],
+  "*": ["class", "title"],
 };
 
 export function sanitizeRichTextHtml(value: string) {

@@ -145,7 +145,7 @@ export default function EmailSettingsPage() {
           <h1 className="rv-display text-5xl sm:text-6xl text-[var(--rv-text-primary)] tracking-tight">
             Serviço de <span className="text-[var(--rv-accent)]">E-mail</span>
           </h1>
-          <p className="text-[var(--rv-text-muted)] text-sm sm:text-base max-w-2xl" style={{ fontFamily: "var(--font-body)" }}>
+          <p className="text-[var(--rv-text-muted)] text-sm sm:text-base max-w-2xl font-[var(--font-body)]">
             Configure os parâmetros SMTP para garantir que as mensagens de sistema, verificação e recuperação cheguem aos heróis.
           </p>
         </div>

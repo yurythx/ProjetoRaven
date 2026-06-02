@@ -133,16 +133,14 @@ export default async function Home() {
       <JsonLd data={orgSchema} />
       {/* ── Ambient background orbs ── */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "600px", height: "600px", top: "-10%", left: "-15%", background: "var(--rv-accent)" }} />
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "400px", height: "400px", bottom: "-5%", right: "-10%", background: "var(--rv-cyan)", animationDelay: "1.5s" }} />
-        <div className="rv-orb" style={{ width: "300px", height: "300px", top: "40%", right: "20%", background: "var(--rv-accent-2)", opacity: 0.2 }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[600px] h-[600px] top-[-10%] left-[-15%] bg-[var(--rv-accent)]" />
+        <div className="rv-orb rv-animate-pulse-glow w-[400px] h-[400px] bottom-[-5%] right-[-10%] bg-[var(--rv-cyan)] [animation-delay:1.5s]" />
+        <div className="rv-orb w-[300px] h-[300px] top-[40%] right-[20%] bg-[var(--rv-accent-2)] opacity-20" />
       </div>
 
       {/* ── Hero Section ── */}
       <section className="relative flex min-h-[100dvh] flex-col items-center justify-center px-4 text-center">
-        <div className="pointer-events-none absolute inset-0 opacity-5"
-          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V18L28 2l28 16v32L28 66zm0-2l26-15V19L28 4 2 19v30l26 15z' fill='none' stroke='%238b5cf6' stroke-width='1'/%3E%3C/svg%3E\")" }}
-        />
+        <div className="pointer-events-none absolute inset-0 opacity-5 rv-hero-grid" />
 
         <div className="relative z-10 max-w-5xl px-4 sm:px-6">
           <div className="mb-6 sm:mb-8 inline-flex">
@@ -157,7 +155,7 @@ export default async function Home() {
             <span className="rv-text-gradient">RAVEN</span>
           </h1>
 
-          <p className="text-[var(--rv-text-muted)] text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-3 sm:mb-4 px-2" style={{ fontFamily: "var(--font-body)" }}>
+          <p className="text-[var(--rv-text-muted)] text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed mb-3 sm:mb-4 px-2 font-[var(--font-body)]">
             Seu espaço central para explorar artigos técnicos, participar de fóruns de discussão e interagir com uma comunidade apaixonada por tecnologia.
           </p>
           <p className="rv-label text-[var(--rv-accent)] mb-10 sm:mb-14 tracking-[0.3em] sm:tracking-[0.5em] text-[8px] sm:text-[10px]">
@@ -217,7 +215,7 @@ export default async function Home() {
               </div>
               <div>
                 <h3 className="rv-display text-xl text-[var(--rv-text-primary)] mb-2">{f.title}</h3>
-                <p className="text-sm text-[var(--rv-text-muted)] leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+                <p className="text-sm text-[var(--rv-text-muted)] leading-relaxed font-[var(--font-body)]">
                   {f.description}
                 </p>
               </div>
@@ -266,7 +264,7 @@ export default async function Home() {
                       {post.title}
                     </h3>
                     {post.excerpt && (
-                      <p className="text-xs text-[var(--rv-text-muted)] line-clamp-2 leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+                      <p className="text-xs text-[var(--rv-text-muted)] line-clamp-2 leading-relaxed font-[var(--font-body)]">
                         {post.excerpt}
                       </p>
                     )}
@@ -336,7 +334,7 @@ export default async function Home() {
             Sua jornada começa<br />
             <span className="rv-text-accent">aqui.</span>
           </h2>
-          <p className="text-[var(--rv-text-muted)] mb-10 text-lg" style={{ fontFamily: "var(--font-body)" }}>
+          <p className="text-[var(--rv-text-muted)] mb-10 text-lg font-[var(--font-body)]">
             Crie sua conta para participar das discussões e interagir com os criadores de conteúdo.
           </p>
           <div className="flex flex-wrap justify-center gap-4">

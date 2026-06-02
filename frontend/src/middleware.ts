@@ -8,11 +8,7 @@ type MeResponse = {
   is_forum_moderator?: boolean;
 };
 
-// Computed once at module load — env vars are fixed for the lifetime of the process.
-// Keeping it here (runtime) rather than next.config.ts (build time) means
-// NEXT_PUBLIC_WS_BASE_URL and NEXT_PUBLIC_API_BASE_URL are read from the
-// container environment, not baked in during docker build.
-const CSP_HEADER = (() => {
+function buildCspHeader(nonce: string): string {
   const dev = process.env.NODE_ENV !== "production";
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
@@ -23,19 +19,23 @@ const CSP_HEADER = (() => {
 
   const wsUrl = process.env.NEXT_PUBLIC_WS_BASE_URL || "";
   const connectExtra = dev
-    ? " ws://localhost:8000 ws://django:8000"
+    ? " ws://localhost:8000 ws://django:8000 ws://localhost:8006 ws://127.0.0.1:8006"
     : wsUrl
       ? ` ${wsUrl}`
       : "";
 
   const extraImg = apiOrigin ? ` ${apiOrigin}` : "";
   const extraScript = dev ? " 'unsafe-eval'" : "";
+  const styleSrc = dev ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`;
+  const styleSrcAttr = "style-src-attr 'unsafe-inline'";
 
   return [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com${extraScript}`,
-    "style-src 'self' 'unsafe-inline'",
-    `img-src 'self' data: blob: http://django:8000 https://django:8000${extraImg}`,
+    `script-src 'self' 'nonce-${nonce}' https://static.cloudflareinsights.com${extraScript}`,
+    "script-src-attr 'none'",
+    styleSrc,
+    styleSrcAttr,
+    `img-src 'self' data: blob:${dev ? " http://django:8000 https://django:8000" : ""}${extraImg}`,
     "font-src 'self'",
     `connect-src 'self' https://cloudflareinsights.com${connectExtra}`,
     "media-src 'self'",
@@ -44,9 +44,9 @@ const CSP_HEADER = (() => {
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",
-    ...(dev ? [] : ["upgrade-insecure-requests"]),
+    ...(dev ? [] : ["upgrade-insecure-requests", "block-all-mixed-content"]),
   ].join("; ");
-})();
+}
 
 async function fetchMe(accessToken: string) {
   const baseUrl = getApiBaseUrl();
@@ -79,13 +79,41 @@ function redirectToLogin(req: NextRequest) {
   return res;
 }
 
-function withCsp(res: NextResponse): NextResponse {
-  res.headers.set("Content-Security-Policy", CSP_HEADER);
+function withCsp(res: NextResponse, cspHeader: string, nonce: string): NextResponse {
+  res.headers.set("Content-Security-Policy", cspHeader);
+  res.headers.set("x-nonce", nonce);
   return res;
+}
+
+function computeCookieSecure(): boolean {
+  const cookieSecureProp = process.env.COOKIE_SECURE;
+  if (cookieSecureProp !== undefined) {
+    return cookieSecureProp.toLowerCase() === "true";
+  }
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  const isHttps = Boolean(siteUrl?.startsWith("https://")) || Boolean(process.env.VERCEL_URL);
+  return isProd() && isHttps;
+}
+
+function generateNonce(): string {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  let binary = "";
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary);
 }
 
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
+  const nonce = generateNonce();
+  const cspHeader = buildCspHeader(nonce);
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", cspHeader);
+
+  const next = () => withCsp(NextResponse.next({ request: { headers: requestHeaders } }), cspHeader, nonce);
+  const redirect = (url: URL) => withCsp(NextResponse.redirect(url), cspHeader, nonce);
+  const apply = (res: NextResponse) => withCsp(res, cspHeader, nonce);
 
   const isBlogEditorRoute =
     path === "/blog/novo" ||
@@ -95,7 +123,7 @@ export async function middleware(req: NextRequest) {
   if (isBlogEditorRoute) {
     const access = req.cookies.get("raven_access")?.value ?? null;
     const refresh = req.cookies.get("raven_refresh")?.value ?? null;
-    if (!access && !refresh) return withCsp(NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url)));
+    if (!access && !refresh) return redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url));
 
     let nextAccess = access;
     let me: MeResponse | null = null;
@@ -107,41 +135,41 @@ export async function middleware(req: NextRequest) {
       } else if (meRes.status === 401 && refresh) {
         nextAccess = null;
       } else {
-        return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
+        return redirect(new URL("/blog", req.url));
       }
     }
 
     if (!me && refresh) {
       const r = await refreshAccess(refresh);
-      if (!r.ok) return withCsp(NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url)));
+      if (!r.ok) return redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url));
       const body = (await r.json().catch(() => null)) as { access?: unknown } | null;
       const newAccess = body && typeof body.access === "string" ? body.access : null;
-      if (!newAccess) return withCsp(NextResponse.redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url)));
+      if (!newAccess) return redirect(new URL(`/login?next=${encodeURIComponent(path)}`, req.url));
       nextAccess = newAccess;
       const meRes2 = await fetchMe(newAccess);
-      if (!meRes2.ok) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
+      if (!meRes2.ok) return redirect(new URL("/blog", req.url));
       me = (await meRes2.json().catch(() => null)) as MeResponse | null;
 
-      if (!me?.is_admin && !me?.is_blog_editor) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
-      const res = NextResponse.next();
-      res.cookies.set("raven_access", newAccess, { httpOnly: true, secure: isProd(), sameSite: "lax", path: "/" });
-      return withCsp(res);
+      if (!me?.is_admin && !me?.is_blog_editor) return redirect(new URL("/blog", req.url));
+      const res = next();
+      res.cookies.set("raven_access", newAccess, { httpOnly: true, secure: computeCookieSecure(), sameSite: "lax", path: "/" });
+      return res;
     }
 
-    if (!me?.is_admin && !me?.is_blog_editor) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
-    return withCsp(NextResponse.next());
+    if (!me?.is_admin && !me?.is_blog_editor) return redirect(new URL("/blog", req.url));
+    return next();
   }
 
   const needsAdmin = path.startsWith("/dashboard");
   const needsStrictAdmin = path.startsWith("/dashboard/usuarios");
   const needsAuth = needsAdmin || path.startsWith("/forum/new") || path === "/me";
-  if (!needsAuth) return withCsp(NextResponse.next());
+  if (!needsAuth) return next();
 
   const access = req.cookies.get("raven_access")?.value ?? null;
   const refresh = req.cookies.get("raven_refresh")?.value ?? null;
-  if (!access && !refresh) return withCsp(redirectToLogin(req));
+  if (!access && !refresh) return apply(redirectToLogin(req));
 
-  const secure = isProd();
+  const secure = computeCookieSecure();
   let nextAccess = access;
   let me: MeResponse | null = null;
 
@@ -152,20 +180,20 @@ export async function middleware(req: NextRequest) {
     } else if (meRes.status === 401 && refresh) {
       nextAccess = null;
     } else {
-      return withCsp(redirectToLogin(req));
+      return apply(redirectToLogin(req));
     }
   }
 
   if (!me && refresh) {
     const r = await refreshAccess(refresh);
-    if (!r.ok) return withCsp(redirectToLogin(req));
+    if (!r.ok) return apply(redirectToLogin(req));
     const body = (await r.json().catch(() => null)) as { access?: unknown } | null;
     const newAccess = body && typeof body.access === "string" ? body.access : null;
-    if (!newAccess) return withCsp(redirectToLogin(req));
+    if (!newAccess) return apply(redirectToLogin(req));
 
     nextAccess = newAccess;
     const meRes2 = await fetchMe(newAccess);
-    if (!meRes2.ok) return withCsp(redirectToLogin(req));
+    if (!meRes2.ok) return apply(redirectToLogin(req));
     me = (await meRes2.json().catch(() => null)) as MeResponse | null;
 
     const isDashboardRoot = path === "/dashboard";
@@ -181,26 +209,26 @@ export async function middleware(req: NextRequest) {
           : isDashboardRoot
             ? Boolean(me?.is_admin || me?.is_blog_editor || me?.is_forum_moderator)
             : Boolean(me?.is_admin);
-    const res = allowed ? NextResponse.next() : NextResponse.redirect(new URL("/blog", req.url));
+    const res = allowed ? next() : redirect(new URL("/blog", req.url));
     res.cookies.set("raven_access", newAccess, {
       httpOnly: true,
       secure,
       sameSite: "lax",
       path: "/",
     });
-    return withCsp(res);
+    return res;
   }
 
-  if (!me) return withCsp(redirectToLogin(req));
+  if (!me) return apply(redirectToLogin(req));
   const isDashboardRoot = path === "/dashboard";
   const isBlogArea = path.startsWith("/dashboard/blog");
   const isForumArea = path.startsWith("/dashboard/forum");
-  if (needsStrictAdmin && !me.is_admin) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
-  if (isBlogArea && !me.is_admin && !me.is_blog_editor) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
-  if (isForumArea && !me.is_admin && !me.is_forum_moderator) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
-  if (isDashboardRoot && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
-  if (needsAdmin && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return withCsp(NextResponse.redirect(new URL("/blog", req.url)));
-  return withCsp(NextResponse.next());
+  if (needsStrictAdmin && !me.is_admin) return redirect(new URL("/blog", req.url));
+  if (isBlogArea && !me.is_admin && !me.is_blog_editor) return redirect(new URL("/blog", req.url));
+  if (isForumArea && !me.is_admin && !me.is_forum_moderator) return redirect(new URL("/blog", req.url));
+  if (isDashboardRoot && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return redirect(new URL("/blog", req.url));
+  if (needsAdmin && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return redirect(new URL("/blog", req.url));
+  return next();
 }
 
 export const config = {

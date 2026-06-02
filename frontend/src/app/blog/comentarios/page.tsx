@@ -40,7 +40,7 @@ export default function BlogComentariosPage() {
   return (
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb" style={{ width: "400px", height: "400px", top: "-5%", right: "-10%", background: "var(--rv-accent)", opacity: 0.1 }} />
+        <div className="rv-orb w-[400px] h-[400px] top-[-5%] right-[-10%] bg-[var(--rv-accent)] opacity-10" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">

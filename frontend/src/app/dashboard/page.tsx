@@ -17,7 +17,7 @@ export default function DashboardPage() {
         <h1 className="rv-display text-5xl sm:text-7xl text-[var(--rv-text-primary)] tracking-tight">
           Console <span className="text-[var(--rv-accent)]">Central</span>
         </h1>
-        <p className="text-[var(--rv-text-muted)] text-sm sm:text-lg max-w-2xl leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+        <p className="text-[var(--rv-text-muted)] text-sm sm:text-lg max-w-2xl leading-relaxed font-[var(--font-body)]">
           Bem-vindo ao centro de comando. Gerencie o blog, modere a comunidade e configure os parâmetros vitais do ecossistema Raven.
         </p>
       </div>

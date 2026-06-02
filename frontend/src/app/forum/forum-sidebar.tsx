@@ -66,10 +66,9 @@ export function ForumSidebar({
       )}
 
       {/* Participate */}
-      <div className="rv-card p-5 flex flex-col gap-3"
-        style={{ background: "linear-gradient(135deg, rgba(68,183,139,0.08), rgba(6,182,212,0.04))" }}>
+      <div className="rv-card p-5 flex flex-col gap-3 bg-[linear-gradient(135deg,rgba(68,183,139,0.08),rgba(6,182,212,0.04))]">
         <h3 className="rv-display text-sm text-[var(--rv-text-primary)]">Participe</h3>
-        <p className="text-xs text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+        <p className="text-xs text-[var(--rv-text-muted)] font-[var(--font-body)]">
           Crie um tópico ou responda às discussões da comunidade.
         </p>
         <ForumHeaderActions newTopicHref="/forum/new" />
@@ -87,8 +86,7 @@ export function ForumSidebar({
           {RULES.map((r, i) => (
             <li
               key={i}
-              className="flex items-start gap-2.5 text-xs text-[var(--rv-text-muted)]"
-              style={{ fontFamily: "var(--font-body)" }}
+              className="flex items-start gap-2.5 text-xs text-[var(--rv-text-muted)] font-[var(--font-body)]"
             >
               <span className="rv-label text-[var(--rv-accent)] font-bold flex-shrink-0 mt-0.5">
                 {i + 1}.

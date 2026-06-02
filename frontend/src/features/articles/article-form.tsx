@@ -25,6 +25,7 @@ const RichEditor = dynamic(
 )
 import { PreviewDialog } from "@/components/cms/preview-dialog"
 import { MediaDialog } from "@/features/media/media-dialog"
+import { Progress } from "@/components/ui/progress"
 import { notify } from "@/lib/notifications"
 import { ArticleHistory } from "@/features/articles/article-history"
 import { ArticleComments } from "@/features/articles/article-comments"
@@ -342,6 +343,10 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
 
   const isReadyForReview = Object.values(requiredChecks).every(Boolean)
   const isReadyForPublish = isReadyForReview && recommendedChecks.meta_description && recommendedChecks.meta_title
+  const healthPercent = Math.round(
+    ((Object.values(requiredChecks).filter(Boolean).length + Object.values(recommendedChecks).filter(Boolean).length) /
+      (Object.keys(requiredChecks).length + Object.keys(recommendedChecks).length)) * 100
+  )
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -598,8 +603,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
                     id="af-title"
                     name={field.name}
                     ref={field.ref}
-                    className="rv-input bg-[var(--rv-surface-2)]"
-                    style={{ height: '3.5rem', fontSize: '1.25rem', fontWeight: 900 }}
+                    className="rv-input bg-[var(--rv-surface-2)] h-14 text-xl font-black"
                     placeholder="Título do post"
                     value={field.value}
                     onChange={(e) => handleTitleChange(e.target.value)}
@@ -736,8 +740,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
                   </div>
                   <textarea
                     id="af-meta-description"
-                    className="rv-input bg-[var(--rv-surface-2)] resize-none"
-                    style={{ height: 'auto', minHeight: '6rem', padding: '0.75rem 1rem' }}
+                    className="rv-input bg-[var(--rv-surface-2)] resize-none min-h-24 py-3 px-4"
                     placeholder="Breve resumo para os resultados de busca..."
                     {...field}
                     value={field.value ?? ''}
@@ -787,12 +790,11 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
                   {isReadyForPublish ? 'Excelente' : isReadyForReview ? 'Bom' : 'Incompleto'}
                 </span>
               </div>
-              <div className="h-1.5 w-full bg-[var(--rv-surface-2)] rounded-full mt-2 overflow-hidden">
-                <div 
-                  className={`h-full transition-all duration-500 ${isReadyForPublish ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                  style={{ width: `${(Object.values(requiredChecks).filter(Boolean).length + Object.values(recommendedChecks).filter(Boolean).length) / (Object.keys(requiredChecks).length + Object.keys(recommendedChecks).length) * 100}%` }}
-                />
-              </div>
+              <Progress
+                value={healthPercent}
+                className="h-1.5 mt-2 bg-[var(--rv-surface-2)]"
+                indicatorClassName={isReadyForPublish ? "bg-emerald-500" : "bg-amber-500"}
+              />
             </div>
           </div>
 
@@ -1065,8 +1067,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
                     id="af-excerpt"
                     name={field.name}
                     ref={field.ref}
-                    className="rv-input bg-[var(--rv-surface-2)] resize-none"
-                    style={{ height: 'auto', minHeight: '8rem', padding: '0.75rem 1rem' }}
+                    className="rv-input bg-[var(--rv-surface-2)] resize-none min-h-32 py-3 px-4"
                     placeholder="Escreva um breve resumo atrativo..."
                     value={field.value ?? ''}
                     onChange={(e) => {

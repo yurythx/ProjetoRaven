@@ -1,4 +1,5 @@
 export default function DiagnosticsLoading() {
+  const lineWidths = ["w-full", "w-[60%]", "w-[80%]", "w-[45%]", "w-[70%]", "w-[55%]", "w-[90%]", "w-[40%]", "w-[65%]", "w-[75%]", "w-[50%]", "w-[85%]"];
   return (
     <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-16 animate-pulse">
       {/* Header */}
@@ -13,8 +14,8 @@ export default function DiagnosticsLoading() {
 
       {/* JSON output card */}
       <div className="rounded-2xl bg-[var(--rv-surface-2)] p-6 space-y-3">
-        {[100, 60, 80, 45, 70, 55, 90, 40, 65, 75, 50, 85].map((w, i) => (
-          <div key={i} className="h-3 rounded bg-[var(--rv-border)]" style={{ width: `${w}%` }} />
+        {lineWidths.map((w, i) => (
+          <div key={i} className={`h-3 rounded bg-[var(--rv-border)] ${w}`} />
         ))}
       </div>
     </div>

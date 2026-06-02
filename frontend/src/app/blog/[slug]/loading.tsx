@@ -1,4 +1,6 @@
 export default function BlogPostLoading() {
+  const lineWidthsA = ["w-full", "w-[95%]", "w-[88%]", "w-full", "w-[72%]", "w-[90%]", "w-full", "w-[60%]", "w-[85%]", "w-full", "w-[78%]", "w-[92%]"];
+  const lineWidthsB = ["w-full", "w-[88%]", "w-[95%]", "w-[70%]", "w-full", "w-[82%]"];
   return (
     <div className="relative min-h-screen animate-pulse">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:py-16 sm:px-6 lg:px-8">
@@ -26,20 +28,18 @@ export default function BlogPostLoading() {
 
         {/* Article body */}
         <div className="space-y-3">
-          {[100, 95, 88, 100, 72, 90, 100, 60, 85, 100, 78, 92].map((w, i) => (
+          {lineWidthsA.map((w, i) => (
             <div
               key={i}
-              className="h-4 rounded bg-[var(--rv-surface-2)]"
-              style={{ width: `${w}%` }}
+              className={`h-4 rounded bg-[var(--rv-surface-2)] ${w}`}
             />
           ))}
           {/* Paragraph break */}
           <div className="h-6" />
-          {[100, 88, 95, 70, 100, 82].map((w, i) => (
+          {lineWidthsB.map((w, i) => (
             <div
               key={`b-${i}`}
-              className="h-4 rounded bg-[var(--rv-surface-2)]"
-              style={{ width: `${w}%` }}
+              className={`h-4 rounded bg-[var(--rv-surface-2)] ${w}`}
             />
           ))}
         </div>

@@ -1,4 +1,5 @@
 export default function UsersAdminLoading() {
+  const tableHeaderWidths = ["w-[200px]", "w-[160px]", "w-[80px]", "w-[80px]", "w-[100px]", "w-[80px]"];
   return (
     <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-16 sm:py-24 animate-pulse">
       {/* Hero card */}
@@ -20,8 +21,8 @@ export default function UsersAdminLoading() {
       {/* User table */}
       <div className="rounded-2xl bg-[var(--rv-surface-2)] overflow-hidden">
         <div className="flex gap-4 px-6 py-3 border-b border-[var(--rv-border)]">
-          {[200, 160, 80, 80, 100, 80].map((w, i) => (
-            <div key={i} className="h-2.5 rounded bg-[var(--rv-border)]" style={{ width: w }} />
+          {tableHeaderWidths.map((w, i) => (
+            <div key={i} className={`h-2.5 rounded bg-[var(--rv-border)] ${w}`} />
           ))}
         </div>
         {Array.from({ length: 8 }).map((_, i) => (

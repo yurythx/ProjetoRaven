@@ -159,8 +159,7 @@ export function BlogComments({ postId, postSlug }: { postId: string; postSlug: s
             onChange={(e) => setContent(e.target.value)}
             rows={4}
             placeholder="Escreva seu comentário..."
-            className="rv-input resize-y text-sm"
-            style={{ minHeight: "6rem" }}
+            className="rv-input resize-y text-sm min-h-24"
           />
           <div className="flex justify-end">
             <button

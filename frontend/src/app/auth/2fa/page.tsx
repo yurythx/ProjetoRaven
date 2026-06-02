@@ -53,7 +53,7 @@ function TwoFAContent() {
   return (
     <div className="relative flex min-h-[calc(100dvh-4rem)] sm:min-h-[calc(100dvh-5rem)] items-center justify-center px-4 py-8">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "400px", height: "400px", top: "-10%", left: "-5%", background: "var(--rv-accent)" }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[400px] h-[400px] top-[-10%] left-[-5%] bg-[var(--rv-accent)]" />
       </div>
 
       <div className="relative z-10 w-full max-w-sm">
@@ -70,7 +70,7 @@ function TwoFAContent() {
           <div className="mb-8 text-center">
             <span className="rv-badge rv-badge-purple mb-4 inline-flex">🔐 Autenticação de 2 Fatores</span>
             <h1 className="rv-display text-2xl text-[var(--rv-text-primary)]">Verificação 2FA</h1>
-            <p className="mt-2 text-sm text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+            <p className="mt-2 text-sm text-[var(--rv-text-muted)] font-[var(--font-body)]">
               Abra seu aplicativo autenticador e insira o código de 6 dígitos.
             </p>
           </div>

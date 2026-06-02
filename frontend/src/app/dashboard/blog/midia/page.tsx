@@ -8,7 +8,7 @@ import { ConfirmDialog } from "@/components/rv-confirm-dialog";
 import { RvModal } from "@/components/rv-modal";
 import { fixImageUrl } from "@/lib/utils";
 import { Trash2, Upload, Copy, Check } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_MIME = new Set(["image/jpeg", "image/jpg", "image/pjpeg", "image/png", "image/webp", "image/gif", "image/avif"]);
@@ -419,10 +419,7 @@ export default function MediaLibraryPage() {
   return (
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div
-          className="rv-orb"
-          style={{ width: "400px", height: "400px", bottom: "5%", right: "-5%", background: "var(--rv-gold)", opacity: 0.05 }}
-        />
+        <div className="rv-orb w-[400px] h-[400px] bottom-[5%] right-[-5%] bg-[var(--rv-gold)] opacity-[0.05]" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">

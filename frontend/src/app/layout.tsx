@@ -3,6 +3,7 @@ import { Exo_2, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 import { cookies } from "next/headers";
+import { headers } from "next/headers";
 import { AppFooter } from "@/components/app-footer";
 import { AppHeader } from "@/components/app-header";
 import { AuthProvider } from "@/components/auth-provider";
@@ -10,7 +11,6 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { PwaRegister } from "@/components/pwa-register";
 import { NotificationProvider } from "@/contexts/notifications";
 import { QueryProvider } from "@/components/query-provider";
-import { SonnerProvider } from "@/components/sonner-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster as UiToaster } from "@/components/ui/toaster";
 import { ToastProvider } from "@/hooks/use-toast";
@@ -71,6 +71,8 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const cookieStore = await cookies();
+  const hdrs = await headers();
+  const nonce = hdrs.get("x-nonce") || undefined;
   const themeCookie = cookieStore.get("raven.theme")?.value;
   const dataTheme = themeCookie === "light" ? "light" : themeCookie === "dark" ? "dark" : undefined;
 
@@ -84,13 +86,23 @@ export default async function RootLayout({
       <head>
         <link rel="alternate" type="application/rss+xml" title="Projeto Raven — Blog RSS" href="/api/blog/rss" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        {nonce ? (
+          <script
+            nonce={nonce}
+            suppressHydrationWarning
+            dangerouslySetInnerHTML={{
+              __html:
+                "(function(){try{var p=localStorage.getItem('raven.theme');var pref=(p==='light'||p==='dark'||p==='system')?p:null;var resolved=(pref==='system'||!pref)?((window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'):pref;document.documentElement.dataset.theme=resolved;document.cookie='raven.theme='+resolved+';path=/;max-age=31536000;SameSite=Lax';}catch(e){}})();",
+            }}
+          />
+        ) : null}
       </head>
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--rv-text-primary)] antialiased relative">
         <PwaRegister />
         {/* Global Ambient Background */}
         <div className="pointer-events-none fixed inset-0 overflow-hidden z-0">
-          <div className="rv-orb" style={{ width: "900px", height: "900px", top: "-15%", right: "-12%", background: "var(--rv-accent)", opacity: 0.10 }} />
-          <div className="rv-orb" style={{ width: "700px", height: "700px", bottom: "-15%", left: "-12%", background: "var(--rv-cyan)", opacity: 0.08 }} />
+          <div className="rv-orb rv-orb-global-a" />
+          <div className="rv-orb rv-orb-global-b" />
         </div>
 
         <ThemeProvider initialTheme={dataTheme}>
@@ -104,7 +116,6 @@ export default async function RootLayout({
                 </main>
                 <AppFooter />
                 <UiToaster />
-                <SonnerProvider />
               </ToastProvider>
               </NotificationProvider>
             </QueryProvider>

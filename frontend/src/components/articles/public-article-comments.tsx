@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { showApiError } from '@/lib/toast-helpers';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import { Link2 } from 'lucide-react';
 

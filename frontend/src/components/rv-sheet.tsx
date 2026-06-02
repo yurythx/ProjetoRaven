@@ -21,8 +21,7 @@ export function RvSheet({ open, onClose, title, description, children }: Props) 
   return (
     <>
       <div
-        className={`fixed inset-0 z-40 transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-        style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(2px)" }}
+        className={`fixed inset-0 z-40 transition-opacity duration-300 bg-black/50 backdrop-blur-[2px] ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
         onClick={onClose}
       />
       <div

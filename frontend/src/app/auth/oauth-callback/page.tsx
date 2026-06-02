@@ -55,7 +55,7 @@ function OAuthCallbackContent() {
       <div className="flex min-h-[calc(100dvh-5rem)] flex-col items-center justify-center gap-6 px-4 text-center">
         <div className="text-4xl">⚠</div>
         <h1 className="rv-display text-2xl text-[var(--rv-text-primary)]">Falha no Login Social</h1>
-        <p className="text-sm text-[var(--rv-text-muted)] max-w-sm" style={{ fontFamily: "var(--font-body)" }}>
+        <p className="text-sm text-[var(--rv-text-muted)] max-w-sm font-[var(--font-body)]">
           {error}
         </p>
         <button
@@ -85,4 +85,3 @@ export default function OAuthCallbackPage() {
     </Suspense>
   );
 }
-

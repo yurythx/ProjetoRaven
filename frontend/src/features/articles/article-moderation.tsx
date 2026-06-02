@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/select"
 import { ConfirmDialog } from "@/components/rv-confirm-dialog"
 import { Check, Loader2, Pencil, Search, X } from "lucide-react"
-import { toast } from "sonner"
+import { toast } from "@/hooks/use-toast"
 
 type ArticleLite = {
   id: string

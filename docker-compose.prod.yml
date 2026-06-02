@@ -17,8 +17,7 @@
 # O nome "projetoraven" isola containers, redes e volumes do app existente.
 #
 # Requisitos antes do primeiro deploy:
-#   1. cp Backend/.env.prod.example  Backend/.env.prod  (preencher todos os valores)
-#   2. cp frontend/.env.prod.example frontend/.env.prod
+#   1. Rodar ./setup.sh na raiz do projeto (gera Backend/.env.prod e frontend/.env.prod)
 #   3. Gerar chaves JWT RSA (uma única vez no servidor):
 #        mkdir -p Backend/keys
 #        openssl genrsa -out Backend/keys/private.pem 2048
@@ -71,6 +70,7 @@ services:
     volumes:
       - media_files:/app/mediafiles
       - static_files:/app/staticfiles
+      - backups_data:/app/backups
       - ./Backend/keys:/app/keys
     ports:
       # Exposto apenas para o cloudflared rotear /api/ diretamente (opcional)
@@ -91,6 +91,27 @@ services:
              openssl rsa -in /app/keys/private.pem -pubout -out /app/keys/public.pem)) &&
              python manage.py bootstrap_prod &&
              daphne -b 0.0.0.0 -p 8000 core.asgi:application"
+
+  celery_worker:
+    build:
+      context: ./Backend
+      target: production
+    restart: unless-stopped
+    env_file: ./Backend/.env.prod
+    environment:
+      USE_SQLITE: "False"
+      POSTGRES_HOST: postgres
+    volumes:
+      - media_files:/app/mediafiles
+      - static_files:/app/staticfiles
+      - backups_data:/app/backups
+      - ./Backend/keys:/app/keys
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A core worker -l info
 
   # ── Frontend (exposto ao cloudflared via host) ────────────────────────────────
   frontend:
@@ -128,3 +149,4 @@ volumes:
   redis_data:
   media_files:
   static_files:
+  backups_data:

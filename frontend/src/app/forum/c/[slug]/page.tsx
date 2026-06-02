@@ -111,8 +111,8 @@ export default async function ForumCategoryPage({
     <div className="relative min-h-screen">
       {/* Ambient */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "450px", height: "450px", top: "-15%", left: "-10%", background: "var(--rv-accent)", opacity: 0.15 }} />
-        <div className="rv-orb" style={{ width: "280px", height: "280px", bottom: "10%", right: "-5%", background: "var(--rv-cyan)", opacity: 0.10 }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[450px] h-[450px] top-[-15%] left-[-10%] bg-[var(--rv-accent)] opacity-15" />
+        <div className="rv-orb w-[280px] h-[280px] bottom-[10%] right-[-5%] bg-[var(--rv-cyan)] opacity-10" />
       </div>
 
       {/* Hero */}
@@ -135,7 +135,7 @@ export default async function ForumCategoryPage({
                   {category.name}
                 </h1>
                 {category.description && (
-                  <p className="text-sm text-[var(--rv-text-muted)] max-w-lg" style={{ fontFamily: "var(--font-body)" }}>
+                  <p className="text-sm text-[var(--rv-text-muted)] max-w-lg font-[var(--font-body)]">
                     {category.description}
                   </p>
                 )}
@@ -167,7 +167,7 @@ export default async function ForumCategoryPage({
 
         <div className="lg:col-span-8 space-y-4">
           {!topicsRes.ok && (
-            <div className="rv-card p-8 text-center text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+            <div className="rv-card p-8 text-center text-[var(--rv-text-muted)] font-[var(--font-body)]">
               Não foi possível carregar os tópicos.
             </div>
           )}
@@ -176,7 +176,7 @@ export default async function ForumCategoryPage({
             <div className="rv-card p-12 text-center">
               <div className="text-4xl mb-4">💬</div>
               <h3 className="rv-display text-2xl text-[var(--rv-text-primary)] mb-2">Nenhum tópico ainda</h3>
-              <p className="text-[var(--rv-text-muted)] text-sm mb-6" style={{ fontFamily: "var(--font-body)" }}>
+              <p className="text-[var(--rv-text-muted)] text-sm mb-6 font-[var(--font-body)]">
                 Seja o primeiro a iniciar uma discussão nesta categoria.
               </p>
               <ForumHeaderActions newTopicHref={`/forum/new?category=${category.slug}`} />

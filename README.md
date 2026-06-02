@@ -200,15 +200,14 @@ docker compose logs -f frontend
 O seed é executado automaticamente na inicialização do django. Se precisar rodar manualmente:
 
 ```bash
-docker compose exec django python manage.py seed_dev
+docker compose exec django python manage.py seed
 ```
 
 Usuários criados:
 
 | E-mail | Senha | Papel |
 |---|---|---|
-| `admin@raven.gg` | `admin123` | Superadmin |
-| `player@raven.gg` | `player123` | Membro comum |
+| `admin@raven.gg` | `changeme` | Superadmin |
 
 ### URLs de desenvolvimento
 
@@ -483,14 +482,21 @@ docker image prune -f
 ### Backup
 
 ```bash
-# Backup completo (banco + mídia)
-./backup.sh
+# Backup/restore via dashboard (recomendado em produção)
+# Acesse: /dashboard/configuracoes/backup (somente superadmin)
+
+# Operação manual (console)
+chmod +x ravenctl.sh
+./ravenctl.sh backup
 
 # Somente banco de dados
-./backup.sh --db-only
+./ravenctl.sh backup --db-only
 
-# Restaurar um backup específico
-./backup.sh --restore backups/db_20260525_143000.sql.gz
+# Verificar integridade
+./ravenctl.sh verify --from 20260525_143000
+
+# Restaurar banco + mídia
+./ravenctl.sh restore --from 20260525_143000 --with-media
 
 # Backup manual do banco
 docker compose -f docker-compose.prod.yml exec postgres \

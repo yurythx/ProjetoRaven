@@ -12,6 +12,19 @@ export default function ErrorPage({
 }) {
   useEffect(() => {
     console.error("[app error]", error);
+
+    const msg = String((error as unknown as { message?: unknown })?.message ?? "");
+    const isChunkLoadError =
+      (error as unknown as { name?: unknown })?.name === "ChunkLoadError" ||
+      msg.includes("ChunkLoadError") ||
+      msg.includes("Loading chunk");
+
+    if (isChunkLoadError) {
+      const id = setTimeout(() => {
+        window.location.reload();
+      }, 250);
+      return () => clearTimeout(id);
+    }
   }, [error]);
 
   return (
@@ -19,12 +32,10 @@ export default function ErrorPage({
       {/* Ambient orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
-          className="rv-orb rv-animate-pulse-glow"
-          style={{ width: "500px", height: "500px", top: "-10%", left: "-20%", background: "var(--rv-red)", opacity: 0.10 }}
+          className="rv-orb rv-animate-pulse-glow w-[500px] h-[500px] top-[-10%] left-[-20%] bg-[var(--rv-red)] opacity-10"
         />
         <div
-          className="rv-orb"
-          style={{ width: "350px", height: "350px", bottom: "-5%", right: "-10%", background: "var(--rv-accent)", opacity: 0.08, animationDelay: "1.5s" }}
+          className="rv-orb w-[350px] h-[350px] bottom-[-5%] right-[-10%] bg-[var(--rv-accent)] opacity-[0.08] [animation-delay:1.5s]"
         />
       </div>
 
@@ -39,7 +50,7 @@ export default function ErrorPage({
           Algo deu errado
         </h1>
 
-        <p className="text-[var(--rv-text-muted)] mb-10 max-w-sm mx-auto leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+        <p className="text-[var(--rv-text-muted)] mb-10 max-w-sm mx-auto leading-relaxed font-[var(--font-body)]">
           Ocorreu um erro inesperado. Se o problema persistir, tente recarregar a página.
         </p>
 

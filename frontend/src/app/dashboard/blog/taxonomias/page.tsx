@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth-provider";
 import { ConfirmDialog } from "@/components/rv-confirm-dialog";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { Pencil, Trash2, Plus, X, Check } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -494,10 +494,7 @@ export default function TaxonomiasPage() {
   return (
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div
-          className="rv-orb"
-          style={{ width: "400px", height: "400px", top: "5%", right: "-5%", background: "var(--rv-accent)", opacity: 0.06 }}
-        />
+        <div className="rv-orb w-[400px] h-[400px] top-[5%] right-[-5%] bg-[var(--rv-accent)] opacity-[0.06]" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">

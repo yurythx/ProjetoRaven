@@ -88,8 +88,8 @@ function SearchContent() {
   return (
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "500px", height: "500px", top: "-10%", left: "-5%", background: "var(--rv-accent)", opacity: 0.12 }} />
-        <div className="rv-orb" style={{ width: "350px", height: "350px", bottom: "5%", right: "-5%", background: "var(--rv-cyan)", opacity: 0.08 }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[500px] h-[500px] top-[-10%] left-[-5%] bg-[var(--rv-accent)] opacity-15" />
+        <div className="rv-orb w-[350px] h-[350px] bottom-[5%] right-[-5%] bg-[var(--rv-cyan)] opacity-[0.08]" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-12 sm:py-16 sm:px-6">
@@ -97,7 +97,7 @@ function SearchContent() {
         <div className="mb-10 space-y-3">
           <span className="rv-badge rv-badge-purple inline-flex">✦ Busca Global</span>
           <h1 className="rv-display text-4xl sm:text-5xl text-[var(--rv-text-primary)]">Buscar</h1>
-          <p className="text-[var(--rv-text-muted)] text-sm" style={{ fontFamily: "var(--font-body)" }}>
+          <p className="text-[var(--rv-text-muted)] text-sm font-[var(--font-body)]">
             Encontre artigos do blog e tópicos do fórum em um só lugar.
           </p>
         </div>
@@ -132,7 +132,7 @@ function SearchContent() {
         {!query.trim() && (
           <div className="text-center py-20">
             <Search className="h-12 w-12 text-[var(--rv-text-dim)] mx-auto mb-4" aria-hidden />
-            <p className="text-[var(--rv-text-muted)] text-sm" style={{ fontFamily: "var(--font-body)" }}>
+            <p className="text-[var(--rv-text-muted)] text-sm font-[var(--font-body)]">
               Digite para buscar em blog e fórum
             </p>
           </div>
@@ -141,7 +141,7 @@ function SearchContent() {
         {/* No results */}
         {searched && !loading && !hasResults && query.trim() && (
           <div className="text-center py-20">
-            <p className="text-[var(--rv-text-muted)] text-sm mb-6" style={{ fontFamily: "var(--font-body)" }}>
+            <p className="text-[var(--rv-text-muted)] text-sm mb-6 font-[var(--font-body)]">
               Tente termos diferentes ou explore o conteúdo abaixo.
             </p>
             <div className="flex justify-center gap-4">
@@ -185,7 +185,7 @@ function SearchContent() {
                           {p.title}
                         </h3>
                         {p.excerpt && (
-                          <p className="text-xs text-[var(--rv-text-muted)] line-clamp-2 mt-1" style={{ fontFamily: "var(--font-body)" }}>
+                          <p className="text-xs text-[var(--rv-text-muted)] line-clamp-2 mt-1 font-[var(--font-body)]">
                             {p.excerpt}
                           </p>
                         )}

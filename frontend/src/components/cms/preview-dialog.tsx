@@ -41,7 +41,7 @@ export function PreviewDialog({
     <>
       <span
         onClick={() => setOpen(true)}
-        style={{ cursor: "pointer", display: "inline-flex" }}
+        className="cursor-pointer inline-flex"
       >
         {trigger ?? (
           <button type="button" className="rv-btn rv-btn-ghost h-9 px-4 text-xs">
@@ -54,13 +54,15 @@ export function PreviewDialog({
         /* Overlay */
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)" }}
           onClick={() => setOpen(false)}
         >
+          <div
+            className="absolute inset-0 bg-black/85 backdrop-blur-md"
+          onClick={() => setOpen(false)}
+          />
           {/* Modal card — stopPropagation para não fechar ao clicar dentro */}
           <div
-            className="rv-card w-full flex flex-col overflow-hidden"
-            style={{ maxWidth: "1100px", maxHeight: "92vh", height: "92vh" }}
+            className="rv-card w-full flex flex-col overflow-hidden max-w-[1100px] max-h-[92vh] h-[92vh] relative z-10"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -108,8 +110,7 @@ export function PreviewDialog({
                   href={baseHref}
                   target="_blank"
                   rel="noreferrer"
-                  className="rv-btn rv-btn-ghost flex items-center gap-1.5"
-                  style={{ fontSize: "11px", height: "2rem", padding: "0 0.75rem" }}
+                  className="rv-btn rv-btn-ghost flex items-center gap-1.5 text-[11px] h-8 px-3"
                 >
                   <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" /> Nova Aba
                 </Link>
@@ -138,17 +139,7 @@ export function PreviewDialog({
               </div>
             ) : (
               <div className="flex-1 overflow-auto flex items-center justify-center p-4 bg-[var(--rv-surface-2)]">
-                <div
-                  style={{
-                    width: 375,
-                    height: 667,
-                    borderRadius: "3rem",
-                    border: "8px solid #1e293b",
-                    overflow: "hidden",
-                    flexShrink: 0,
-                    background: "white",
-                  }}
-                >
+                <div className="w-[375px] h-[667px] rounded-[3rem] border-[8px] border-slate-800 overflow-hidden shrink-0 bg-white">
                   <iframe
                     key="mobile"
                     src={iframeHref}

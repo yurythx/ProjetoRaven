@@ -22,7 +22,7 @@ export default function UserAdminPage() {
           <h1 className="rv-display text-5xl sm:text-6xl text-[var(--rv-text-primary)] tracking-tight">
             Gestão de <span className="text-[var(--rv-accent)]">Usuários</span>
           </h1>
-          <p className="text-[var(--rv-text-muted)] text-sm sm:text-base max-w-2xl font-medium" style={{ fontFamily: "var(--font-body)" }}>
+          <p className="text-[var(--rv-text-muted)] text-sm sm:text-base max-w-2xl font-medium font-[var(--font-body)]">
             Administração de contas, grupos e níveis de acesso ao ecossistema Raven.
           </p>
         </div>

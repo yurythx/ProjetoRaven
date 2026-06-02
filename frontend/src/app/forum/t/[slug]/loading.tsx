@@ -1,4 +1,6 @@
 export default function ForumTopicLoading() {
+  const topicLineWidths = ["w-full", "w-[92%]", "w-[88%]", "w-full", "w-[75%]", "w-[95%]", "w-full", "w-[68%]"];
+  const replyLineWidths = ["w-full", "w-[88%]", "w-[72%]"];
   return (
     <div className="relative min-h-screen animate-pulse">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">
@@ -26,8 +28,8 @@ export default function ForumTopicLoading() {
           <div className="h-9 w-full rounded-lg bg-[var(--rv-border)]" />
           <div className="h-9 w-2/3 rounded-lg bg-[var(--rv-border)]" />
           <div className="space-y-2 pt-4">
-            {[100, 92, 88, 100, 75, 95, 100, 68].map((w, i) => (
-              <div key={i} className="h-3 rounded bg-[var(--rv-border)]" style={{ width: `${w}%` }} />
+            {topicLineWidths.map((w, i) => (
+              <div key={i} className={`h-3 rounded bg-[var(--rv-border)] ${w}`} />
             ))}
           </div>
         </div>
@@ -45,8 +47,8 @@ export default function ForumTopicLoading() {
                 <div className="h-3 w-20 rounded bg-[var(--rv-border)] ml-2" />
               </div>
               <div className="space-y-2">
-                {[100, 88, 72].map((w, j) => (
-                  <div key={j} className="h-3 rounded bg-[var(--rv-border)]" style={{ width: `${w}%` }} />
+                {replyLineWidths.map((w, j) => (
+                  <div key={j} className={`h-3 rounded bg-[var(--rv-border)] ${w}`} />
                 ))}
               </div>
             </div>

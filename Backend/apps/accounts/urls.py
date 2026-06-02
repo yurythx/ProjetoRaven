@@ -32,6 +32,19 @@ from .api.smtp import (
 )
 from .api.analytics import AdminAnalyticsView
 from .api.diagnostics import AdminDiagnosticsView
+from .api.backups import (
+    AdminBackupsView,
+    AdminBackupCreateJobView,
+    AdminBackupDownloadView,
+    AdminBackupRestoreView,
+    AdminBackupDeleteView,
+    AdminBackupsPruneView,
+    AdminBackupsPruneJobView,
+    AdminBackupVerifyView,
+    AdminBackupRestoreJobCreateView,
+    AdminBackupJobView,
+    AdminBackupJobCancelView,
+)
 from .api.user_admin import UserViewSet
 from .api.audit import AdminAuditEventViewSet
 from .api.social import (
@@ -72,6 +85,17 @@ urlpatterns = [
     path("smtp-settings/test/", SMTPTestEmailView.as_view(), name="smtp_settings_test"),
     path("admin/analytics/", AdminAnalyticsView.as_view(), name="admin_analytics"),
     path("admin/diagnostics/", AdminDiagnosticsView.as_view(), name="admin_diagnostics"),
+    path("admin/backups/", AdminBackupsView.as_view(), name="admin_backups"),
+    path("admin/backups/job/", AdminBackupCreateJobView.as_view(), name="admin_backup_job_create"),
+    path("admin/backups/prune/", AdminBackupsPruneView.as_view(), name="admin_backups_prune"),
+    path("admin/backups/prune-job/", AdminBackupsPruneJobView.as_view(), name="admin_backups_prune_job"),
+    path("admin/backups/<str:backup_id>/download/", AdminBackupDownloadView.as_view(), name="admin_backup_download"),
+    path("admin/backups/<str:backup_id>/restore/", AdminBackupRestoreView.as_view(), name="admin_backup_restore"),
+    path("admin/backups/<str:backup_id>/restore-job/", AdminBackupRestoreJobCreateView.as_view(), name="admin_backup_restore_job"),
+    path("admin/backups/<str:backup_id>/verify/", AdminBackupVerifyView.as_view(), name="admin_backup_verify"),
+    path("admin/backups/<str:backup_id>/", AdminBackupDeleteView.as_view(), name="admin_backup_delete"),
+    path("admin/backup-jobs/<str:job_id>/", AdminBackupJobView.as_view(), name="admin_backup_job"),
+    path("admin/backup-jobs/<str:job_id>/cancel/", AdminBackupJobCancelView.as_view(), name="admin_backup_job_cancel"),
     path("password-reset/", PasswordResetRequestView.as_view(), name="password_reset_request"),
     path("password-reset/confirm/", PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
     path("friends/", FriendshipView.as_view(), name="friendships"),

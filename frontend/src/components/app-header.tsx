@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
-import { useTheme } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useNotifications } from "@/contexts/notifications";
 import { Bell } from "lucide-react";
@@ -20,7 +19,6 @@ const STATIC_LINKS = [
 
 export function AppHeader() {
   const { user, isLoading, logout } = useAuth();
-  const { resolvedTheme } = useTheme();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,9 +32,7 @@ export function AppHeader() {
   const canSeeDashboard = (isAdmin || isEditor || isMod) && !isLoading;
   const heroName = String(u?.display_name || u?.username || "Usuário");
 
-  // True whenever the header renders over a dark background:
-  // dark theme (always), or light theme when scrolled/menu-open (forced dark bg).
-  const headerDark = resolvedTheme === "dark" || scrolled || menuOpen;
+  const headerDark = scrolled || menuOpen;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -48,7 +44,7 @@ export function AppHeader() {
 
   // ── Adaptive color tokens ─────────────────────────────────────────────────
 
-  const logoText = headerDark ? "text-white" : "text-[var(--rv-black)]";
+  const logoText = headerDark ? "text-white" : "text-[var(--rv-text-primary)]";
   const logoSub  = headerDark ? "text-white/35" : "text-[var(--rv-text-dim)]";
 
   const navLinkInactive = headerDark

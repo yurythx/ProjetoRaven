@@ -137,7 +137,7 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
               )}
             </div>
           </div>
-          <div className="rv-divider hidden sm:block" style={{ width: "1px", height: "32px", background: "var(--rv-border)" }} />
+          <div className="rv-divider hidden sm:block w-px h-8 bg-[var(--rv-border)]" />
           <div className="flex flex-wrap gap-4">
             <div>
               <div className="rv-label text-[9px] text-[var(--rv-text-dim)]">Criado</div>
@@ -169,8 +169,7 @@ export default async function ArticlePreviewPage({ params }: { params: Promise<{
         {/* Excerpt */}
         {post.excerpt && (
           <p
-            className="text-[var(--rv-text-muted)] text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-[var(--rv-accent)] pl-4 whitespace-pre-line"
-            style={{ fontFamily: "var(--font-body)" }}
+            className="text-[var(--rv-text-muted)] text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-[var(--rv-accent)] pl-4 whitespace-pre-line font-[var(--font-body)]"
           >
             {post.excerpt}
           </p>

@@ -24,8 +24,7 @@ export default function PrivacidadePage() {
 
       {/* Body */}
       <div
-        className="space-y-10 text-[var(--rv-text-muted)] leading-relaxed"
-        style={{ fontFamily: "var(--font-body)" }}
+        className="space-y-10 text-[var(--rv-text-muted)] leading-relaxed font-[var(--font-body)]"
       >
         <Section title="1. Quem Somos">
           O Projeto Raven é uma plataforma de blog e fórum voltada para a comunidade de tecnologia.
@@ -132,10 +131,7 @@ export default function PrivacidadePage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2
-        className="rv-display text-lg text-[var(--rv-text-primary)] mb-3"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
+      <h2 className="rv-display text-lg text-[var(--rv-text-primary)] mb-3 font-[var(--font-display)]">
         {title}
       </h2>
       <div className="text-sm leading-7">{children}</div>

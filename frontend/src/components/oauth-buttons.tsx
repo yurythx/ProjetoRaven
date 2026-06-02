@@ -49,8 +49,7 @@ export function OAuthButtons({ mode = "login" }: Props) {
           type="button"
           disabled={loading !== null}
           onClick={() => handleOAuth(p.id)}
-          className="flex items-center justify-center gap-3 w-full h-11 rounded-xl border border-[var(--rv-border)] bg-[var(--rv-surface)] text-sm text-[var(--rv-text-base)] hover:bg-[var(--rv-surface-2)] hover:border-[var(--rv-accent)]/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ fontFamily: "var(--font-body)" }}
+          className="flex items-center justify-center gap-3 w-full h-11 rounded-xl border border-[var(--rv-border)] bg-[var(--rv-surface)] text-sm text-[var(--rv-text-base)] hover:bg-[var(--rv-surface-2)] hover:border-[var(--rv-accent)]/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-[var(--font-body)]"
         >
           {loading === p.id ? (
             <span className="h-4 w-4 rounded-full border-2 border-[var(--rv-accent)] border-t-transparent animate-spin" />

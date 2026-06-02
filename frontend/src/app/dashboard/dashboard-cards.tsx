@@ -13,6 +13,7 @@ import {
   BarChart2,
   KeyRound,
   ClipboardCheck,
+  HardDrive,
 } from "lucide-react";
 
 const CARDS = [
@@ -95,6 +96,14 @@ const CARDS = [
     icon: KeyRound,
     color: "var(--rv-gold)",
     role: "admin"
+  },
+  {
+    title: "Backups",
+    desc: "Backup e restore do banco e da mídia.",
+    href: "/dashboard/configuracoes/backup",
+    icon: HardDrive,
+    color: "var(--rv-gold)",
+    role: "superuser"
   }
 ];
 
@@ -102,17 +111,26 @@ export function DashboardCards() {
   const { user, isLoading } = useAuth();
   const u = (user ?? null) as Record<string, unknown> | null;
   const isAdmin = Boolean(u?.is_admin || u?.is_staff || u?.is_superuser) && !isLoading;
+  const isSuperuser = Boolean(u?.is_superuser) && !isLoading;
   const isModerator = Boolean(u?.is_forum_moderator || u?.is_blog_editor || isAdmin) && !isLoading;
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {CARDS.map((card) => {
         const hasAccess = 
+          card.role === "superuser" ? isSuperuser :
           card.role === "admin" ? isAdmin :
           card.role === "moderator" ? isModerator :
           true; // "editor" or open
         
         if (!hasAccess) return null;
+
+        const colorClass =
+          card.color === "var(--rv-accent)" ? "text-[var(--rv-accent)]" :
+          card.color === "var(--rv-cyan)" ? "text-[var(--rv-cyan)]" :
+          card.color === "var(--rv-gold)" ? "text-[var(--rv-gold)]" :
+          card.color === "var(--rv-text-muted)" ? "text-[var(--rv-text-muted)]" :
+          "text-[var(--rv-accent)]";
 
         return (
           <Link 
@@ -122,8 +140,7 @@ export function DashboardCards() {
           >
             <div className="flex items-start justify-between">
               <div 
-                className="h-12 w-12 rounded-2xl flex items-center justify-center border border-white/5 bg-white/5 group-hover:scale-110 transition-transform duration-500"
-                style={{ color: card.color }}
+                className={`h-12 w-12 rounded-2xl flex items-center justify-center border border-white/5 bg-white/5 group-hover:scale-110 transition-transform duration-500 ${colorClass}`}
               >
                 <card.icon className="h-6 w-6" />
               </div>
@@ -132,7 +149,7 @@ export function DashboardCards() {
             
             <div className="space-y-2">
               <h3 className="rv-display text-xl text-[var(--rv-text-primary)] group-hover:text-[var(--rv-accent)] transition-colors">{card.title}</h3>
-              <p className="text-xs text-[var(--rv-text-muted)] leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+              <p className="text-xs text-[var(--rv-text-muted)] leading-relaxed font-[var(--font-body)]">
                 {card.desc}
               </p>
             </div>

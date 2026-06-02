@@ -48,7 +48,7 @@ function StatCard({
   value: number | string;
   sub?: string;
   icon: React.ElementType;
-  accent?: string;
+  accent?: boolean;
 }) {
   return (
     <div className="rv-card p-5 flex flex-col gap-3">
@@ -56,10 +56,7 @@ function StatCard({
         <span className="text-xs text-[var(--rv-text-muted)] uppercase tracking-widest">{label}</span>
         <Icon className="h-4 w-4 text-[var(--rv-text-dim)]" />
       </div>
-      <p
-        className="rv-display text-3xl text-[var(--rv-text-primary)]"
-        style={accent ? { color: accent } : undefined}
-      >
+      <p className={`rv-display text-3xl ${accent ? "text-[var(--rv-accent)]" : "text-[var(--rv-text-primary)]"}`}>
         {value}
       </p>
       {sub && <p className="text-xs text-[var(--rv-text-muted)]">{sub}</p>}
@@ -118,7 +115,7 @@ export default function AnalyticsPage() {
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard label="Total"        value={data.users.total}       icon={Users} sub={`${data.users.verified} verificados`} />
-              <StatCard label="Hoje"         value={data.users.new_today}   icon={Users} accent="var(--rv-accent)" sub="novos registros" />
+              <StatCard label="Hoje"         value={data.users.new_today}   icon={Users} accent sub="novos registros" />
               <StatCard label="Esta semana"  value={data.users.new_week}    icon={Users} sub="últimos 7 dias" />
               <StatCard label="Online hoje"  value={data.users.online_today} icon={Users} sub={`${data.users.banned} banidos`} />
             </div>
@@ -175,7 +172,7 @@ export default function AnalyticsPage() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <StatCard label="Posts publicados" value={data.content.blog_published}     icon={BookOpen} />
                 <StatCard label="Tópicos do fórum" value={data.content.forum_topics}       icon={BookOpen} />
-                <StatCard label="Replies hoje"     value={data.content.forum_replies_today} icon={BookOpen} accent="var(--rv-accent)" />
+                <StatCard label="Replies hoje"     value={data.content.forum_replies_today} icon={BookOpen} accent />
               </div>
             </section>
           )}

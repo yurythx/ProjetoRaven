@@ -23,8 +23,7 @@ export function RvModal({ open, onClose, title, description, children, maxWidth 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className={`rv-card w-full ${maxWidth} flex flex-col max-h-[90dvh] overflow-hidden`}>

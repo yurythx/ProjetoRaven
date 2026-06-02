@@ -63,7 +63,7 @@ export default function ForumBuscaPage() {
   return (
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "500px", height: "500px", top: "-10%", right: "-5%", background: "var(--rv-accent)", opacity: 0.12 }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[500px] h-[500px] top-[-10%] right-[-5%] bg-[var(--rv-accent)] opacity-15" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">

@@ -57,6 +57,7 @@ Interface web construída com **Next.js 15**, focada em performance, SEO e UX de
 | `/dashboard/auditoria` | Admin | Log de auditoria de ações administrativas |
 | `/dashboard/configuracoes/email` | Admin | Configuração de SMTP |
 | `/dashboard/configuracoes/diagnosticos` | Admin | Diagnóstico de saúde dos serviços |
+| `/dashboard/configuracoes/backup` | Superadmin | Backup/restore (DB + mídia) com jobs, logs, verificação e retenção |
 
 ---
 

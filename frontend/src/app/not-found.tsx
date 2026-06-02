@@ -12,12 +12,10 @@ export default function NotFoundPage() {
       {/* Ambient orbs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
-          className="rv-orb rv-animate-pulse-glow"
-          style={{ width: "500px", height: "500px", top: "-10%", left: "-20%", background: "var(--rv-accent)", opacity: 0.12 }}
+          className="rv-orb rv-animate-pulse-glow w-[500px] h-[500px] top-[-10%] left-[-20%] bg-[var(--rv-accent)] opacity-15"
         />
         <div
-          className="rv-orb rv-animate-pulse-glow"
-          style={{ width: "350px", height: "350px", bottom: "-5%", right: "-10%", background: "var(--rv-cyan)", opacity: 0.1, animationDelay: "1.5s" }}
+          className="rv-orb rv-animate-pulse-glow w-[350px] h-[350px] bottom-[-5%] right-[-10%] bg-[var(--rv-cyan)] opacity-10 [animation-delay:1.5s]"
         />
       </div>
 
@@ -32,7 +30,7 @@ export default function NotFoundPage() {
           Página não encontrada
         </h1>
 
-        <p className="text-[var(--rv-text-muted)] mb-10 max-w-sm mx-auto leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+        <p className="text-[var(--rv-text-muted)] mb-10 max-w-sm mx-auto leading-relaxed font-[var(--font-body)]">
           A página que você está procurando não existe, foi movida ou o endereço está incorreto.
         </p>
 

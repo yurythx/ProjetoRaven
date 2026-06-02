@@ -192,3 +192,32 @@ class AdminIPRestrictionMiddleware:
         if xff:
             return xff.split(",")[0].strip()
         return request.META.get("REMOTE_ADDR", "")
+
+
+class MaintenanceModeMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.path.startswith("/api/health/") or request.path.startswith("/api/metrics/"):
+            return self.get_response(request)
+
+        try:
+            from django.core.cache import caches
+            cache = caches["default"]
+            payload = cache.get("maintenance:mode")
+        except Exception:
+            payload = None
+
+        if payload:
+            user = getattr(request, "user", None)
+            is_admin = bool(user and user.is_authenticated and getattr(user, "is_admin", False))
+            if not is_admin:
+                message = payload.get("message") if isinstance(payload, dict) else "Em manutenção"
+                if request.path.startswith("/api/"):
+                    from django.http import JsonResponse
+                    return JsonResponse({"error": "maintenance", "message": message}, status=503)
+                from django.http import HttpResponse
+                return HttpResponse(message, status=503)
+
+        return self.get_response(request)

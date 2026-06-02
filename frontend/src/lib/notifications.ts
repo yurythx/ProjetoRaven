@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 function stringifyError(err: unknown) {
   if (!err) return "";
@@ -42,4 +42,3 @@ export const notify = {
     toast.error(title, { description: stringifyError(error) });
   },
 };
-

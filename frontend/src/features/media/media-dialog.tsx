@@ -126,7 +126,8 @@ export function MediaDialog({
   }, [open, tab, search, loadGallery]);
 
   function close(selectedUrl: string) {
-    onSelect(selectedUrl);
+    const normalized = fixImageUrl(selectedUrl) ?? selectedUrl;
+    onSelect(normalized);
     setOpen(false);
     setUrl("");
     setAltText("");

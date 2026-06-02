@@ -60,21 +60,24 @@ export function ArticleAnalytics() {
       label: "Total de Posts",
       value: total_articles,
       icon: FileText,
-      color: "var(--rv-accent)",
+      shellClass: "bg-[color-mix(in_srgb,var(--rv-accent)_15%,transparent)] border border-[color-mix(in_srgb,var(--rv-accent)_25%,transparent)]",
+      iconClass: "text-[var(--rv-accent)]",
       sub: `${published_count} publicados · ${draft_count} rascunhos`,
     },
     {
       label: "Visualizações Totais",
       value: total_views.toLocaleString("pt-BR"),
       icon: Eye,
-      color: "var(--rv-cyan)",
+      shellClass: "bg-[color-mix(in_srgb,var(--rv-cyan)_15%,transparent)] border border-[color-mix(in_srgb,var(--rv-cyan)_25%,transparent)]",
+      iconClass: "text-[var(--rv-cyan)]",
       sub: "todas as publicações",
     },
     {
       label: "Média por Post",
       value: total_articles > 0 ? (total_views / total_articles).toFixed(1) : "0",
       icon: TrendingUp,
-      color: "var(--rv-gold)",
+      shellClass: "bg-[color-mix(in_srgb,var(--rv-gold)_15%,transparent)] border border-[color-mix(in_srgb,var(--rv-gold)_25%,transparent)]",
+      iconClass: "text-[var(--rv-gold)]",
       sub: "visualizações / artigo",
     },
   ];
@@ -83,13 +86,12 @@ export function ArticleAnalytics() {
     <div className="space-y-8">
       {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {statCards.map(({ label, value, icon: Icon, color, sub }) => (
+        {statCards.map(({ label, value, icon: Icon, shellClass, iconClass, sub }) => (
           <div key={label} className="rv-card p-6 flex items-start gap-4">
             <div
-              className="h-10 w-10 flex-shrink-0 rounded-xl flex items-center justify-center"
-              style={{ background: `color-mix(in srgb, ${color} 15%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 25%, transparent)` }}
+              className={`h-10 w-10 flex-shrink-0 rounded-xl flex items-center justify-center ${shellClass}`}
             >
-              <Icon className="h-5 w-5" style={{ color }} />
+              <Icon className={`h-5 w-5 ${iconClass}`} />
             </div>
             <div className="min-w-0">
               <p className="rv-label text-[9px] text-[var(--rv-text-dim)] tracking-widest mb-1">{label.toUpperCase()}</p>
@@ -104,7 +106,7 @@ export function ArticleAnalytics() {
         {/* Views chart */}
         <div className="rv-card p-6">
           <div className="flex items-center gap-2 mb-6">
-            <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--rv-accent) 15%, transparent)" }}>
+            <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-[color-mix(in_srgb,var(--rv-accent)_15%,transparent)]">
               <Calendar className="h-4 w-4 text-[var(--rv-accent)]" />
             </div>
             <div>
@@ -174,7 +176,7 @@ export function ArticleAnalytics() {
         {/* Top posts */}
         <div className="rv-card p-6">
           <div className="flex items-center gap-2 mb-6">
-            <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: "color-mix(in srgb, var(--rv-gold) 15%, transparent)" }}>
+            <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-[color-mix(in_srgb,var(--rv-gold)_15%,transparent)]">
               <BarChart2 className="h-4 w-4 text-[var(--rv-gold)]" />
             </div>
             <div>
@@ -207,8 +209,7 @@ export function ArticleAnalytics() {
                       <p className="rv-label text-[8px] text-[var(--rv-text-dim)]">TOTAL</p>
                     </div>
                     <div
-                      className="text-right px-2 py-1 rounded-lg"
-                      style={{ background: "color-mix(in srgb, var(--rv-gold) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--rv-gold) 20%, transparent)" }}
+                      className="text-right px-2 py-1 rounded-lg bg-[color-mix(in_srgb,var(--rv-gold)_12%,transparent)] border border-[color-mix(in_srgb,var(--rv-gold)_20%,transparent)]"
                     >
                       <p className="text-xs font-semibold text-[var(--rv-gold)]">+{article.views_last_30_days}</p>
                       <p className="rv-label text-[8px] text-[var(--rv-gold)]/70">30D</p>

@@ -187,7 +187,7 @@ function CategoriesTab({
       </div>
 
       {confirmDel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="rv-card p-6 max-w-xs w-full flex flex-col gap-4">
             <p className="text-sm text-[var(--rv-text-primary)] font-semibold">
               Remover <span className="text-[var(--rv-accent)]">&ldquo;{confirmDel.name}&rdquo;</span>?
@@ -364,7 +364,7 @@ function TagsTab({
       )}
 
       {confirmDel && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(0,0,0,0.7)", backdropFilter: "blur(4px)" }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
           <div className="rv-card p-6 max-w-xs w-full flex flex-col gap-4">
             <p className="text-sm text-[var(--rv-text-primary)] font-semibold">
               Remover tag <span className="text-[var(--rv-accent)]">&ldquo;{confirmDel.name}&rdquo;</span>?

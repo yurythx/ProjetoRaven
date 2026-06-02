@@ -40,10 +40,7 @@ export default function DashboardBlogCommentsPage() {
   return (
     <div className="relative min-h-screen">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div
-          className="rv-orb"
-          style={{ width: "500px", height: "500px", top: "-10%", left: "-10%", background: "var(--rv-cyan)", opacity: 0.06 }}
-        />
+        <div className="rv-orb w-[500px] h-[500px] top-[-10%] left-[-10%] bg-[var(--rv-cyan)] opacity-[0.06]" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">

@@ -31,15 +31,13 @@ export default async function ForumPage() {
     <div className="relative min-h-screen">
       {/* Ambient Effects */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "600px", height: "600px", top: "-10%", right: "-5%", background: "var(--rv-accent)", opacity: 0.15 }} />
-        <div className="rv-orb" style={{ width: "400px", height: "400px", bottom: "5%", left: "-10%", background: "var(--rv-cyan)", opacity: 0.10 }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[600px] h-[600px] top-[-10%] right-[-5%] bg-[var(--rv-accent)] opacity-15" />
+        <div className="rv-orb w-[400px] h-[400px] bottom-[5%] left-[-10%] bg-[var(--rv-cyan)] opacity-10" />
       </div>
 
       {/* Hero */}
       <section className="relative border-b border-[var(--rv-border)] bg-gradient-to-b from-[var(--rv-surface)]/80 to-transparent">
-        <div className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50V18L28 2l28 16v32L28 66zm0-2l26-15V19L28 4 2 19v30l26 15z' fill='none' stroke='%238b5cf6' stroke-width='1'/%3E%3C/svg%3E")` }}
-        />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.05] rv-hero-grid" />
         <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 sm:py-24 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8">
             <div className="space-y-4">
@@ -47,7 +45,7 @@ export default async function ForumPage() {
               <h1 className="rv-display text-5xl sm:text-6xl md:text-7xl text-[var(--rv-text-primary)] tracking-tight">
                 Fórum & Discussões
               </h1>
-              <p className="mt-4 text-[var(--rv-text-muted)] max-w-lg text-sm sm:text-base leading-relaxed" style={{ fontFamily: "var(--font-body)" }}>
+              <p className="mt-4 text-[var(--rv-text-muted)] max-w-lg text-sm sm:text-base leading-relaxed font-[var(--font-body)]">
                 Discussões, dúvidas e novidades direto da comunidade.
               </p>
             </div>
@@ -103,7 +101,7 @@ export default async function ForumPage() {
                       <h3 className="rv-display text-base sm:text-lg text-[var(--rv-text-primary)] group-hover:text-[var(--rv-accent)] transition-colors">
                         {c.name}
                       </h3>
-                      <p className="mt-1 text-xs text-[var(--rv-text-muted)] line-clamp-2" style={{ fontFamily: "var(--font-body)" }}>
+                      <p className="mt-1 text-xs text-[var(--rv-text-muted)] line-clamp-2 font-[var(--font-body)]">
                         {c.description}
                       </p>
                     </div>
@@ -120,7 +118,7 @@ export default async function ForumPage() {
 
           {!categoriesRes.ok && (
             <div className="rv-card p-8 text-center space-y-2">
-              <p className="text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+              <p className="text-[var(--rv-text-muted)] font-[var(--font-body)]">
                 Não foi possível carregar as categorias do fórum.
               </p>
             </div>

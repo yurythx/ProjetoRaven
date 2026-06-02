@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ConfirmDialog } from "@/components/rv-confirm-dialog"
-import { toast } from "sonner"
+import { toast } from "@/hooks/use-toast"
 import { Check, Link2, Loader2, Search, Trash2, X } from "lucide-react"
 
 type ModerationItem = {

@@ -20,8 +20,8 @@ export default function RegisterPage() {
     <div className="relative flex min-h-[calc(100dvh-4rem)] sm:min-h-[calc(100dvh-5rem)] items-center justify-center px-4 py-8 sm:py-10">
       {/* Background orbs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb rv-animate-pulse-glow" style={{ width: "450px", height: "450px", top: "-5%", right: "-10%", background: "var(--rv-cyan)" }} />
-        <div className="rv-orb" style={{ width: "350px", height: "350px", bottom: "-10%", left: "-5%", background: "var(--rv-accent)", opacity: 0.3, animationDelay: "2s" }} />
+        <div className="rv-orb rv-animate-pulse-glow w-[450px] h-[450px] top-[-5%] right-[-10%] bg-[var(--rv-cyan)]" />
+        <div className="rv-orb w-[350px] h-[350px] bottom-[-10%] left-[-5%] bg-[var(--rv-accent)] opacity-30 [animation-delay:2s]" />
       </div>
 
       <div className="relative z-10 w-full max-w-md">
@@ -40,7 +40,7 @@ export default function RegisterPage() {
           <div className="mb-8">
             <span className="rv-badge rv-badge-cyan mb-4 inline-flex">◈ Nova Conta</span>
             <h1 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Criar conta</h1>
-            <p className="mt-2 text-sm text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+            <p className="mt-2 text-sm text-[var(--rv-text-muted)] font-[var(--font-body)]">
               Preencha os dados abaixo e faça parte da comunidade Raven.
             </p>
           </div>
@@ -126,8 +126,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rv-btn rv-btn-primary w-full h-13 mt-2"
-              style={{ background: "linear-gradient(135deg, var(--rv-cyan), var(--rv-accent))" }}
+              className="rv-btn rv-btn-primary w-full h-13 mt-2 bg-[linear-gradient(135deg,var(--rv-cyan),var(--rv-accent))]"
             >
               {isSubmitting ? (
                 <span className="flex items-center gap-2">
@@ -154,7 +153,7 @@ export default function RegisterPage() {
 
           <div className="rv-divider my-6" />
 
-          <p className="text-center text-sm text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+          <p className="text-center text-sm text-[var(--rv-text-muted)] font-[var(--font-body)]">
             Já tem uma conta?{" "}
             <Link href="/login" className="text-[var(--rv-accent)] hover:underline font-semibold">
               Entrar

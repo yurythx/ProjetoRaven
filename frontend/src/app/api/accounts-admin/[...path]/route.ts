@@ -66,11 +66,25 @@ async function proxy(req: Request, segments: string[]) {
   }
 
   if (res.status === 204 || res.status === 205 || res.status === 304) {
-    return new NextResponse(null, { status: res.status });
+    return new Response(null, { status: res.status });
   }
-  const contentType = res.headers.get("content-type") ?? "application/json";
-  const text = await res.text();
-  return new NextResponse(text, { status: res.status, headers: { "content-type": contentType } });
+
+  const headers = new Headers();
+  const passthrough = [
+    "content-type",
+    "content-disposition",
+    "content-length",
+    "cache-control",
+    "etag",
+    "last-modified",
+  ];
+  for (const key of passthrough) {
+    const v = res.headers.get(key);
+    if (v) headers.set(key, v);
+  }
+  if (!headers.get("content-type")) headers.set("content-type", "application/json");
+
+  return new Response(res.body, { status: res.status, headers });
 }
 
 export async function GET(req: Request, { params }: { params: Promise<{ path: string[] }> }) {

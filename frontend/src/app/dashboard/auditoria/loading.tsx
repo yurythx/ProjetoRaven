@@ -1,4 +1,5 @@
 export default function AuditLoading() {
+  const tableHeaderWidths = ["w-[80px]", "w-[120px]", "w-[160px]", "w-[80px]", "w-[100px]"];
   return (
     <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-16 animate-pulse">
       {/* Header */}
@@ -19,8 +20,8 @@ export default function AuditLoading() {
       <div className="rounded-2xl bg-[var(--rv-surface-2)] overflow-hidden">
         {/* Table header */}
         <div className="flex gap-4 px-6 py-3 border-b border-[var(--rv-border)]">
-          {[80, 120, 160, 80, 100].map((w, i) => (
-            <div key={i} className="h-2.5 rounded bg-[var(--rv-border)]" style={{ width: w }} />
+          {tableHeaderWidths.map((w, i) => (
+            <div key={i} className={`h-2.5 rounded bg-[var(--rv-border)] ${w}`} />
           ))}
         </div>
         {/* Rows */}

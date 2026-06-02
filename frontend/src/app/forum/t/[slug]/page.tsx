@@ -159,8 +159,8 @@ export default async function ForumTopicPage({
       <JsonLd data={topicSchema} />
       {/* Ambient */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="rv-orb" style={{ width: "400px", height: "400px", top: "-10%", right: "-5%", background: "var(--rv-accent)", opacity: 0.12 }} />
-        <div className="rv-orb" style={{ width: "250px", height: "250px", bottom: "15%", left: "-5%", background: "var(--rv-cyan)", opacity: 0.08 }} />
+        <div className="rv-orb w-[400px] h-[400px] top-[-10%] right-[-5%] bg-[var(--rv-accent)] opacity-15" />
+        <div className="rv-orb w-[250px] h-[250px] bottom-[15%] left-[-5%] bg-[var(--rv-cyan)] opacity-[0.08]" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:py-12 sm:px-6 lg:px-8">
@@ -238,7 +238,7 @@ export default async function ForumTopicPage({
           </div>
 
           {!repliesRes.ok && (
-            <div className="rv-card p-6 text-center text-[var(--rv-text-muted)]" style={{ fontFamily: "var(--font-body)" }}>
+            <div className="rv-card p-6 text-center text-[var(--rv-text-muted)] font-[var(--font-body)]">
               Não foi possível carregar as respostas.
             </div>
           )}
@@ -246,8 +246,12 @@ export default async function ForumTopicPage({
           {replies.map((r) => {
             const rAuthorName = r.author.display_name || r.author.username;
             return (
-              <div key={r.id} className={`rv-card p-5 sm:p-6 ${r.is_solution ? "border-[var(--rv-accent)]/40" : ""}`}
-                style={r.is_solution ? { background: "rgba(139,92,246,0.05)" } : {}}>
+              <div
+                key={r.id}
+                className={`rv-card p-5 sm:p-6 ${
+                  r.is_solution ? "border-[var(--rv-accent)]/40 bg-[rgba(139,92,246,0.05)]" : ""
+                }`}
+              >
                 <div className="flex items-center justify-between gap-4 mb-4">
                   <div className="flex items-center gap-3 flex-wrap">
                     <div className="h-7 w-7 rounded-full flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-[var(--rv-surface-2)] to-[var(--rv-surface)] border border-[var(--rv-border)]">
@@ -293,7 +297,7 @@ export default async function ForumTopicPage({
             <div className="rv-card p-6 sm:p-10 text-center">
               <div className="text-3xl mb-3">💬</div>
               <h3 className="rv-display text-xl text-[var(--rv-text-primary)] mb-2">Nenhuma resposta ainda</h3>
-              <p className="text-[var(--rv-text-muted)] text-sm" style={{ fontFamily: "var(--font-body)" }}>
+              <p className="text-[var(--rv-text-muted)] text-sm font-[var(--font-body)]">
                 Seja o primeiro a responder este tópico.
               </p>
             </div>

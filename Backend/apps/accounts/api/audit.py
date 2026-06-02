@@ -33,6 +33,10 @@ class AdminAuditEventViewSet(viewsets.ReadOnlyModelViewSet):
             if val:
                 qs = qs.filter(**{field: val})
 
+        action_prefix = (params.get("action_prefix") or "").strip()
+        if action_prefix:
+            qs = qs.filter(action__startswith=action_prefix)
+
         ordering = params.get("ordering")
         if ordering:
             allowed = {"created_at", "action"}

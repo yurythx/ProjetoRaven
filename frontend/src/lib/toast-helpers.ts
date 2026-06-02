@@ -1,4 +1,4 @@
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 export function showApiError(title: string, error: unknown) {
   const message = (() => {
@@ -17,4 +17,3 @@ export function showApiError(title: string, error: unknown) {
   })();
   toast.error(title, { description: message });
 }
-

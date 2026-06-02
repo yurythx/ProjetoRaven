@@ -19,8 +19,7 @@ dev-down:
 .PHONY: prod-check
 prod-check:
 	@test -f Backend/.env.prod   || (echo "ERROR: Backend/.env.prod missing — copy from Backend/.env.prod.example" && exit 1)
-	@test -f frontend/.env.prod  || (echo "ERROR: frontend/.env.prod missing — copy from frontend/.env.prod.example" && exit 1)
-	@test -f nginx/ssl/fullchain.pem || (echo "ERROR: nginx/ssl/fullchain.pem missing — add TLS certs" && exit 1)
+	@test -f frontend/.env.prod  || (echo "ERROR: frontend/.env.prod missing — run ./setup.sh to generate it" && exit 1)
 	@echo "Pre-flight checks passed."
 
 .PHONY: prod-build
@@ -58,7 +57,7 @@ prod-down:
 
 .PHONY: prod-restart
 prod-restart:
-	$(COMPOSE_PROD) restart django frontend nginx
+	$(COMPOSE_PROD) restart django frontend
 
 # ── Maintenance ───────────────────────────────────────────────────────────────
 .PHONY: shell

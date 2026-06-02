@@ -14,9 +14,8 @@ describe("sanitizeRichTextHtml", () => {
   it("mantém tags/atributos do rich text", () => {
     const html = `<p><span style="text-align:center;color:#fff" class="x">t</span> <a href="https://example.com" target="_blank" rel="noreferrer">link</a></p>`;
     const out = sanitizeRichTextHtml(html);
-    expect(out).toContain("style=");
+    expect(out).not.toContain("style=");
     expect(out).toContain('class="x"');
     expect(out).toContain("href=");
   });
 });
-

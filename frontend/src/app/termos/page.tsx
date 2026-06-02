@@ -24,8 +24,7 @@ export default function TermosPage() {
 
       {/* Body */}
       <div
-        className="space-y-10 text-[var(--rv-text-muted)] leading-relaxed"
-        style={{ fontFamily: "var(--font-body)" }}
+        className="space-y-10 text-[var(--rv-text-muted)] leading-relaxed font-[var(--font-body)]"
       >
         <Section title="1. Aceitação dos Termos">
           Ao acessar ou usar o Projeto Raven (&ldquo;Plataforma&rdquo;), você concorda com estes Termos de Uso.
@@ -104,10 +103,7 @@ export default function TermosPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <h2
-        className="rv-display text-lg text-[var(--rv-text-primary)] mb-3"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
+      <h2 className="rv-display text-lg text-[var(--rv-text-primary)] mb-3 font-[var(--font-display)]">
         {title}
       </h2>
       <p className="text-sm leading-7">{children}</p>
