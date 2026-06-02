@@ -126,7 +126,7 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
                 className="relative sm:w-[220px] sm:flex-shrink-0 overflow-hidden rounded-xl border border-[var(--rv-border)] bg-[var(--rv-surface-2)]"
                 aria-label={`Abrir ${p.title}`}
               >
-                <div className="relative aspect-[4/3]">
+                <div className="relative aspect-video">
                   {p.image ? (
                     <Image
                       src={fixImageUrl(p.image) ?? ""}
@@ -134,7 +134,7 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
                       fill
                       priority={idx === 0}
                       sizes="(max-width: 640px) 100vw, 220px"
-                      className="object-cover"
+                      className="object-cover object-center"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center text-[var(--rv-text-dim)]">
