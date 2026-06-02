@@ -29,7 +29,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Standalone runner — usa apenas os arquivos gerados pelo Next.js (sem node_modules completo)
-FROM node:22-alpine AS runner
+FROM node:22 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

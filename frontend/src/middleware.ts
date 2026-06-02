@@ -26,7 +26,7 @@ function buildCspHeader(nonce: string): string {
 
   const extraImg = apiOrigin ? ` ${apiOrigin}` : "";
   const extraScript = dev ? " 'unsafe-eval'" : "";
-  const styleSrc = dev ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`;
+  const styleSrc = dev ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'unsafe-inline'`;
   const styleSrcAttr = "style-src-attr 'unsafe-inline'";
 
   return [
