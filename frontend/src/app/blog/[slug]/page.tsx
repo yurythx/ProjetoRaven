@@ -100,7 +100,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   return (
     <div className="relative min-h-screen">
       <JsonLd data={articleSchema} />
-      <div className="relative z-10 mx-auto max-w-4xl px-4 py-8 sm:py-14 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto max-w-3xl px-4 py-8 sm:py-14 sm:px-6 lg:px-8">
         {/* ── Breadcrumb ── */}
         <nav className="flex items-center gap-2 mb-8 rv-label text-[9px] text-[var(--rv-text-dim)] flex-wrap">
           <Link href="/" className="hover:text-[var(--rv-accent)] transition-colors">Início</Link>
@@ -137,7 +137,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </div>
 
         {/* ── Title ── */}
-        <h1 className="rv-display text-3xl sm:text-4xl md:text-5xl text-[var(--rv-text-primary)] leading-tight mb-6">
+        <h1 className="rv-article-title text-3xl sm:text-4xl md:text-5xl text-[var(--rv-text-primary)] mb-6">
           {post.title}
         </h1>
 
@@ -206,22 +206,31 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           </div>
         )}
 
-        {/* ── Excerpt ── */}
-        {post.excerpt && (
-          <p className="text-[var(--rv-text-muted)] text-base sm:text-lg leading-relaxed mb-8 border-l-2 border-[var(--rv-accent)] pl-4 whitespace-pre-line font-[var(--font-body)]">
-            {post.excerpt}
-          </p>
-        )}
+        {/* ── Abstract ── */}
+        {post.excerpt ? (
+          <section className="rv-card rv-paper p-5 sm:p-7 mb-10">
+            <div className="rv-label text-[9px] text-[var(--rv-text-dim)]">Resumo</div>
+            <p className="rv-article-abstract mt-2 text-[var(--rv-text-muted)] text-sm sm:text-base leading-relaxed whitespace-pre-line">
+              {post.excerpt}
+            </p>
+            {post.tags?.length ? (
+              <div className="mt-4 text-sm text-[var(--rv-text-muted)]">
+                <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">Palavras-chave</span>
+                <span className="text-[var(--rv-text-dim)]">: </span>
+                <span>{post.tags.map((t) => t.name).join(", ")}</span>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
 
         {/* ── Content ── */}
-        <article className="rv-card p-6 sm:p-10 mb-10">
+        <article className="rv-card rv-paper p-6 sm:p-10 mb-10">
           <ArticleContent
             html={sanitizeRichTextHtml(post.content)}
-            className="rv-article-body prose prose-base sm:prose-lg prose-invert max-w-none
+            className="rv-article-body rv-article-academic prose prose-base sm:prose-lg prose-invert max-w-none
               prose-p:text-[var(--rv-text-muted)]
               prose-li:text-[var(--rv-text-muted)]
-              prose-headings:text-[var(--rv-text-primary)] prose-headings:font-black prose-headings:tracking-tight
-              prose-h2:rv-display prose-h3:rv-display
+              prose-headings:text-[var(--rv-text-primary)] prose-headings:font-semibold prose-headings:tracking-tight
               prose-a:text-[var(--rv-accent)] prose-a:no-underline hover:prose-a:underline
               prose-code:text-[var(--rv-cyan)] prose-code:bg-[var(--rv-surface-2)] prose-code:rounded prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm
               prose-pre:bg-[var(--rv-surface-2)] prose-pre:border prose-pre:border-[var(--rv-border)] prose-pre:rounded-xl

@@ -8,6 +8,10 @@ type MeResponse = {
   is_forum_moderator?: boolean;
 };
 
+function toWsProtocol(proto: string): string {
+  return proto === "https:" ? "wss:" : proto === "http:" ? "ws:" : proto;
+}
+
 function buildCspHeader(nonce: string): string {
   const dev = process.env.NODE_ENV !== "production";
 
@@ -18,11 +22,26 @@ function buildCspHeader(nonce: string): string {
   } catch {}
 
   const wsUrl = process.env.NEXT_PUBLIC_WS_BASE_URL || "";
-  const connectExtra = dev
-    ? " ws://localhost:8000 ws://django:8000 ws://localhost:8006 ws://127.0.0.1:8006"
-    : wsUrl
-      ? ` ${wsUrl}`
-      : "";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+
+  const connectSrcParts = new Set<string>(["'self'", "https://cloudflareinsights.com"]);
+  const addWsOrigin = (raw: string) => {
+    if (!raw) return;
+    try {
+      const u = new URL(raw);
+      connectSrcParts.add(`${toWsProtocol(u.protocol)}//${u.host}`);
+    } catch {}
+  };
+
+  if (dev) {
+    ["ws://localhost:8000", "ws://django:8000", "ws://localhost:8006", "ws://127.0.0.1:8006"].forEach((s) =>
+      connectSrcParts.add(s)
+    );
+  } else {
+    addWsOrigin(siteUrl);
+    addWsOrigin(apiBaseUrl);
+    addWsOrigin(wsUrl);
+  }
 
   const extraImg = apiOrigin ? ` ${apiOrigin}` : "";
   const extraScript = dev ? " 'unsafe-eval'" : "";
@@ -37,7 +56,7 @@ function buildCspHeader(nonce: string): string {
     styleSrcAttr,
     `img-src 'self' data: blob:${dev ? " http://django:8000 https://django:8000" : ""}${extraImg}`,
     "font-src 'self'",
-    `connect-src 'self' https://cloudflareinsights.com${connectExtra}`,
+    `connect-src ${Array.from(connectSrcParts).join(" ")}`,
     "media-src 'self'",
     "object-src 'none'",
     "frame-src 'self'",

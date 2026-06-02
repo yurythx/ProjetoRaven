@@ -46,6 +46,7 @@ html[data-theme="dark"] {
   --font-display:  'Exo 2', sans-serif;
   --font-body:     'Inter', sans-serif;
   --font-mono:     'JetBrains Mono', monospace;
+  --font-article:  ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
 /* ── Light theme ────────────────────────────────────────────────── */
@@ -333,6 +334,39 @@ html[data-theme="light"] ::selection {
   letter-spacing: 0.25em;
   text-transform: uppercase;
   font-size: 0.65rem;
+}
+
+.rv-article-title {
+  font-family: var(--font-article);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+}
+
+.rv-article-abstract {
+  font-family: var(--font-article);
+}
+
+.rv-paper {
+  border-radius: 1rem;
+}
+
+html[data-theme="dark"] .rv-paper {
+  background: rgba(5, 14, 9, 0.72);
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(68, 183, 139, 0.06);
+}
+
+html[data-theme="dark"] .rv-paper:hover {
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(68, 183, 139, 0.06);
+}
+
+html[data-theme="light"] .rv-paper {
+  background: rgba(244, 251, 247, 0.94);
+  box-shadow: 0 1px 2px rgba(9, 46, 32, 0.08), 0 8px 30px rgba(9, 46, 32, 0.08);
+}
+
+html[data-theme="light"] .rv-paper:hover {
+  box-shadow: 0 1px 2px rgba(9, 46, 32, 0.08), 0 8px 30px rgba(9, 46, 32, 0.08);
 }
 
 /* ===================================================================
@@ -721,6 +755,11 @@ html[data-theme="light"] .prose :where(strong):not(:where([class~=not-prose] *))
   line-height: 1.85;
   letter-spacing: 0.01em;
   color: var(--rv-text-muted);
+}
+
+.rv-article-body.rv-article-academic {
+  font-family: var(--font-article);
+  letter-spacing: 0;
 }
 
 html[data-theme="dark"] .prose.prose-invert [style*="color:#000"],
