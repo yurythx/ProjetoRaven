@@ -9,7 +9,7 @@ psycopg2-binary>=2.9.9
 
 # Redis
 django-redis>=5.4.0
-redis>=5.0.0
+redis>=8.0.0
 
 # Observability
 sentry-sdk[django]>=2.0.0
