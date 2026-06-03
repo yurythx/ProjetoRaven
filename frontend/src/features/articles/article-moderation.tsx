@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/use-auth"
@@ -56,6 +57,9 @@ const parsePageParam = (nextUrl: string | null) => {
 
 export function ArticleModeration() {
   const queryClient = useQueryClient()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { user } = useAuth()
   const u = (user ?? null) as Record<string, unknown> | null
   const canModerate = Boolean(u?.is_admin || u?.is_blog_editor || u?.is_staff || u?.is_superuser)
@@ -67,8 +71,11 @@ export function ArticleModeration() {
   const [rejectTargets, setRejectTargets] = React.useState<ArticleLite[]>([])
   const [status, setStatus] = React.useState<"pending" | "published" | "rejected" | "all">("pending")
   const [categoryId, setCategoryId] = React.useState<string>("all")
+  const [ordering, setOrdering] = React.useState<string>("-updated_at")
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
   const selectedCount = selectedIds.size
+  const didInitFromUrl = React.useRef(false)
+  const urlSyncDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const statusMeta = React.useMemo(() => ({
     pending: { label: "Pendente", badge: "bg-amber-500/20 text-amber-500" },
@@ -78,6 +85,70 @@ export function ArticleModeration() {
     scheduled: { label: "Agendado", badge: "bg-sky-500/20 text-sky-300" },
     archived: { label: "Arquivado", badge: "bg-zinc-500/20 text-zinc-300" },
   }) satisfies Record<string, { label: string; badge: string }>, [])
+
+  const countsQuery = useQuery({
+    queryKey: ["articles-moderation-counts", categoryId, debounced],
+    queryFn: async ({ signal }) => {
+      const fetchCount = async (s?: "pending" | "published" | "rejected") => {
+        const params: Record<string, string> = { page_size: "1" }
+        if (s) params.status = s
+        if (categoryId !== "all") params.category = categoryId
+        if (debounced) params.search = debounced
+        const qs = new URLSearchParams(params).toString()
+        const res = await fetch(`/api/blog-admin/articles/?${qs}`, { signal })
+        if (!res.ok) throw new Error(`Erro ${res.status}`)
+        const data = await res.json() as { count?: unknown }
+        return Number.isFinite(Number(data?.count)) ? Number(data.count) : 0
+      }
+
+      const [pending, published, rejected, all] = await Promise.all([
+        fetchCount("pending"),
+        fetchCount("published"),
+        fetchCount("rejected"),
+        fetchCount(undefined),
+      ])
+      return { pending, published, rejected, all }
+    },
+    enabled: canModerate,
+    staleTime: 20_000,
+    retry: 1,
+  })
+
+  React.useEffect(() => {
+    if (didInitFromUrl.current) return
+
+    const s = (searchParams.get("status") || "").trim().toLowerCase()
+    const q = searchParams.get("q") ?? ""
+    const cat = searchParams.get("category") ?? ""
+    const ord = (searchParams.get("ordering") || "").trim()
+
+    const allowedStatus = new Set(["pending", "published", "rejected", "all"])
+    if (allowedStatus.has(s)) setStatus(s as "pending" | "published" | "rejected" | "all")
+    if (q) setQuery(q)
+    if (cat) setCategoryId(cat)
+    if (ord) setOrdering(ord)
+
+    didInitFromUrl.current = true
+  }, [searchParams])
+
+  React.useEffect(() => {
+    if (!didInitFromUrl.current) return
+    if (urlSyncDebounceRef.current) clearTimeout(urlSyncDebounceRef.current)
+
+    urlSyncDebounceRef.current = setTimeout(() => {
+      const qs = new URLSearchParams()
+      if (status !== "pending") qs.set("status", status)
+      if (categoryId !== "all") qs.set("category", categoryId)
+      if (ordering !== "-updated_at") qs.set("ordering", ordering)
+      if (debounced) qs.set("q", debounced)
+      const href = qs.toString() ? `${pathname}?${qs.toString()}` : pathname
+      router.replace(href, { scroll: false })
+    }, 250)
+
+    return () => {
+      if (urlSyncDebounceRef.current) clearTimeout(urlSyncDebounceRef.current)
+    }
+  }, [router, pathname, status, categoryId, ordering, debounced])
 
   const categoriesQuery = useQuery({
     queryKey: ["articles-categories-lite"],
@@ -95,12 +166,12 @@ export function ArticleModeration() {
   const categories = categoriesQuery.data ?? []
 
   const pendingQuery = useInfiniteQuery<Paginated<ArticleLite>>({
-    queryKey: ["articles-moderation", status, categoryId, debounced],
+    queryKey: ["articles-moderation", status, categoryId, debounced, ordering],
     initialPageParam: 1,
     queryFn: async ({ pageParam, signal }) => {
       const safePage = typeof pageParam === "number" ? pageParam : Number(pageParam)
       const params: Record<string, string | number> = {
-        ordering: "-updated_at",
+        ordering,
         page: Number.isFinite(safePage) && safePage > 0 ? safePage : 1,
         page_size: 18,
       }
@@ -126,7 +197,7 @@ export function ArticleModeration() {
 
   React.useEffect(() => {
     setSelectedIds(new Set())
-  }, [status, categoryId, debounced])
+  }, [status, categoryId, debounced, ordering])
 
   const toggleSelect = (id: string) => {
     setSelectedIds((prev) => {
@@ -177,6 +248,7 @@ export function ArticleModeration() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["articles-moderation"] })
+      await queryClient.invalidateQueries({ queryKey: ["articles-moderation-counts"] })
       await queryClient.invalidateQueries({ queryKey: ["dashboard-articles-grid"] })
       toast.success("Post aprovado e publicado")
     },
@@ -196,6 +268,7 @@ export function ArticleModeration() {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["articles-moderation"] })
+      await queryClient.invalidateQueries({ queryKey: ["articles-moderation-counts"] })
       await queryClient.invalidateQueries({ queryKey: ["dashboard-articles-grid"] })
       toast.success("Post rejeitado")
     },
@@ -233,6 +306,7 @@ export function ArticleModeration() {
     },
     onSuccess: async ({ ok, fail, failedSlugs }) => {
       await queryClient.invalidateQueries({ queryKey: ["articles-moderation"] })
+      await queryClient.invalidateQueries({ queryKey: ["articles-moderation-counts"] })
       await queryClient.invalidateQueries({ queryKey: ["dashboard-articles-grid"] })
       setSelectedIds(new Set())
       if (fail === 0) toast.success(`${ok} posts aprovados`)
@@ -279,6 +353,7 @@ export function ArticleModeration() {
     },
     onSuccess: async ({ ok, fail, failedSlugs }) => {
       await queryClient.invalidateQueries({ queryKey: ["articles-moderation"] })
+      await queryClient.invalidateQueries({ queryKey: ["articles-moderation-counts"] })
       await queryClient.invalidateQueries({ queryKey: ["dashboard-articles-grid"] })
       setSelectedIds(new Set())
       if (fail === 0) toast.success(`${ok} posts rejeitados`)
@@ -348,20 +423,36 @@ export function ArticleModeration() {
               className="pl-11 h-12 rounded-xl bg-white/5 border-white/10 hover:border-primary/30 transition-all shadow-inner"
             />
           </div>
-          <div className="flex gap-2">
-            <Select value={status} onValueChange={(v) => setStatus(v as "pending" | "published" | "rejected" | "all")}>
-              <SelectTrigger className="h-12 w-32 rounded-xl bg-white/5 border-white/10 hover:border-primary/30 shadow-inner">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl p-1">
-                <SelectItem value="pending" className="rounded-xl cursor-pointer">Pendente</SelectItem>
-                <SelectItem value="published" className="rounded-xl cursor-pointer">Publicado</SelectItem>
-                <SelectItem value="rejected" className="rounded-xl cursor-pointer">Rejeitado</SelectItem>
-                <SelectItem value="all" className="rounded-xl cursor-pointer">Todos</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="flex gap-2 flex-wrap">
+            <div className="flex items-center gap-2 flex-wrap">
+              {([
+                { key: "pending", label: "Pendentes", cls: "bg-amber-500/15 text-amber-400 border-amber-500/20 hover:bg-amber-500/20" },
+                { key: "published", label: "Publicados", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20" },
+                { key: "rejected", label: "Rejeitados", cls: "bg-rose-500/15 text-rose-300 border-rose-500/20 hover:bg-rose-500/20" },
+                { key: "all", label: "Todos", cls: "bg-white/5 text-foreground/80 border-white/10 hover:bg-white/10" },
+              ] as const).map((t) => {
+                const active = status === t.key
+                const count = countsQuery.data?.[t.key] ?? null
+                return (
+                  <Button
+                    key={t.key}
+                    type="button"
+                    variant="outline"
+                    onClick={() => setStatus(t.key)}
+                    className={cn(
+                      "h-10 rounded-xl px-4 text-[10px] font-black uppercase tracking-widest",
+                      t.cls,
+                      active ? "ring-2 ring-primary/30" : ""
+                    )}
+                    disabled={countsQuery.isFetching}
+                  >
+                    {t.label} {count !== null ? `(${count})` : ""}
+                  </Button>
+                )
+              })}
+            </div>
             <Select value={categoryId} onValueChange={setCategoryId}>
-              <SelectTrigger className="h-12 w-44 rounded-xl bg-white/5 border-white/10 hover:border-primary/30 shadow-inner">
+              <SelectTrigger className="h-10 w-44 rounded-xl bg-white/5 border-white/10 hover:border-primary/30 shadow-inner">
                 <SelectValue placeholder="Categoria" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl p-1">
@@ -371,6 +462,18 @@ export function ArticleModeration() {
                     {c.name}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select value={ordering} onValueChange={setOrdering}>
+              <SelectTrigger className="h-10 w-44 rounded-xl bg-white/5 border-white/10 hover:border-primary/30 shadow-inner">
+                <SelectValue placeholder="Ordenação" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl p-1">
+                <SelectItem value="-updated_at" className="rounded-xl cursor-pointer">Mais recentes (update)</SelectItem>
+                <SelectItem value="-created_at" className="rounded-xl cursor-pointer">Mais recentes (criação)</SelectItem>
+                <SelectItem value="-published_at" className="rounded-xl cursor-pointer">Publicação</SelectItem>
+                <SelectItem value="-view_count" className="rounded-xl cursor-pointer">Mais vistos</SelectItem>
+                <SelectItem value="title" className="rounded-xl cursor-pointer">Título (A-Z)</SelectItem>
               </SelectContent>
             </Select>
           </div>
