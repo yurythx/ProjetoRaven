@@ -30,8 +30,6 @@ def _signed_state():
 @override_settings(
     OAUTH_GOOGLE_CLIENT_ID="google-id",
     OAUTH_GOOGLE_CLIENT_SECRET="google-secret",
-    OAUTH_DISCORD_CLIENT_ID="discord-id",
-    OAUTH_DISCORD_CLIENT_SECRET="discord-secret",
 )
 class GoogleAuthUrlTest(TestCase):
     def test_returns_url_with_client_id(self):
@@ -44,19 +42,6 @@ class GoogleAuthUrlTest(TestCase):
         with override_settings(OAUTH_GOOGLE_CLIENT_ID=""):
             with self.assertRaises(ValueError):
                 oauth_service.google_auth_url("https://example.com/cb", "s")
-
-
-@override_settings(OAUTH_DISCORD_CLIENT_ID="discord-id", OAUTH_DISCORD_CLIENT_SECRET="discord-secret")
-class DiscordAuthUrlTest(TestCase):
-    def test_returns_url_with_client_id(self):
-        url = oauth_service.discord_auth_url("https://example.com/cb", "state456")
-        self.assertIn("discord.com", url)
-        self.assertIn("discord-id", url)
-
-    def test_raises_when_client_id_missing(self):
-        with override_settings(OAUTH_DISCORD_CLIENT_ID=""):
-            with self.assertRaises(ValueError):
-                oauth_service.discord_auth_url("https://example.com/cb", "s")
 
 
 class GetOrCreateUserTest(TestCase):
@@ -116,49 +101,31 @@ class GetOrCreateUserTest(TestCase):
         self.assertTrue(created)
         self.assertNotEqual(user.username, "Hero_Name")
 
-    def test_discord_provider_creates_separate_social_account(self):
-        user_google, _ = oauth_service.get_or_create_user("google", self.USER_INFO)
-        info_discord = {**self.USER_INFO, "provider_uid": "discord-uid-xyz"}
-        user_discord, created = oauth_service.get_or_create_user("discord", info_discord)
-        self.assertFalse(created)
-        self.assertEqual(user_google.pk, user_discord.pk)
-        self.assertEqual(SocialAccount.objects.filter(user=user_google).count(), 2)
-
-
 # ── View tests ──────────────────────────────────────────────────────────────────
 
 @override_settings(
     OAUTH_GOOGLE_CLIENT_ID="google-id",
     OAUTH_GOOGLE_CLIENT_SECRET="google-secret",
-    OAUTH_DISCORD_CLIENT_ID="discord-id",
-    OAUTH_DISCORD_CLIENT_SECRET="discord-secret",
 )
 class OAuthInitViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
+        self.redirect_uri = "http://testserver/auth/oauth-callback?provider=google"
 
     def test_google_returns_auth_url_and_state(self):
         resp = self.client.get(
             "/api/v1/accounts/oauth/google/",
-            {"redirect_uri": "https://example.com/cb"}
+            {"redirect_uri": self.redirect_uri}
         )
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertIn("auth_url", resp.data)
         self.assertIn("state", resp.data)
         self.assertIn("accounts.google.com", resp.data["auth_url"])
 
-    def test_discord_returns_auth_url_and_state(self):
-        resp = self.client.get(
-            "/api/v1/accounts/oauth/discord/",
-            {"redirect_uri": "https://example.com/cb"}
-        )
-        self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertIn("discord.com", resp.data["auth_url"])
-
     def test_unknown_provider_returns_400(self):
         resp = self.client.get(
             "/api/v1/accounts/oauth/github/",
-            {"redirect_uri": "https://example.com/cb"}
+            {"redirect_uri": self.redirect_uri}
         )
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -166,11 +133,18 @@ class OAuthInitViewTest(TestCase):
         resp = self.client.get("/api/v1/accounts/oauth/google/")
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_redirect_uri_not_allowed_returns_400(self):
+        resp = self.client.get(
+            "/api/v1/accounts/oauth/google/",
+            {"redirect_uri": "https://example.com/cb"}
+        )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_unconfigured_client_id_returns_503(self):
         with override_settings(OAUTH_GOOGLE_CLIENT_ID=""):
             resp = self.client.get(
                 "/api/v1/accounts/oauth/google/",
-                {"redirect_uri": "https://example.com/cb"}
+                {"redirect_uri": self.redirect_uri}
             )
             self.assertEqual(resp.status_code, status.HTTP_503_SERVICE_UNAVAILABLE)
 
@@ -180,7 +154,7 @@ class OAuthInitViewTest(TestCase):
     OAUTH_GOOGLE_CLIENT_SECRET="google-secret",
 )
 class OAuthCallbackViewTest(TestCase):
-    REDIRECT_URI = "https://example.com/cb"
+    REDIRECT_URI = "http://testserver/auth/oauth-callback?provider=google"
     PROVIDER = "google"
 
     def setUp(self):
@@ -216,6 +190,10 @@ class OAuthCallbackViewTest(TestCase):
             {"code": "x", "state": _signed_state(), "redirect_uri": self.REDIRECT_URI},
             format="json",
         )
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_redirect_uri_not_allowed_returns_400(self):
+        resp = self._post(redirect_uri="https://example.com/cb")
         self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_provider_exchange_failure_returns_502(self):
@@ -316,15 +294,11 @@ class ConnectedAccountsViewTest(TestCase):
         SocialAccount.objects.create(
             user=self.user, provider="google", provider_uid="g-uid-1", extra_data={}
         )
-        SocialAccount.objects.create(
-            user=self.user, provider="discord", provider_uid="d-uid-2", extra_data={}
-        )
         resp = self.client.get("/api/v1/accounts/oauth/connected/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(resp.data), 2)
+        self.assertEqual(len(resp.data), 1)
         providers = {a["provider"] for a in resp.data}
         self.assertIn("google", providers)
-        self.assertIn("discord", providers)
 
     def test_does_not_return_other_users_accounts(self):
         other = _make_user("other@example.com", "other")

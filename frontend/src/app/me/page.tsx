@@ -681,12 +681,10 @@ type SocialAccountRow = { id: string; provider: string; provider_uid: string; cr
 
 const PROVIDER_LABELS: Record<string, string> = {
   google: "Google",
-  discord: "Discord",
 };
 
 const PROVIDER_ICONS: Record<string, string> = {
   google: "🇬",
-  discord: "🎮",
 };
 
 function ConnectedAccountsCard() {
@@ -731,7 +729,7 @@ function ConnectedAccountsCard() {
         <div className="h-6 w-6 rounded-full border-2 border-[var(--rv-accent)] border-t-transparent animate-spin" />
       ) : (
         <div className="space-y-3">
-          {(["google", "discord"] as const).map((provider) => {
+          {(["google"] as const).map((provider) => {
             const linked = accountsByProvider[provider];
             return (
               <div key={provider} className="flex items-center justify-between gap-4">

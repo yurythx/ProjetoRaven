@@ -150,7 +150,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class EmailVerifySerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
-    code = serializers.CharField(required=True, min_length=6, max_length=6)
+    code = serializers.RegexField(regex=r"^\d{6}$", required=True)
 
 
 class EmailResendSerializer(serializers.Serializer):
@@ -163,7 +163,7 @@ class PasswordResetCodeRequestSerializer(serializers.Serializer):
 
 class PasswordResetCodeConfirmSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
-    code = serializers.CharField(required=True, min_length=6, max_length=6)
+    code = serializers.RegexField(regex=r"^\d{6}$", required=True)
     new_password = serializers.CharField(required=True, write_only=True)
 
     def validate_new_password(self, value):

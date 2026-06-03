@@ -13,6 +13,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   const { provider } = await params;
   const body = await request.json() as { code: string; state: string; redirect_uri: string };
 
+  if (provider !== "google") {
+    return NextResponse.json({ error: "Unknown provider" }, { status: 404 });
+  }
+
   const result = await backendFetch<OAuthResponse>(
     `/api/v1/accounts/oauth/${provider}/callback/`,
     {

@@ -6,14 +6,12 @@ from rest_framework.views import APIView
 from ..permissions import IsSuperUser
 
 
-_PROVIDERS = ["google", "discord"]
+_PROVIDERS = ["google"]
 _ENV_KEYS = {
     "google":  ("OAUTH_GOOGLE_CLIENT_ID",  "OAUTH_GOOGLE_CLIENT_SECRET"),
-    "discord": ("OAUTH_DISCORD_CLIENT_ID", "OAUTH_DISCORD_CLIENT_SECRET"),
 }
 _REDIRECT_PATHS = {
-    "google":  "/api/auth/oauth/google/callback",
-    "discord": "/api/auth/oauth/discord/callback",
+    "google":  "/auth/oauth-callback?provider=google",
 }
 
 

@@ -2,6 +2,7 @@ from rest_framework import viewsets, response, status
 from rest_framework.decorators import action
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from django.utils import timezone
+from django.db.models import Q
 from apps.common.throttling import BlogPostThrottle
 
 from ...services.post import PostService
@@ -59,6 +60,42 @@ class PostViewSet(viewsets.ModelViewSet):
         # Unauthenticated: published + public only
         return PostSelector.get_published()
 
+    def _apply_admin_filters(self, qs):
+        params = self.request.query_params
+
+        status_param = (params.get("status") or "").strip().lower()
+        if status_param:
+            allowed = {s for s, _ in Post.Status.choices}
+            if status_param in allowed:
+                qs = qs.filter(status=status_param)
+
+        category_param = (params.get("category") or "").strip()
+        if category_param:
+            if "-" in category_param:
+                qs = qs.filter(category_id=category_param)
+            else:
+                qs = qs.filter(category__slug=category_param)
+
+        search = (params.get("search") or "").strip()
+        if search:
+            qs = qs.filter(
+                Q(title__icontains=search)
+                | Q(slug__icontains=search)
+                | Q(excerpt__icontains=search)
+                | Q(author__username__icontains=search)
+                | Q(author__email__icontains=search)
+                | Q(category__name__icontains=search)
+            )
+
+        ordering = (params.get("ordering") or "").strip()
+        if ordering:
+            raw = ordering[1:] if ordering.startswith("-") else ordering
+            allowed = {"updated_at", "created_at", "published_at", "view_count", "title"}
+            if raw in allowed:
+                qs = qs.order_by(ordering)
+
+        return qs
+
     def retrieve(self, request, *args, **kwargs):
         from django.db.models import F
         instance = self.get_object()
@@ -69,7 +106,16 @@ class PostViewSet(viewsets.ModelViewSet):
         return response.Response(serializer.data)
 
     def list(self, request):
-        qs = self.filter_queryset(self.get_queryset())
+        qs = self.get_queryset()
+        user = request.user
+        is_editor = bool(
+            user
+            and user.is_authenticated
+            and (getattr(user, "is_blog_editor", False) or user.is_staff or user.is_superuser)
+        )
+        if is_editor:
+            qs = self._apply_admin_filters(qs)
+        qs = self.filter_queryset(qs)
         page = self.paginate_queryset(qs)
         if page is not None:
             serializer = self.get_serializer(page, many=True)

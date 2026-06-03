@@ -1,4 +1,4 @@
-"""OAuth 2.0 endpoints for Google and Discord.
+"""OAuth 2.0 endpoints for Google.
 
 Flow:
   1. GET  /oauth/{provider}/        → { auth_url, state }
@@ -10,6 +10,7 @@ The `state` is a HMAC-signed value (TimestampSigner) to prevent CSRF.
 import logging
 
 from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
+from django.conf import settings
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,8 +25,50 @@ logger = logging.getLogger(__name__)
 _STATE_MAX_AGE = 600  # 10 minutes
 _PROVIDERS = {
     "google":  (oauth_service.google_auth_url,  oauth_service.google_exchange_code),
-    "discord": (oauth_service.discord_auth_url, oauth_service.discord_exchange_code),
 }
+
+def _origin(url: str) -> str:
+    from urllib.parse import urlparse
+
+    p = urlparse(url)
+    if not p.scheme or not p.netloc:
+        return ""
+    return f"{p.scheme}://{p.netloc}"
+
+
+def _is_allowed_redirect_uri(*, provider: str, redirect_uri: str, request) -> bool:
+    from urllib.parse import urlparse, parse_qs
+
+    p = urlparse(redirect_uri)
+    if p.scheme not in {"http", "https"}:
+        return False
+    if not p.netloc:
+        return False
+
+    allowed_origins: set[str] = set()
+    site_url = getattr(settings, "NEXT_PUBLIC_SITE_URL", "") or ""
+    if site_url:
+        o = _origin(site_url)
+        if o:
+            allowed_origins.add(o)
+
+    req_origin = _origin(request.build_absolute_uri("/"))
+    if req_origin:
+        allowed_origins.add(req_origin)
+
+    if _origin(redirect_uri) not in allowed_origins:
+        return False
+
+    if p.path != "/auth/oauth-callback":
+        return False
+
+    qs = parse_qs(p.query)
+    qs_provider = (qs.get("provider") or [""])[0]
+    if qs_provider != provider:
+        return False
+
+    return True
+
 
 
 class OAuthInitView(APIView):
@@ -39,6 +82,8 @@ class OAuthInitView(APIView):
         redirect_uri = request.query_params.get("redirect_uri", "")
         if not redirect_uri:
             return Response({"error": "redirect_uri required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not _is_allowed_redirect_uri(provider=provider, redirect_uri=redirect_uri, request=request):
+            return Response({"error": "redirect_uri not allowed"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             build_url, _ = _PROVIDERS[provider]
@@ -64,6 +109,8 @@ class OAuthCallbackView(APIView):
 
         if not code or not state or not redirect_uri:
             return Response({"error": "code, state and redirect_uri are required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not _is_allowed_redirect_uri(provider=provider, redirect_uri=redirect_uri, request=request):
+            return Response({"error": "redirect_uri not allowed"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Verify state
         try:

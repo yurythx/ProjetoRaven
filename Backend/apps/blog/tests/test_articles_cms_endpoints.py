@@ -127,3 +127,37 @@ class ArticlesCmsEndpointsTestCase(TestCase):
         list_res2 = self.client.get("/api/v1/blog/public/comments/?post_slug=hello")
         self.assertEqual(list_res2.status_code, 200)
         self.assertEqual(len(list_res2.json().get("results", [])), 1)
+
+    def test_editor_can_filter_articles_by_status(self):
+        self.client.force_authenticate(user=self.editor)
+
+        Post.objects.create(
+            title="Pendente 1",
+            slug="pendente-1",
+            excerpt="x",
+            content="x",
+            author=self.editor,
+            status=Post.Status.PENDING,
+            is_public=True,
+        )
+        Post.objects.create(
+            title="Publicado 1",
+            slug="publicado-1",
+            excerpt="y",
+            content="y",
+            author=self.editor,
+            status=Post.Status.PUBLISHED,
+            is_public=True,
+        )
+
+        res_pending = self.client.get("/api/v1/blog/articles/", {"status": "pending"})
+        self.assertEqual(res_pending.status_code, 200)
+        slugs_pending = [r["slug"] for r in res_pending.json().get("results", [])]
+        self.assertIn("pendente-1", slugs_pending)
+        self.assertNotIn("publicado-1", slugs_pending)
+
+        res_published = self.client.get("/api/v1/blog/articles/", {"status": "published"})
+        self.assertEqual(res_published.status_code, 200)
+        slugs_published = [r["slug"] for r in res_published.json().get("results", [])]
+        self.assertIn("publicado-1", slugs_published)
+        self.assertNotIn("pendente-1", slugs_published)

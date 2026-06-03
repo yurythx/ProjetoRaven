@@ -23,7 +23,12 @@ function OAuthCallbackContent() {
       return;
     }
 
-    if (!code || !state || !provider) {
+    if (provider !== "google") {
+      setError("Provedor social inválido.");
+      return;
+    }
+
+    if (!code || !state) {
       setError("Parâmetros de callback incompletos.");
       return;
     }

@@ -28,6 +28,7 @@ type BlogPostListItem = {
   author_name: string; category_name: string;
   published_at: string | null; created_at: string;
   read_time_minutes: number; image: string | null;
+  view_count?: number;
 };
 
 type TopicListItem = {
@@ -37,7 +38,16 @@ type TopicListItem = {
   last_reply_at: string | null;
 };
 
+type CategoryListItem = { id: string; name: string; slug: string; post_count?: number };
+type TagListItem = { id: string; name: string; slug: string };
+
 type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] };
+
+type HealthDetailed = {
+  stats?: {
+    total_users?: number;
+  };
+};
 
 function extractList<T>(data: unknown): T[] {
   if (!data) return [];
@@ -87,7 +97,7 @@ const features = [
 export default async function Home() {
   const base = getSiteBaseUrl();
 
-  const [postsRes, topicsRes] = await Promise.allSettled([
+  const [postsRes, topicsRes, popularRes, categoriesRes, tagsRes, healthRes] = await Promise.allSettled([
     backendFetch<Paginated<BlogPostListItem>>(
       "/api/v1/blog/public/posts/?page=1&page_size=3&ordering=-published_at",
       { method: "GET", next: { revalidate: 120 } }
@@ -96,6 +106,13 @@ export default async function Home() {
       "/api/v1/forum/public/topics/?page=1&page_size=5&ordering=-last_reply_at",
       { method: "GET", next: { revalidate: 60 } }
     ),
+    backendFetch<Paginated<BlogPostListItem>>(
+      "/api/v1/blog/public/posts/?page=1&page_size=3&ordering=-view_count",
+      { method: "GET", next: { revalidate: 300 } }
+    ),
+    backendFetch<unknown>("/api/v1/blog/public/categories/?page=1&page_size=12", { method: "GET", next: { revalidate: 300 } }),
+    backendFetch<unknown>("/api/v1/blog/public/tags/?page=1&page_size=18", { method: "GET", next: { revalidate: 300 } }),
+    backendFetch<HealthDetailed>("/api/health/detailed/", { method: "GET", next: { revalidate: 60 } }),
   ]);
 
   const posts: BlogPostListItem[] =
@@ -107,6 +124,30 @@ export default async function Home() {
     topicsRes.status === "fulfilled" && topicsRes.value.ok
       ? extractList(topicsRes.value.data)
       : [];
+
+  const popularPosts: BlogPostListItem[] =
+    popularRes.status === "fulfilled" && popularRes.value.ok
+      ? extractList(popularRes.value.data)
+      : [];
+
+  const categories: CategoryListItem[] =
+    categoriesRes.status === "fulfilled" && categoriesRes.value.ok
+      ? extractList<CategoryListItem>(categoriesRes.value.data)
+      : [];
+
+  const tags: TagListItem[] =
+    tagsRes.status === "fulfilled" && tagsRes.value.ok
+      ? extractList<TagListItem>(tagsRes.value.data)
+      : [];
+
+  const totalArticles =
+    postsRes.status === "fulfilled" && postsRes.value.ok ? postsRes.value.data.count : null;
+  const totalTopics =
+    topicsRes.status === "fulfilled" && topicsRes.value.ok ? topicsRes.value.data.count : null;
+  const totalMembers =
+    healthRes.status === "fulfilled" && healthRes.value.ok
+      ? (healthRes.value.data.stats?.total_users ?? null)
+      : null;
 
   const websiteSchema = {
     "@context": "https://schema.org",
@@ -178,15 +219,52 @@ export default async function Home() {
       <section className="relative z-10 border-y border-[var(--rv-border)] bg-[var(--rv-surface)]/50 backdrop-blur-sm">
         <div className="mx-auto max-w-6xl grid grid-cols-2 md:grid-cols-4 divide-x divide-[var(--rv-border)]">
           {[
-            { val: "150+", label: "Artigos" },
-            { val: "3,400+",  label: "Tópicos" },
-            { val: "12,000+",  label: "Membros" },
+            { val: totalArticles == null ? "—" : totalArticles.toLocaleString("pt-BR"), label: "Artigos" },
+            { val: totalTopics == null ? "—" : totalTopics.toLocaleString("pt-BR"), label: "Tópicos" },
+            { val: totalMembers == null ? "—" : totalMembers.toLocaleString("pt-BR"), label: "Membros" },
             { val: "JWT",  label: "Auth API" },
           ].map((s) => (
             <div key={s.label} className="py-5 px-4 sm:py-6 sm:px-8 text-center">
               <div className="rv-display text-lg sm:text-2xl text-[var(--rv-accent)]">{s.val}</div>
               <div className="rv-label text-[8px] sm:text-[9px] text-[var(--rv-text-dim)] mt-1">{s.label}</div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Comece por aqui ── */}
+      <section className="relative z-10 mx-auto max-w-7xl px-4 py-14 sm:py-20 sm:px-6 lg:px-8">
+        <div className="text-center mb-8 sm:mb-12">
+          <span className="rv-badge rv-badge-gold mb-4 inline-flex">✦ Comece por aqui</span>
+          <h2 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Três caminhos rápidos</h2>
+          <p className="text-sm text-[var(--rv-text-muted)] mt-3 font-[var(--font-body)]">
+            Encontre conteúdo, leia artigos e participe de discussões — sem fricção.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          {[
+            { title: "Buscar", desc: "Pesquise em artigos e tópicos.", href: "/search", badge: "Busca", badgeClass: "rv-badge-cyan", icon: "🔎" },
+            { title: "Explorar blog", desc: "Leia os últimos artigos e séries.", href: "/blog", badge: "Blog", badgeClass: "rv-badge-purple", icon: "✦" },
+            { title: "Ir ao fórum", desc: "Crie tópicos e interaja com a comunidade.", href: "/forum", badge: "Fórum", badgeClass: "rv-badge-cyan", icon: "◈" },
+          ].map((c) => (
+            <Link key={c.title} href={c.href} className="rv-card group p-7 flex flex-col gap-3 hover:scale-[1.01] transition-transform duration-200">
+              <div className="flex items-start justify-between">
+                <div className="h-12 w-12 rounded-2xl bg-[var(--rv-surface-2)] border border-[var(--rv-border)] flex items-center justify-center text-xl">
+                  {c.icon}
+                </div>
+                <span className={`rv-badge ${c.badgeClass}`}>{c.badge}</span>
+              </div>
+              <div>
+                <h3 className="rv-display text-lg text-[var(--rv-text-primary)]">{c.title}</h3>
+                <p className="text-sm text-[var(--rv-text-muted)] leading-relaxed font-[var(--font-body)] mt-1">
+                  {c.desc}
+                </p>
+              </div>
+              <div className="mt-auto flex items-center gap-2 text-[var(--rv-accent)] rv-label text-[10px]">
+                Abrir <span className="group-hover:translate-x-1 transition-transform inline-block">→</span>
+              </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -280,6 +358,132 @@ export default async function Home() {
         </section>
       )}
 
+      {/* ── Featured / popular ── */}
+      {popularPosts.length > 0 && (
+        <section className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:pb-24 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between mb-8 sm:mb-12">
+            <div>
+              <span className="rv-badge rv-badge-gold mb-3 inline-flex">⭐ Destaques</span>
+              <h2 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Mais lidos</h2>
+            </div>
+            <Link href="/blog?sort=popular" className="rv-btn rv-btn-ghost text-xs px-5 h-9">
+              Ver ranking →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {popularPosts.map((post) => {
+              const imgSrc = post.image ? fixImageUrl(post.image) : null;
+              return (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className="rv-card group flex flex-col overflow-hidden hover:scale-[1.01] transition-transform duration-200"
+                >
+                  {imgSrc ? (
+                    <div className="relative w-full overflow-hidden aspect-video">
+                      <Image
+                        src={imgSrc}
+                        alt={post.title}
+                        fill
+                        className="object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-video bg-gradient-to-br from-[var(--rv-surface-2)] to-[var(--rv-surface)] flex items-center justify-center text-4xl opacity-30">
+                      ⭐
+                    </div>
+                  )}
+                  <div className="flex flex-col gap-2 p-5 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      {post.category_name ? (
+                        <span className="rv-badge rv-badge-purple text-[8px]">{post.category_name}</span>
+                      ) : (
+                        <span />
+                      )}
+                      {typeof post.view_count === "number" ? (
+                        <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">
+                          {post.view_count.toLocaleString("pt-BR")} views
+                        </span>
+                      ) : null}
+                    </div>
+                    <h3 className="rv-display text-base text-[var(--rv-text-primary)] line-clamp-2 group-hover:text-[var(--rv-accent)] transition-colors">
+                      {post.title}
+                    </h3>
+                    {post.excerpt ? (
+                      <p className="text-xs text-[var(--rv-text-muted)] line-clamp-2 leading-relaxed font-[var(--font-body)]">
+                        {post.excerpt}
+                      </p>
+                    ) : null}
+                    <div className="mt-auto flex items-center justify-between pt-3 border-t border-[var(--rv-border)]">
+                      <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">{post.author_name}</span>
+                      <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">{post.read_time_minutes} min</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ── Explorar por tema ── */}
+      {(categories.length > 0 || tags.length > 0) && (
+        <section className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:pb-24 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-12">
+            <div>
+              <span className="rv-badge rv-badge-purple mb-3 inline-flex">✦ Descoberta</span>
+              <h2 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Explorar por tema</h2>
+              <p className="text-sm text-[var(--rv-text-muted)] mt-2 font-[var(--font-body)]">
+                Categorias e tags para navegar mais rápido pelo conteúdo.
+              </p>
+            </div>
+            <Link href="/blog" className="rv-btn rv-btn-ghost text-xs px-5 h-9 self-start sm:self-auto">
+              Ver blog →
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+            <div className="rv-card p-6 sm:p-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="rv-display text-lg text-[var(--rv-text-primary)]">Categorias</h3>
+                <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">{categories.length}</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {categories.slice(0, 12).map((c) => (
+                  <Link
+                    key={c.id}
+                    href={`/blog?category=${encodeURIComponent(c.slug)}`}
+                    className="rv-badge rv-badge-purple text-[8px] hover:opacity-90 transition-opacity"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div className="rv-card p-6 sm:p-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="rv-display text-lg text-[var(--rv-text-primary)]">Tags</h3>
+                <span className="rv-label text-[9px] text-[var(--rv-text-dim)]">{tags.length}</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {tags.slice(0, 18).map((t) => (
+                  <Link
+                    key={t.id}
+                    href={`/blog?tag=${encodeURIComponent(t.slug)}`}
+                    className="rv-badge rv-badge-cyan text-[8px] hover:opacity-90 transition-opacity"
+                  >
+                    {t.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── Active topics ── */}
       {topics.length > 0 && (
         <section className="relative z-10 mx-auto max-w-7xl px-4 pb-16 sm:pb-24 sm:px-6 lg:px-8">
@@ -331,18 +535,21 @@ export default async function Home() {
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24 text-center">
           <span className="rv-badge rv-badge-gold mb-8 inline-flex">🤝 Conecte-se conosco</span>
           <h2 className="rv-display text-4xl md:text-6xl text-[var(--rv-text-primary)] mb-6">
-            Sua jornada começa<br />
-            <span className="rv-text-accent">aqui.</span>
+            Continue explorando<br />
+            <span className="rv-text-accent">o Projeto Raven.</span>
           </h2>
           <p className="text-[var(--rv-text-muted)] mb-10 text-lg font-[var(--font-body)]">
-            Crie sua conta para participar das discussões e interagir com os criadores de conteúdo.
+            Leia o blog, participe do fórum e acompanhe os destaques. Quando quiser, entre para comentar e publicar.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/register" className="rv-btn rv-btn-primary px-12 h-14">
-              Criar Conta Gratuita
+            <Link href="/blog" className="rv-btn rv-btn-primary px-12 h-14">
+              Explorar Blog
             </Link>
-            <Link href="/login" className="rv-btn rv-btn-ghost px-8 h-14">
-              Já tenho conta
+            <Link href="/forum" className="rv-btn rv-btn-ghost px-10 h-14">
+              Ir ao Fórum
+            </Link>
+            <Link href="/register" className="rv-btn rv-btn-ghost px-10 h-14">
+              Criar Conta
             </Link>
           </div>
         </div>

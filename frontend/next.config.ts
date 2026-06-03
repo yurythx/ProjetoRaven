@@ -7,8 +7,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const isDev = process.env.NODE_ENV === "development";
 
-// Internal Docker service name — Next.js image optimizer and schema proxy use this
-const INTERNAL_MEDIA_ORIGIN = "http://django:8000";
+// Internal Docker service name — schema proxy uses this
 const INTERNAL_API_ORIGIN = process.env.INTERNAL_API_BASE_URL || process.env.API_BASE_URL || "http://django:8000";
 
 function tryParseRemotePatternFromEnv(): { protocol: "http" | "https"; hostname: string; port?: string; pathname: string } | null {
@@ -77,10 +76,6 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return [
-      {
-        source: "/media/:path*",
-        destination: `${INTERNAL_MEDIA_ORIGIN}/media/:path*`,
-      },
       {
         source: "/api/schema/:path*",
         destination: `${INTERNAL_API_ORIGIN}/api/schema/:path*`,

@@ -65,10 +65,19 @@ export function ArticleModeration() {
   const [rejectOpen, setRejectOpen] = React.useState(false)
   const [rejectReason, setRejectReason] = React.useState("")
   const [rejectTargets, setRejectTargets] = React.useState<ArticleLite[]>([])
-  const [status, setStatus] = React.useState<"pending" | "rejected" | "all">("pending")
+  const [status, setStatus] = React.useState<"pending" | "published" | "rejected" | "all">("pending")
   const [categoryId, setCategoryId] = React.useState<string>("all")
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
   const selectedCount = selectedIds.size
+
+  const statusMeta = React.useMemo(() => ({
+    pending: { label: "Pendente", badge: "bg-amber-500/20 text-amber-500" },
+    published: { label: "Publicado", badge: "bg-emerald-500/20 text-emerald-400" },
+    rejected: { label: "Rejeitado", badge: "bg-rose-500/20 text-rose-500" },
+    draft: { label: "Rascunho", badge: "bg-violet-500/20 text-violet-300" },
+    scheduled: { label: "Agendado", badge: "bg-sky-500/20 text-sky-300" },
+    archived: { label: "Arquivado", badge: "bg-zinc-500/20 text-zinc-300" },
+  }) satisfies Record<string, { label: string; badge: string }>, [])
 
   const categoriesQuery = useQuery({
     queryKey: ["articles-categories-lite"],
@@ -340,12 +349,13 @@ export function ArticleModeration() {
             />
           </div>
           <div className="flex gap-2">
-            <Select value={status} onValueChange={(v) => setStatus(v as "pending" | "rejected" | "all")}>
+            <Select value={status} onValueChange={(v) => setStatus(v as "pending" | "published" | "rejected" | "all")}>
               <SelectTrigger className="h-12 w-32 rounded-xl bg-white/5 border-white/10 hover:border-primary/30 shadow-inner">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-white/10 bg-background/95 backdrop-blur-xl shadow-2xl p-1">
                 <SelectItem value="pending" className="rounded-xl cursor-pointer">Pendente</SelectItem>
+                <SelectItem value="published" className="rounded-xl cursor-pointer">Publicado</SelectItem>
                 <SelectItem value="rejected" className="rounded-xl cursor-pointer">Rejeitado</SelectItem>
                 <SelectItem value="all" className="rounded-xl cursor-pointer">Todos</SelectItem>
               </SelectContent>
@@ -381,7 +391,9 @@ export function ArticleModeration() {
 
       {!pendingQuery.isLoading && !pendingQuery.isError && items.length === 0 && (
         <div className="text-center py-16 sm:py-20 border-2 border-dashed rounded-3xl bg-muted/10">
-          <h3 className="text-lg font-semibold mb-2">Nenhum artigo pendente</h3>
+          <h3 className="text-lg font-semibold mb-2">
+            {status === "all" ? "Nenhum artigo encontrado" : `Nenhum artigo ${statusMeta[status]?.label?.toLowerCase?.() ?? "encontrado"}`}
+          </h3>
           <p className="text-muted-foreground max-w-md mx-auto">
             Nenhum resultado para os filtros selecionados.
           </p>
@@ -404,30 +416,32 @@ export function ArticleModeration() {
                 {selectedCount > 0 ? `${selectedCount} item(ns) selecionado(s)` : `${items.length} resultado(s)`}
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-3 relative z-10 flex-wrap">
-              <Button
-                type="button"
-                className="rounded-xl h-9 sm:h-11 px-4 sm:px-6 font-black uppercase tracking-widest text-[10px] sm:text-[11px] shadow-lg shadow-primary/20"
-                disabled={selectedCount === 0 || isMutating}
-                onClick={() => {
-                  const slugs = items.filter((a) => selectedIds.has(a.id)).map((a) => a.slug)
-                  bulkApproveMutation.mutate(slugs)
-                }}
-              >
-                {bulkApproveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
-                Aprovar Lote
-              </Button>
-              <Button
-                type="button"
-                variant="destructive"
-                className="rounded-xl h-9 sm:h-11 px-4 sm:px-6 font-black uppercase tracking-widest text-[10px] sm:text-[11px] shadow-lg shadow-rose-500/20"
-                disabled={selectedCount === 0 || isMutating}
-                onClick={() => openReject(items.filter((a) => selectedIds.has(a.id)))}
-              >
-                <X className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />
-                Rejeitar Lote
-              </Button>
-            </div>
+            {status === "pending" && (
+              <div className="flex items-center gap-2 sm:gap-3 relative z-10 flex-wrap">
+                <Button
+                  type="button"
+                  className="rounded-xl h-9 sm:h-11 px-4 sm:px-6 font-black uppercase tracking-widest text-[10px] sm:text-[11px] shadow-lg shadow-primary/20"
+                  disabled={selectedCount === 0 || isMutating}
+                  onClick={() => {
+                    const slugs = items.filter((a) => selectedIds.has(a.id)).map((a) => a.slug)
+                    bulkApproveMutation.mutate(slugs)
+                  }}
+                >
+                  {bulkApproveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
+                  Aprovar Lote
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="rounded-xl h-9 sm:h-11 px-4 sm:px-6 font-black uppercase tracking-widest text-[10px] sm:text-[11px] shadow-lg shadow-rose-500/20"
+                  disabled={selectedCount === 0 || isMutating}
+                  onClick={() => openReject(items.filter((a) => selectedIds.has(a.id)))}
+                >
+                  <X className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />
+                  Rejeitar Lote
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4" role="list" aria-label="Posts">
@@ -445,10 +459,18 @@ export function ArticleModeration() {
                   </div>
                   <div className="space-y-3 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant="secondary" className={cn("rounded-full px-4 py-1 text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-sm", 
-                        (a.status || status) === "pending" ? "bg-amber-500/20 text-amber-500" : "bg-rose-500/20 text-rose-500")}>
-                        {(a.status || status) === "rejected" ? "Rejeitado" : (a.status || status) === "pending" ? "Pendente" : "Status"}
-                      </Badge>
+                      {(() => {
+                        const s = String(a.status || status || "").toLowerCase()
+                        const meta = statusMeta[s] ?? { label: s || "Status", badge: "bg-white/10 text-foreground/70" }
+                        return (
+                          <Badge
+                            variant="secondary"
+                            className={cn("rounded-full px-4 py-1 text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-sm", meta.badge)}
+                          >
+                            {meta.label}
+                          </Badge>
+                        )
+                      })()}
                       {a.category_name && (
                         <Badge variant="outline" className="rounded-full px-4 py-1 text-[9px] font-black uppercase tracking-widest border-white/10 bg-white/5">
                           {a.category_name}
@@ -473,26 +495,28 @@ export function ArticleModeration() {
                   </div>
                 </div>
 
-                <div className="mt-4 sm:mt-6 flex gap-2 sm:gap-3">
-                  <Button
-                    type="button"
-                    className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/10"
-                    disabled={isMutating}
-                    onClick={() => approveMutation.mutate(a.slug)}
-                  >
-                    {approveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
-                    Aprovar
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-rose-500/10"
-                    disabled={isMutating}
-                    onClick={() => openReject([a])}
-                  >
-                    <X className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" /> Rejeitar
-                  </Button>
-                </div>
+                {(String(a.status || "").toLowerCase() === "pending" || status === "pending") && (
+                  <div className="mt-4 sm:mt-6 flex gap-2 sm:gap-3">
+                    <Button
+                      type="button"
+                      className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/10"
+                      disabled={isMutating}
+                      onClick={() => approveMutation.mutate(a.slug)}
+                    >
+                      {approveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
+                      Aprovar
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-rose-500/10"
+                      disabled={isMutating}
+                      onClick={() => openReject([a])}
+                    >
+                      <X className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" /> Rejeitar
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>
