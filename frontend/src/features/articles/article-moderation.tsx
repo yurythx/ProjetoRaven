@@ -77,14 +77,14 @@ export function ArticleModeration() {
   const didInitFromUrl = React.useRef(false)
   const urlSyncDebounceRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const statusMeta = React.useMemo(() => ({
+  const statusMeta = React.useMemo<Record<string, { label: string; badge: string }>>(() => ({
     pending: { label: "Pendente", badge: "bg-amber-500/20 text-amber-500" },
     published: { label: "Publicado", badge: "bg-emerald-500/20 text-emerald-400" },
     rejected: { label: "Rejeitado", badge: "bg-rose-500/20 text-rose-500" },
     draft: { label: "Rascunho", badge: "bg-violet-500/20 text-violet-300" },
     scheduled: { label: "Agendado", badge: "bg-sky-500/20 text-sky-300" },
     archived: { label: "Arquivado", badge: "bg-zinc-500/20 text-zinc-300" },
-  }) satisfies Record<string, { label: string; badge: string }>, [])
+  }), [])
 
   const countsQuery = useQuery({
     queryKey: ["articles-moderation-counts", categoryId, debounced],
