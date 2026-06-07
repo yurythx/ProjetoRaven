@@ -12,7 +12,7 @@ function toWsProtocol(proto: string): string {
   return proto === "https:" ? "wss:" : proto === "http:" ? "ws:" : proto;
 }
 
-function buildCspHeader(nonce: string): string {
+function buildCspHeader(nonce: string, opts: { upgradeInsecureRequests: boolean }): string {
   const dev = process.env.NODE_ENV !== "production";
 
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "";
@@ -59,11 +59,11 @@ function buildCspHeader(nonce: string): string {
     `connect-src ${Array.from(connectSrcParts).join(" ")}`,
     "media-src 'self'",
     "object-src 'none'",
-    "frame-src 'self'",
+    "frame-src 'self' https://www.youtube-nocookie.com https://www.youtube.com https://player.vimeo.com https://www.loom.com",
     "frame-ancestors 'self'",
     "base-uri 'self'",
     "form-action 'self'",
-    ...(dev ? [] : ["upgrade-insecure-requests", "block-all-mixed-content"]),
+    ...(dev || !opts.upgradeInsecureRequests ? [] : ["upgrade-insecure-requests", "block-all-mixed-content"]),
   ].join("; ");
 }
 
@@ -125,14 +125,24 @@ function generateNonce(): string {
 export async function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
   const nonce = generateNonce();
-  const cspHeader = buildCspHeader(nonce);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const isHttps = req.nextUrl.protocol === "https:" || siteUrl.startsWith("https://");
+  const cspHeader = buildCspHeader(nonce, { upgradeInsecureRequests: isHttps });
   const requestHeaders = new Headers(req.headers);
+  const upstreamRequestId = (req.headers.get("x-request-id") || "").trim();
+  const requestId = upstreamRequestId || crypto.randomUUID();
   requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("x-request-id", requestId);
   requestHeaders.set("Content-Security-Policy", cspHeader);
 
-  const next = () => withCsp(NextResponse.next({ request: { headers: requestHeaders } }), cspHeader, nonce);
-  const redirect = (url: URL) => withCsp(NextResponse.redirect(url), cspHeader, nonce);
-  const apply = (res: NextResponse) => withCsp(res, cspHeader, nonce);
+  const addRid = (res: NextResponse) => {
+    res.headers.set("x-request-id", requestId);
+    return res;
+  };
+
+  const next = () => addRid(withCsp(NextResponse.next({ request: { headers: requestHeaders } }), cspHeader, nonce));
+  const redirect = (url: URL) => addRid(withCsp(NextResponse.redirect(url), cspHeader, nonce));
+  const apply = (res: NextResponse) => addRid(withCsp(res, cspHeader, nonce));
 
   const isBlogEditorRoute =
     path === "/blog/novo" ||

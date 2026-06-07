@@ -25,6 +25,16 @@ type ForumTopicListItem = {
   updated_at: string;
 };
 
+type BlogCategoryListItem = {
+  slug: string;
+  updated_at?: string;
+};
+
+type BlogTagListItem = {
+  slug: string;
+  updated_at?: string;
+};
+
 function nextPath(nextUrl: string | null): string | null {
   if (!nextUrl) return null;
   try {
@@ -83,10 +93,44 @@ async function fetchAllForumTopics(): Promise<ForumTopicListItem[]> {
   return all;
 }
 
+async function fetchAllBlogCategories(): Promise<BlogCategoryListItem[]> {
+  const all: BlogCategoryListItem[] = [];
+  let path: string | null = "/api/v1/blog/public/categories/?page=1&page_size=100";
+  for (let i = 0; i < 50 && path; i++) {
+    const res = await backendFetch<Paginated<BlogCategoryListItem>>(path, {
+      method: "GET",
+      cache: "force-cache",
+      next: { revalidate: 300, tags: ["blog:categories"] },
+    });
+    if (!res.ok) break;
+    all.push(...(res.data.results ?? []));
+    path = nextPath(res.data.next);
+  }
+  return all;
+}
+
+async function fetchAllBlogTags(): Promise<BlogTagListItem[]> {
+  const all: BlogTagListItem[] = [];
+  let path: string | null = "/api/v1/blog/public/tags/?page=1&page_size=200";
+  for (let i = 0; i < 50 && path; i++) {
+    const res = await backendFetch<Paginated<BlogTagListItem>>(path, {
+      method: "GET",
+      cache: "force-cache",
+      next: { revalidate: 300, tags: ["blog:tags"] },
+    });
+    if (!res.ok) break;
+    all.push(...(res.data.results ?? []));
+    path = nextPath(res.data.next);
+  }
+  return all;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = getSiteBaseUrl();
-  const [posts, forumCategories, forumTopics] = await Promise.all([
+  const [posts, blogCategories, blogTags, forumCategories, forumTopics] = await Promise.all([
     fetchAllBlogPosts(),
+    fetchAllBlogCategories(),
+    fetchAllBlogTags(),
     fetchAllForumCategories(),
     fetchAllForumTopics(),
   ]);
@@ -95,7 +139,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/`, changeFrequency: "daily", priority: 1 },
     { url: `${base}/blog`, changeFrequency: "daily", priority: 0.9 },
     { url: `${base}/forum`, changeFrequency: "daily", priority: 0.8 },
+    { url: `${base}/search`, changeFrequency: "weekly", priority: 0.6 },
   ];
+
+  for (const c of blogCategories) {
+    items.push({
+      url: `${base}/blog?category=${encodeURIComponent(c.slug)}`,
+      changeFrequency: "weekly",
+      priority: 0.6,
+    });
+  }
+
+  for (const t of blogTags) {
+    items.push({
+      url: `${base}/blog?tag=${encodeURIComponent(t.slug)}`,
+      changeFrequency: "weekly",
+      priority: 0.55,
+    });
+  }
 
   for (const p of posts) {
     const last = p.updated_at || p.published_at || p.created_at;

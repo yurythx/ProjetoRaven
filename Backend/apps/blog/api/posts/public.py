@@ -47,9 +47,9 @@ class PublicPostViewSet(viewsets.ReadOnlyModelViewSet):
             ordering=ordering,
         )
 
-        q = request.query_params.get("q", "").strip()
+        q = (request.query_params.get("q", "") or request.query_params.get("search", "")).strip()
         if q:
-            qs = PostSelector.search_published(q)
+            qs = PostSelector.search_published(q, qs=qs)
 
         page = self.paginate_queryset(qs)
         if page is not None:

@@ -16,22 +16,37 @@ import json
 
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import AnonymousUser
+import logging
+import asyncio
+
+logger = logging.getLogger(__name__)
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         user = self.scope.get("user")
+        await self.accept()
+
         if not user or isinstance(user, AnonymousUser) or not getattr(user, "is_authenticated", False):
             await self.close(code=4003)
             return
 
         self.group_name = f"notifications_user_{user.id}"
-        await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.accept()
+        try:
+            await asyncio.wait_for(
+                self.channel_layer.group_add(self.group_name, self.channel_name),
+                timeout=2.5,
+            )
+        except Exception:
+            logger.warning("WS notifications group_add failed", exc_info=True)
+            await self.close(code=1013)
 
     async def disconnect(self, close_code):
         if hasattr(self, "group_name"):
-            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+            try:
+                await self.channel_layer.group_discard(self.group_name, self.channel_name)
+            except Exception:
+                logger.warning("WS notifications group_discard failed", exc_info=True)
 
     async def receive(self, text_data=None, bytes_data=None):
         pass  # clients are receive-only

@@ -8,6 +8,8 @@ import Image from "next/image";
 import { BookOpen, MessageSquare, FileText, Calendar, Globe } from "lucide-react";
 import { fixImageUrl } from "@/lib/utils";
 
+type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] };
+
 type RecentTopic = {
   slug: string;
   title: string;
@@ -22,6 +24,14 @@ type RecentPost = {
   title: string;
   published_at: string;
   cover_image?: string;
+};
+
+type PublicPostListItem = {
+  id: string;
+  slug: string;
+  title: string;
+  published_at: string | null;
+  image: string | null;
 };
 
 type PublicProfile = {
@@ -48,6 +58,18 @@ async function fetchProfile(username: string): Promise<PublicProfile> {
   return res.json();
 }
 
+async function fetchAuthorPosts(username: string, page: number): Promise<Paginated<PublicPostListItem>> {
+  const params = new URLSearchParams({
+    author: username,
+    page: String(page),
+    page_size: "10",
+    ordering: "-published_at",
+  });
+  const res = await fetch(`/api/blog/posts?${params.toString()}`);
+  if (!res.ok) return { count: 0, next: null, previous: null, results: [] };
+  return res.json();
+}
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
 }
@@ -55,11 +77,20 @@ function formatDate(iso: string) {
 export function PublicProfileClient({ username }: { username: string }) {
   const router = useRouter();
   const [avatarError, setAvatarError] = useState(false);
+  const [showAllPosts, setShowAllPosts] = useState(false);
+  const [postsPage, setPostsPage] = useState(1);
 
   const { data: profile, isLoading, isError, error } = useQuery({
     queryKey: ["public-profile", username],
     queryFn: () => fetchProfile(username),
     retry: false,
+  });
+
+  const authorPostsQuery = useQuery({
+    queryKey: ["public-profile-author-posts", username, postsPage],
+    queryFn: () => fetchAuthorPosts(username, postsPage),
+    enabled: showAllPosts,
+    staleTime: 15_000,
   });
 
   if (isLoading) {
@@ -96,9 +127,11 @@ export function PublicProfileClient({ username }: { username: string }) {
   if (!profile) return null;
 
   const initial = profile.display_name[0].toUpperCase();
-  const hasActivity =
-    (profile.recent_topics?.length ?? 0) > 0 ||
-    (profile.recent_posts?.length ?? 0) > 0;
+  const totalPosts = profile.stats?.blog_posts ?? 0;
+  const hasActivity = totalPosts > 0 || (profile.stats?.forum_topics ?? 0) > 0 || (profile.stats?.forum_replies ?? 0) > 0;
+  const canShowAllPosts = totalPosts > 0 && totalPosts > (profile.recent_posts?.length ?? 0);
+  const allPosts = authorPostsQuery.data?.results ?? [];
+  const totalPages = authorPostsQuery.data ? Math.max(1, Math.ceil(authorPostsQuery.data.count / 10)) : 1;
 
   return (
     <div className="relative min-h-screen">
@@ -227,36 +260,131 @@ export function PublicProfileClient({ username }: { username: string }) {
           )}
 
           {/* Recent blog posts */}
-          {(profile.recent_posts?.length ?? 0) > 0 && (
+          {totalPosts > 0 && (
             <section>
-              <h2 className="text-xs uppercase tracking-widest text-[var(--rv-text-muted)] mb-4 flex items-center gap-2">
-                <BookOpen className="h-3 w-3" /> Artigos publicados
-              </h2>
-              <div className="space-y-2">
-                {profile.recent_posts.map((post) => (
-                  <Link
-                    key={post.slug}
-                    href={`/blog/${post.slug}`}
-                    className="rv-card p-4 flex items-center gap-4 hover:border-[var(--rv-border-hover)] transition-colors block"
-                  >
-                    {post.cover_image && (
-                      <div className="relative h-12 w-16 rounded-lg bg-[var(--rv-surface-2)] flex-shrink-0 overflow-hidden">
-                        <Image
-                          src={fixImageUrl(post.cover_image) ?? post.cover_image}
-                          alt=""
-                          fill
-                          sizes="64px"
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium text-[var(--rv-text-primary)] truncate">{post.title}</p>
-                      <p className="text-xs text-[var(--rv-text-dim)] mt-0.5">{formatDate(post.published_at)}</p>
-                    </div>
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <h2 className="text-xs uppercase tracking-widest text-[var(--rv-text-muted)] flex items-center gap-2">
+                  <BookOpen className="h-3 w-3" /> Artigos publicados
+                </h2>
+                <div className="flex items-center gap-2">
+                  {canShowAllPosts && !showAllPosts && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPostsPage(1);
+                        setShowAllPosts(true);
+                      }}
+                      className="rv-btn rv-btn-ghost h-8 px-3 text-[10px]"
+                    >
+                      Ver todos
+                    </button>
+                  )}
+                  {showAllPosts && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllPosts(false)}
+                      className="rv-btn rv-btn-ghost h-8 px-3 text-[10px]"
+                    >
+                      Fechar
+                    </button>
+                  )}
+                  <Link href={`/blog?author=${encodeURIComponent(username)}`} className="rv-btn rv-btn-ghost h-8 px-3 text-[10px]">
+                    Abrir no blog
                   </Link>
-                ))}
+                </div>
               </div>
+
+              {!showAllPosts ? (
+                <div className="space-y-2">
+                  {(profile.recent_posts?.length ?? 0) > 0 ? (
+                    profile.recent_posts.map((post) => (
+                      <Link
+                        key={post.slug}
+                        href={`/blog/${post.slug}`}
+                        className="rv-card p-4 flex items-center gap-4 hover:border-[var(--rv-border-hover)] transition-colors block"
+                      >
+                        {post.cover_image && (
+                          <div className="relative h-12 w-16 rounded-lg bg-[var(--rv-surface-2)] flex-shrink-0 overflow-hidden">
+                            <Image
+                              src={fixImageUrl(post.cover_image) ?? post.cover_image}
+                              alt=""
+                              fill
+                              sizes="64px"
+                              className="object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-[var(--rv-text-primary)] truncate">{post.title}</p>
+                          <p className="text-xs text-[var(--rv-text-dim)] mt-0.5">{formatDate(post.published_at)}</p>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div className="rv-card p-6 text-center text-sm text-[var(--rv-text-dim)]">
+                      Este membro tem artigos publicados, mas não há itens recentes para exibir.
+                    </div>
+                  )}
+                </div>
+              ) : authorPostsQuery.isLoading ? (
+                <div className="space-y-2">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="h-16 rv-card bg-[var(--rv-surface)] animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {allPosts.map((post) => (
+                    <Link
+                      key={post.slug}
+                      href={`/blog/${post.slug}`}
+                      className="rv-card p-4 flex items-center gap-4 hover:border-[var(--rv-border-hover)] transition-colors block"
+                    >
+                      {post.image && (
+                        <div className="relative h-12 w-16 rounded-lg bg-[var(--rv-surface-2)] flex-shrink-0 overflow-hidden">
+                          <Image
+                            src={fixImageUrl(post.image) ?? post.image}
+                            alt=""
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-[var(--rv-text-primary)] truncate">{post.title}</p>
+                        {post.published_at && (
+                          <p className="text-xs text-[var(--rv-text-dim)] mt-0.5">{formatDate(post.published_at)}</p>
+                        )}
+                      </div>
+                    </Link>
+                  ))}
+
+                  {authorPostsQuery.data && authorPostsQuery.data.count > 10 && (
+                    <div className="flex items-center justify-center gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setPostsPage((p) => Math.max(1, p - 1))}
+                        disabled={postsPage <= 1 || authorPostsQuery.isFetching}
+                        className="rv-btn rv-btn-ghost h-9 px-4 text-xs disabled:opacity-30"
+                      >
+                        ← Anterior
+                      </button>
+                      <span className="text-xs text-[var(--rv-text-dim)]">
+                        Página {postsPage} de {totalPages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setPostsPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={postsPage >= totalPages || authorPostsQuery.isFetching}
+                        className="rv-btn rv-btn-ghost h-9 px-4 text-xs disabled:opacity-30"
+                      >
+                        Próxima →
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </section>
           )}
 

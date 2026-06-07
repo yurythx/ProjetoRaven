@@ -34,6 +34,7 @@ export function ForumSidebar({
           <div className="space-y-0.5">
             <Link
               href="/forum"
+              prefetch={false}
               className={`flex items-center justify-between p-2.5 rounded-xl transition-all text-[10px] ${
                 !currentSlug
                   ? "bg-[var(--rv-accent-glow)] text-[var(--rv-accent)]"
@@ -46,6 +47,7 @@ export function ForumSidebar({
               <Link
                 key={cat.id}
                 href={`/forum/c/${cat.slug}`}
+                prefetch={false}
                 className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
                   currentSlug === cat.slug
                     ? "bg-[var(--rv-accent-glow)] text-[var(--rv-accent)]"
@@ -72,7 +74,7 @@ export function ForumSidebar({
           Crie um tópico ou responda às discussões da comunidade.
         </p>
         <ForumHeaderActions newTopicHref="/forum/new" />
-        <Link href="/register" className="rv-btn rv-btn-ghost w-full h-10 text-xs">
+        <Link href="/register" prefetch={false} className="rv-btn rv-btn-ghost w-full h-10 text-xs">
           Criar Conta Grátis
         </Link>
       </div>

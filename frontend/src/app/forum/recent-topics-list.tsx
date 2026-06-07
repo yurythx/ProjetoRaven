@@ -52,6 +52,7 @@ export async function RecentTopicsList() {
           <Link
             key={topic.id}
             href={`/forum/t/${topic.slug}`}
+            prefetch={false}
             className="rv-card group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-3 sm:gap-4 hover:scale-[1.005] transition-all duration-200"
           >
             {/* Left */}

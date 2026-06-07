@@ -53,6 +53,7 @@ export function HeroCta() {
           <Link
             key={s}
             href={`/search?q=${encodeURIComponent(s)}`}
+            prefetch={false}
             className="rv-badge rv-badge-cyan text-[8px] hover:opacity-90 transition-opacity"
           >
             {s}
@@ -69,12 +70,14 @@ export function HeroCta() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full">
           <Link
             href="/blog"
+            prefetch={false}
             className="rv-btn rv-btn-primary text-xs sm:text-sm px-8 sm:px-10 h-12 sm:h-14 gap-2 w-full sm:w-auto max-w-xs"
           >
             <span>✦</span> Ir para o Blog
           </Link>
           <Link
             href="/forum"
+            prefetch={false}
             className="rv-btn rv-btn-ghost text-xs sm:text-sm px-6 sm:px-8 h-12 sm:h-14 gap-2 w-full sm:w-auto max-w-xs"
           >
             <span className="text-[var(--rv-cyan)]">◈</span> Explorar Fórum
@@ -90,12 +93,14 @@ export function HeroCta() {
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full">
         <Link
           href="/blog"
+          prefetch={false}
           className="rv-btn rv-btn-primary text-xs sm:text-sm px-8 sm:px-10 h-12 sm:h-14 gap-2 w-full sm:w-auto max-w-xs"
         >
           <span>✦</span> Explorar Blog
         </Link>
         <Link
           href="/forum"
+          prefetch={false}
           className="rv-btn rv-btn-ghost text-xs sm:text-sm px-6 sm:px-8 h-12 sm:h-14 gap-2 w-full sm:w-auto max-w-xs"
         >
           <span className="text-[var(--rv-cyan)]">◈</span> Explorar Fórum

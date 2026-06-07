@@ -25,6 +25,173 @@ export function ArticleContent({ html, className }: ArticleContentProps) {
     if (typeof window === "undefined") return
     try {
       const doc = new DOMParser().parseFromString(html, "text/html")
+
+      const toYouTubeId = (href: string): string | null => {
+        try {
+          const u = new URL(href)
+          const host = u.hostname.replace(/^www\./, "").toLowerCase()
+
+          if (host === "youtu.be") {
+            const id = u.pathname.split("/").filter(Boolean)[0] ?? ""
+            return id ? id : null
+          }
+
+          if (host !== "youtube.com" && host !== "m.youtube.com" && host !== "music.youtube.com") return null
+
+          if (u.pathname === "/watch") {
+            const id = u.searchParams.get("v") ?? ""
+            return id ? id : null
+          }
+
+          const m = u.pathname.match(/^\/(shorts|embed)\/([^/?#]+)/i)
+          if (m?.[2]) return m[2]
+
+          return null
+        } catch {
+          return null
+        }
+      }
+
+      const toVimeoId = (href: string): string | null => {
+        try {
+          const u = new URL(href)
+          const host = u.hostname.replace(/^www\./, "").toLowerCase()
+          if (host === "player.vimeo.com") {
+            const m = u.pathname.match(/^\/video\/(\d+)/)
+            return m?.[1] ?? null
+          }
+          if (host !== "vimeo.com") return null
+          const id = u.pathname.split("/").filter(Boolean)[0] ?? ""
+          return /^\d+$/.test(id) ? id : null
+        } catch {
+          return null
+        }
+      }
+
+      const toLoomId = (href: string): string | null => {
+        try {
+          const u = new URL(href)
+          const host = u.hostname.replace(/^www\./, "").toLowerCase()
+          if (host !== "loom.com" && host !== "www.loom.com") return null
+          const m = u.pathname.match(/^\/share\/([^/?#]+)/i)
+          return m?.[1] ?? null
+        } catch {
+          return null
+        }
+      }
+
+      const toDirectVideoUrl = (href: string): string | null => {
+        try {
+          const u = new URL(href)
+          const ext = (u.pathname.split(".").pop() ?? "").toLowerCase()
+          if (ext === "mp4" || ext === "webm" || ext === "ogg") return href
+          return null
+        } catch {
+          return null
+        }
+      }
+
+      const isOnlyLinkParagraph = (p: HTMLParagraphElement, a: HTMLAnchorElement, href: string): boolean => {
+        const text = (p.textContent ?? "").trim()
+        const linkText = (a.textContent ?? "").trim()
+        if (!linkText) return false
+        const isOnly =
+          text === linkText ||
+          text === href ||
+          (linkText === href && text === href)
+        return isOnly
+      }
+
+      const createIframe = (src: string, title: string) => {
+        const wrap = doc.createElement("div")
+        wrap.className = "rv-video-embed"
+        const iframe = doc.createElement("iframe")
+        iframe.setAttribute("src", src)
+        iframe.setAttribute("title", title)
+        iframe.setAttribute("loading", "lazy")
+        iframe.setAttribute(
+          "allow",
+          "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        )
+        iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin")
+        iframe.setAttribute("allowfullscreen", "true")
+        wrap.appendChild(iframe)
+        return wrap
+      }
+
+      const createLinkCard = (href: string) => {
+        let hostname = ""
+        try {
+          hostname = new URL(href).hostname.replace(/^www\./, "")
+        } catch {}
+
+        const wrap = doc.createElement("div")
+        wrap.className = "rv-link-card"
+
+        const a = doc.createElement("a")
+        a.setAttribute("href", href)
+        a.setAttribute("target", "_blank")
+        a.setAttribute("rel", "noopener noreferrer")
+        a.className = "rv-link-card__title"
+        a.textContent = href
+
+        const meta = doc.createElement("div")
+        meta.className = "rv-link-card__meta"
+        meta.textContent = hostname ? hostname : "Link"
+
+        wrap.appendChild(a)
+        wrap.appendChild(meta)
+        return wrap
+      }
+
+      const replaceStandaloneLinks = () => {
+        const paragraphs = Array.from(doc.querySelectorAll("p"))
+        for (const p of paragraphs) {
+          const anchors = Array.from(p.querySelectorAll("a[href]")) as HTMLAnchorElement[]
+          if (anchors.length !== 1) continue
+          const a = anchors[0]
+          const href = (a.getAttribute("href") ?? "").trim()
+          if (!href) continue
+          if (!isOnlyLinkParagraph(p, a, href)) continue
+
+          const yt = toYouTubeId(href)
+          if (yt) {
+            p.replaceWith(createIframe(`https://www.youtube-nocookie.com/embed/${encodeURIComponent(yt)}`, "YouTube video player"))
+            continue
+          }
+
+          const vimeo = toVimeoId(href)
+          if (vimeo) {
+            p.replaceWith(createIframe(`https://player.vimeo.com/video/${encodeURIComponent(vimeo)}`, "Vimeo video player"))
+            continue
+          }
+
+          const loom = toLoomId(href)
+          if (loom) {
+            p.replaceWith(createIframe(`https://www.loom.com/embed/${encodeURIComponent(loom)}`, "Loom video"))
+            continue
+          }
+
+          const directVideo = toDirectVideoUrl(href)
+          if (directVideo) {
+            const wrap = doc.createElement("div")
+            wrap.className = "rv-video-embed"
+            const video = doc.createElement("video")
+            video.setAttribute("controls", "true")
+            video.setAttribute("preload", "metadata")
+            video.setAttribute("playsinline", "true")
+            video.setAttribute("src", directVideo)
+            wrap.appendChild(video)
+            p.replaceWith(wrap)
+            continue
+          }
+
+          p.replaceWith(createLinkCard(href))
+        }
+      }
+
+      replaceStandaloneLinks()
+
       const headings = Array.from(doc.querySelectorAll("h2, h3"))
       const used = new Set<string>()
       const nextToc: Array<{ id: string; text: string; level: 2 | 3 }> = []

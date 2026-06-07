@@ -30,17 +30,36 @@ class GlobalSearchView(APIView):
 
     def _search_posts(self, q: str, limit: int) -> list:
         from apps.blog.models import Post
+        from django.db import connection
 
-        qs = (
-            Post.objects.filter(
-                Q(title__icontains=q) | Q(excerpt__icontains=q),
-                status=Post.Status.PUBLISHED,
-                is_public=True,
-            )
+        base = (
+            Post.objects.filter(status=Post.Status.PUBLISHED, is_public=True)
             .select_related("author")
-            .only("slug", "title", "excerpt", "published_at", "image", "author__username", "author__display_name")
-            .order_by("-published_at")[:limit]
+            .only("slug", "title", "excerpt", "published_at", "image", "author__username", "author__display_name", "created_at")
         )
+
+        qs = base
+
+        if connection.vendor == "postgresql":
+            try:
+                from django.contrib.postgres.search import SearchQuery, SearchRank
+
+                sq = SearchQuery(q, config="portuguese", search_type="websearch")
+                qs = (
+                    qs.filter(search_vector=sq)
+                    .annotate(rank=SearchRank("search_vector", sq))
+                    .order_by("-rank", "-published_at", "-created_at")[:limit]
+                )
+            except Exception:
+                qs = (
+                    qs.filter(Q(title__icontains=q) | Q(excerpt__icontains=q) | Q(content__icontains=q))
+                    .order_by("-published_at", "-created_at")[:limit]
+                )
+        else:
+            qs = (
+                qs.filter(Q(title__icontains=q) | Q(excerpt__icontains=q) | Q(content__icontains=q))
+                .order_by("-published_at", "-created_at")[:limit]
+            )
 
         results = []
         for p in qs:

@@ -119,6 +119,13 @@ class PublicPostViewSetTest(TestCase):
         slugs = [p["slug"] for p in response.data["results"]]
         self.assertIn("findme", slugs)
 
+    def test_search_by_title_accepts_search_param(self):
+        make_post(self.user, self.category, slug="findme2", title="Unique Findable Title 2")
+        response = self.client.get("/api/v1/blog/public/posts/", {"search": "Unique Findable"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        slugs = [p["slug"] for p in response.data["results"]]
+        self.assertIn("findme2", slugs)
+
 
 class PostViewSetEditorTest(TestCase):
     def setUp(self):

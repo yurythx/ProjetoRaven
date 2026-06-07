@@ -54,6 +54,7 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
           <article key={p.id} className="rv-card group flex flex-col hover:scale-[1.02] transition-all duration-300">
             <Link
               href={`/blog/${p.slug}`}
+              prefetch={false}
               className="relative overflow-hidden rounded-t-2xl border-b border-white/5"
               aria-label={`Abrir ${p.title}`}
             >
@@ -74,7 +75,7 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
                 )}
               </div>
               <div className="absolute top-4 left-4">
-                <span className="rv-badge rv-badge-purple text-[8px]">{p.category_name}</span>
+                <span className="rv-badge rv-badge-on-image text-[8px]">{p.category_name}</span>
               </div>
             </Link>
 
@@ -86,7 +87,7 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
                 <span>{p.read_time_minutes} min leitura</span>
               </div>
 
-              <Link href={`/blog/${p.slug}`}>
+              <Link href={`/blog/${p.slug}`} prefetch={false}>
                 <h3 className="rv-display text-lg text-[var(--rv-text-primary)] group-hover:text-[var(--rv-accent)] transition-colors line-clamp-2">
                   {p.title}
                 </h3>
@@ -102,6 +103,7 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
                 {p.author_username ? (
                   <Link
                     href={`/u/${p.author_username}`}
+                    prefetch={false}
                     className="rv-label text-[8px] text-[var(--rv-text-dim)] hover:text-[var(--rv-accent)] transition-colors"
                   >
                     por {p.author_name}
@@ -111,6 +113,7 @@ export function BlogPostsGrid({ initialPosts, initialPage, initialHasNext, query
                 )}
                 <Link
                   href={`/blog/${p.slug}`}
+                  prefetch={false}
                   className="text-[10px] text-[var(--rv-accent)] flex items-center gap-1 group-hover:gap-2 transition-all"
                 >
                   Ler Artigo →

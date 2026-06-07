@@ -58,6 +58,7 @@ export default async function BlogPage(props: {
   const q = (getParam(sp, "q") ?? "").trim();
   const category = (getParam(sp, "category") ?? "").trim();
   const tag = (getParam(sp, "tag") ?? "").trim();
+  const author = (getParam(sp, "author") ?? "").trim();
   const sortRaw = (getParam(sp, "sort") ?? "recent").trim();
   const sort = sortRaw === "popular" ? "popular" : "recent";
   const pageRaw = (getParam(sp, "page") ?? "1").trim();
@@ -70,6 +71,7 @@ export default async function BlogPage(props: {
   if (q) qs.set("search", q);
   if (category) qs.set("category", category);
   if (tag) qs.set("tag", tag);
+  if (author) qs.set("author", author);
   if (sort === "popular") qs.set("ordering", "-view_count");
 
   const [postsRes, categoriesRes, tagsRes] = await Promise.all([
@@ -93,16 +95,18 @@ export default async function BlogPage(props: {
   const canPrev = postsRes.ok ? Boolean(postsRes.data.previous) : false;
   const canNext = postsRes.ok ? Boolean(postsRes.data.next) : false;
 
-  const buildHref = (overrides: { q?: string; category?: string; tag?: string; sort?: string; page?: number }) => {
+  const buildHref = (overrides: { q?: string; category?: string; tag?: string; author?: string; sort?: string; page?: number }) => {
     const p = new URLSearchParams();
     const nq = (overrides.q ?? q).trim();
     const nc = (overrides.category ?? category).trim();
     const nt = (overrides.tag ?? tag).trim();
+    const na = (overrides.author ?? author).trim();
     const ns = overrides.sort ?? sort;
     const np = overrides.page ?? 1;
     if (nq) p.set("q", nq);
     if (nc) p.set("category", nc);
     if (nt) p.set("tag", nt);
+    if (na) p.set("author", na);
     if (ns !== "recent") p.set("sort", ns);
     if (np > 1) p.set("page", String(np));
     const s = p.toString();
@@ -156,6 +160,20 @@ export default async function BlogPage(props: {
           
           <BlogSearchBar defaultValue={q} categories={categories} />
 
+          {author && (
+            <div className="rv-card p-4 bg-[var(--rv-surface-2)]/40 border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="text-xs text-[var(--rv-text-dim)]">
+                Filtrando por{" "}
+                <Link href={`/u/${encodeURIComponent(author)}`} prefetch={false} className="text-[var(--rv-accent)] hover:underline">
+                  @{author}
+                </Link>
+              </div>
+              <Link href={buildHref({ author: "" })} prefetch={false} className="rv-btn rv-btn-ghost h-9 px-4 text-xs self-start sm:self-auto">
+                Limpar autor
+              </Link>
+            </div>
+          )}
+
           {!postsRes.ok ? (
             <div className="rv-card p-12 text-center text-[var(--rv-text-muted)]">Nenhum artigo disponível no momento.</div>
           ) : (postsRes.data?.results || []).length === 0 ? (
@@ -175,6 +193,7 @@ export default async function BlogPage(props: {
                 if (q) p.set("search", q);
                 if (category) p.set("category", category);
                 if (tag) p.set("tag", tag);
+                if (author) p.set("author", author);
                 if (sort === "popular") p.set("ordering", "-view_count");
                 return p.toString();
               })()}
@@ -183,7 +202,7 @@ export default async function BlogPage(props: {
 
           {postsRes.ok && canPrev && (
             <div className="flex items-center justify-start pt-4">
-              <Link href={buildHref({ page: page - 1 })} className="rv-btn rv-btn-ghost h-10 px-6 text-xs">← Anterior</Link>
+              <Link href={buildHref({ page: page - 1 })} prefetch={false} className="rv-btn rv-btn-ghost h-10 px-6 text-xs">← Anterior</Link>
             </div>
           )}
         </div>

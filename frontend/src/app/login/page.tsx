@@ -25,7 +25,7 @@ export default function LoginPage() {
       <div className="relative z-10 w-full max-w-md">
         {/* Logo mark */}
         <div className="mb-10 text-center">
-          <Link href="/" className="inline-flex flex-col items-center gap-2">
+          <Link href="/" prefetch={false} className="inline-flex flex-col items-center gap-2">
             <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] flex items-center justify-center rv-glow-purple">
               <span className="rv-display text-2xl text-[var(--rv-text-primary)]">R</span>
             </div>
@@ -125,12 +125,12 @@ export default function LoginPage() {
           <div className="rv-divider my-6" />
 
           <div className="flex flex-col gap-3 text-center">
-            <Link href="/forgot-password" className="rv-label text-[10px] text-[var(--rv-text-muted)] hover:text-[var(--rv-accent)] transition-colors">
+            <Link href="/forgot-password" prefetch={false} className="rv-label text-[10px] text-[var(--rv-text-muted)] hover:text-[var(--rv-accent)] transition-colors">
               Esqueci minha senha
             </Link>
             <p className="text-sm text-[var(--rv-text-muted)] font-[var(--font-body)]">
               Ainda não tem conta?{" "}
-              <Link href="/register" className="text-[var(--rv-accent)] hover:underline font-semibold">
+              <Link href="/register" prefetch={false} className="text-[var(--rv-accent)] hover:underline font-semibold">
                 Criar conta grátis
               </Link>
             </p>

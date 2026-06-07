@@ -29,6 +29,8 @@ import { Progress } from "@/components/ui/progress"
 import { notify } from "@/lib/notifications"
 import { ArticleHistory } from "@/features/articles/article-history"
 import { ArticleComments } from "@/features/articles/article-comments"
+import { ArticleContent } from "@/components/articles/article-content"
+import { sanitizeRichTextHtml } from "@/lib/sanitize-html"
 
 function clearEditorDraft(id: string | number | undefined) {
   if (id === undefined || id === null) return
@@ -99,7 +101,7 @@ type FormValues = z.infer<typeof formSchema>
 
 interface ArticleFormProps {
   initialData?: Article | null
-  onSuccess: () => void
+  onSuccess: (article?: Article) => void
   onCancel: () => void
 }
 
@@ -146,7 +148,10 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
   const [createdSlug, setCreatedSlug] = useState<string | null>(null)
   const [autoOpenPreview, setAutoOpenPreview] = useState(false)
   const previewAfterSaveRef = useRef(false)
+  const submitAfterCreateRef = useRef(false)
+  const lastSavedArticleRef = useRef<Article | null>(null)
   const effectiveSlug = initialData?.slug ?? createdSlug
+  const [splitPreview, setSplitPreview] = useState(false)
 
   const normalizeTagIds = (raw: unknown): string[] => {
     if (!Array.isArray(raw)) return []
@@ -212,7 +217,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
 
   const reviewMutation = useMutation({
     mutationFn: async ({ action, slug }: { action: 'submit' | 'publish' | 'reject'; slug: string }) => {
-      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/${action}/`, { method: 'POST' })
+      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/${action}`, { method: "POST" })
       if (!res.ok) throw new Error(`Erro ${res.status}`)
     },
     onSuccess: (_, { action }) => {
@@ -221,7 +226,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
       queryClient.invalidateQueries({ queryKey: ['dashboard-articles-grid'] })
       const messages = { submit: "Post enviado para revisão", publish: "Post publicado com sucesso", reject: "Post rejeitado" }
       notify.success(messages[action], "Status atualizado.")
-      onSuccess()
+      onSuccess(lastSavedArticleRef.current ?? initialData ?? undefined)
     },
     onError: (error: unknown) => {
       notify.error("Falha na operação", error instanceof Error ? error.message : String(error))
@@ -236,8 +241,8 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
 
       const savedSlug = initialData?.slug ?? createdSlug
       const url = savedSlug
-        ? `/api/blog-admin/articles/${encodeURIComponent(savedSlug)}/`
-        : '/api/blog-admin/articles/'
+        ? `/api/blog-admin/articles/${encodeURIComponent(savedSlug)}`
+        : "/api/blog-admin/articles"
       const method = savedSlug ? 'PUT' : 'POST'
 
       const res = await fetch(url, {
@@ -252,6 +257,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
       clearEditorDraft(initialData?.id ?? "new-article")
       queryClient.invalidateQueries({ queryKey: ['articles'] })
       queryClient.invalidateQueries({ queryKey: ['blog-article-edit'] })
+      lastSavedArticleRef.current = data
       if (previewAfterSaveRef.current) {
         previewAfterSaveRef.current = false
         setCreatedSlug(data.slug)
@@ -259,8 +265,14 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
         notify.success("Rascunho salvo", "Abrindo preview…")
         return
       }
+      if (!initialData && submitAfterCreateRef.current) {
+        submitAfterCreateRef.current = false
+        setCreatedSlug(data.slug)
+        reviewMutation.mutate({ action: "submit", slug: data.slug })
+        return
+      }
       notify.success(initialData ? "Post atualizado" : "Post criado", "Alterações salvas com sucesso.")
-      onSuccess()
+      onSuccess(data)
     },
     onError: (error: unknown) => {
       notify.error("Falha ao salvar post", error instanceof Error ? error.message : String(error))
@@ -290,9 +302,9 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
 
   const scheduleMutation = useMutation({
     mutationFn: async ({ slug, published_at }: { slug: string; published_at: string }) => {
-      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/schedule/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/schedule`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ published_at }),
       })
       if (!res.ok) { const body = await res.json().catch(() => ({})); throw body }
@@ -309,7 +321,7 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
 
   const deleteMutation = useMutation({
     mutationFn: async (slug: string) => {
-      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/`, { method: 'DELETE' })
+      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}`, { method: "DELETE" })
       if (!res.ok) throw new Error(`Erro ${res.status}`)
     },
     onSuccess: () => {
@@ -578,6 +590,20 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
               {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin mr-1" aria-hidden="true" />}
               {initialData ? "Salvar" : "Criar Post"}
             </button>
+
+            {!initialData && (
+              <button
+                type="button"
+                onClick={() => {
+                  submitAfterCreateRef.current = true
+                  void form.handleSubmit(onSubmit)()
+                }}
+                disabled={mutation.isPending || reviewMutation.isPending || !isReadyForReview}
+                className="h-9 px-4 text-xs flex items-center gap-2 rounded-xl bg-[var(--rv-gold)]/10 hover:bg-[var(--rv-gold)]/20 text-[var(--rv-gold)] border border-[var(--rv-gold)]/30 font-bold uppercase tracking-wider transition-colors disabled:opacity-50"
+              >
+                <Send className="h-4 w-4" aria-hidden="true" /> Criar e enviar p/ revisão
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -627,16 +653,39 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
               name="content"
               render={({ field, fieldState }) => (
                 <div>
-                  <div id="af-content-label" className="rv-label-field" aria-hidden="true">
-                    Corpo do Post
+                  <div className="flex items-center justify-between gap-3 mb-3">
+                    <div id="af-content-label" className="rv-label-field" aria-hidden="true">
+                      Corpo do Post
+                    </div>
+                    <button
+                      type="button"
+                      className={`h-9 px-4 text-[10px] uppercase tracking-widest rounded-xl border transition-colors ${splitPreview ? "border-[var(--rv-accent)]/40 text-[var(--rv-accent)] bg-[color-mix(in_srgb,var(--rv-accent)_10%,transparent)]" : "border-[var(--rv-border)] text-[var(--rv-text-dim)] hover:text-[var(--rv-text-primary)]"}`}
+                      onClick={() => setSplitPreview((v) => !v)}
+                    >
+                      {splitPreview ? "Ocultar preview" : "Preview lado a lado"}
+                    </button>
                   </div>
-                  <div aria-labelledby="af-content-label" role="group">
-                    <RichEditor
-                      id={initialData?.id || "new-article"}
-                      content={field.value}
-                      onChange={field.onChange}
-                      placeholder="Comece a escrever sua história..."
-                    />
+
+                  <div className={splitPreview ? "grid grid-cols-1 lg:grid-cols-2 gap-4 items-start" : ""}>
+                    <div aria-labelledby="af-content-label" role="group" className={splitPreview ? "min-w-0" : ""}>
+                      <RichEditor
+                        id={initialData?.id || "new-article"}
+                        content={field.value}
+                        onChange={field.onChange}
+                        placeholder="Comece a escrever sua história..."
+                      />
+                    </div>
+                    {splitPreview && (
+                      <div className="min-w-0">
+                        <div className="rv-label text-[9px] text-[var(--rv-text-dim)] mb-2">Preview</div>
+                        <div className="rv-card rv-paper p-6">
+                          <ArticleContent
+                            html={sanitizeRichTextHtml(field.value)}
+                            className="rv-article-body prose prose-sm sm:prose-base dark:prose-invert max-w-none"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <FieldError message={fieldState.error?.message} />
                 </div>

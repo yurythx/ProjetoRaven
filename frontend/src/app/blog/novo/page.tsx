@@ -56,7 +56,10 @@ export default function BlogNovoPage() {
         </div>
 
         <ArticleForm
-          onSuccess={() => router.push("/blog")}
+          onSuccess={(article) => {
+            if (article?.slug) router.push(`/blog/${encodeURIComponent(article.slug)}/editar`);
+            else router.push("/blog");
+          }}
           onCancel={() => router.push("/blog")}
         />
       </div>

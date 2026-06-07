@@ -155,6 +155,19 @@ class PostViewSet(viewsets.ModelViewSet):
                 failed.append({"slug": post.slug, "error": str(exc)})
         return response.Response({"approved": approved, "failed": failed})
 
+    @action(detail=False, methods=["post"], url_path="bulk/submit")
+    def bulk_submit_by_slug(self, request):
+        slugs = request.data.get("slugs", [])
+        posts = Post.objects.filter(slug__in=slugs)
+        submitted, failed = [], []
+        for post in posts:
+            try:
+                post.submit_for_review()
+                submitted.append(post.slug)
+            except Exception as exc:
+                failed.append({"slug": post.slug, "error": str(exc)})
+        return response.Response({"submitted": submitted, "failed": failed})
+
     @action(detail=False, methods=["post"], url_path="bulk/reject")
     def bulk_reject_by_slug(self, request):
         slugs = request.data.get("slugs", [])

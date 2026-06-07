@@ -109,9 +109,7 @@ export function useTopicSocket(
       }
     };
 
-    ws.onerror = () => {
-      ws.close();
-    };
+    ws.onerror = () => {};
   }, [topicSlug]);
 
   useEffect(() => {

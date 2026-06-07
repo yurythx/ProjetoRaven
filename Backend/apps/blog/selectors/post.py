@@ -58,20 +58,20 @@ class PostSelector:
         return _base_published().filter(slug=slug).first()
 
     @staticmethod
-    def search_published(query: str) -> QuerySet:
+    def search_published(query: str, *, qs: Optional[QuerySet] = None) -> QuerySet:
         """Full-text search on published posts using the denormalized search_vector field."""
-        qs = _base_published()
+        qs = qs if qs is not None else _base_published()
         if not query:
             return qs
 
         try:
             from django.contrib.postgres.search import SearchQuery, SearchRank
             # config='portuguese' deve bater com o trigger da migração
-            sq = SearchQuery(query, config='portuguese')
+            sq = SearchQuery(query, config="portuguese", search_type="websearch")
             return (
                 qs.filter(search_vector=sq)
                 .annotate(rank=SearchRank("search_vector", sq))
-                .order_by("-rank")
+                .order_by("-rank", "-published_at", "-created_at")
             )
         except Exception:
             # Fallback for non-postgres or if search_vector is not yet populated

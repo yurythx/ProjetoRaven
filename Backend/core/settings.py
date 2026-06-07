@@ -391,10 +391,28 @@ ACCOUNTS_LOGIN_LOCKOUT_SECONDS = int(os.environ.get("ACCOUNTS_LOGIN_LOCKOUT_SECO
 # ---------------------------------------------------------------------------
 ASGI_APPLICATION = "core.asgi.application"
 _CHANNEL_LAYER_URL = REDIS_URL or "redis://localhost:6379/3"
+_channel_layer_host = os.environ.get("CHANNEL_LAYER_URL", _CHANNEL_LAYER_URL).strip() or _CHANNEL_LAYER_URL
+_CHANNEL_LAYER_SOCKET_CONNECT_TIMEOUT = float(os.environ.get("CHANNEL_LAYER_SOCKET_CONNECT_TIMEOUT", "2.5"))
+_CHANNEL_LAYER_SOCKET_TIMEOUT = float(os.environ.get("CHANNEL_LAYER_SOCKET_TIMEOUT", "30"))
+_CHANNEL_LAYER_HEALTHCHECK_INTERVAL = int(os.environ.get("CHANNEL_LAYER_HEALTHCHECK_INTERVAL", "30"))
+_CHANNEL_LAYER_CAPACITY = int(os.environ.get("CHANNEL_LAYER_CAPACITY", "1000"))
+_CHANNEL_LAYER_EXPIRY = int(os.environ.get("CHANNEL_LAYER_EXPIRY", "60"))
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {"hosts": [os.environ.get("CHANNEL_LAYER_URL", _CHANNEL_LAYER_URL)]},
+        "CONFIG": {
+            "hosts": [
+                {
+                    "address": _channel_layer_host,
+                    "socket_connect_timeout": _CHANNEL_LAYER_SOCKET_CONNECT_TIMEOUT,
+                    "socket_timeout": _CHANNEL_LAYER_SOCKET_TIMEOUT,
+                    "retry_on_timeout": True,
+                    "health_check_interval": _CHANNEL_LAYER_HEALTHCHECK_INTERVAL,
+                }
+            ],
+            "capacity": _CHANNEL_LAYER_CAPACITY,
+            "expiry": _CHANNEL_LAYER_EXPIRY,
+        },
     }
 }
 

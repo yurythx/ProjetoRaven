@@ -89,6 +89,7 @@ export default async function ForumPage() {
                   <Link
                     key={c.id}
                     href={`/forum/c/${c.slug}`}
+                    prefetch={false}
                     className="rv-card group p-5 sm:p-6 flex flex-col gap-3 hover:scale-[1.02] transition-all duration-300"
                   >
                     <div className="flex items-start justify-between">

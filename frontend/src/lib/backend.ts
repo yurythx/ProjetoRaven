@@ -28,6 +28,15 @@ export async function backendFetch<T>(
 
   const headers = new Headers(init?.headers);
   if (!headers.has("Accept")) headers.set("Accept", "application/json");
+  if (!headers.has("x-request-id")) {
+    let rid = "";
+    try {
+      const mod = await import("next/headers");
+      const hdrs = await mod.headers();
+      rid = (hdrs.get("x-request-id") || "").trim();
+    } catch {}
+    headers.set("x-request-id", rid || crypto.randomUUID());
+  }
 
   if (init?.accessToken) {
     headers.set("Authorization", `Bearer ${init.accessToken}`);

@@ -22,6 +22,7 @@ class HealthReadyView(APIView):
             "db": self._check_database(),
             "cache": self._check_cache(),
             "redis": self._check_redis(),
+            "celery": self._check_celery(),
         }
 
         all_ok = all(checks.values())
@@ -62,6 +63,17 @@ class HealthReadyView(APIView):
         except Exception:
             return False
 
+    def _check_celery(self) -> bool:
+        try:
+            from django.conf import settings
+            if not getattr(settings, "CELERY_BROKER_URL", ""):
+                return True
+            from celery import current_app
+            replies = current_app.control.ping(timeout=1.0)
+            return bool(replies)
+        except Exception:
+            return False
+
 
 class HealthDetailedView(APIView):
     permission_classes = [AllowAny]
@@ -75,6 +87,7 @@ class HealthDetailedView(APIView):
             "cache": self._check_cache(),
             "redis": self._check_redis(),
             "smtp": self._check_smtp(),
+            "celery": self._check_celery(),
         }
         
         stats = {
@@ -119,6 +132,17 @@ class HealthDetailedView(APIView):
             r = get_redis_connection("default")
             r.ping()
             return True
+        except Exception:
+            return False
+
+    def _check_celery(self) -> bool:
+        try:
+            from django.conf import settings
+            if not getattr(settings, "CELERY_BROKER_URL", ""):
+                return True
+            from celery import current_app
+            replies = current_app.control.ping(timeout=1.0)
+            return bool(replies)
         except Exception:
             return False
     

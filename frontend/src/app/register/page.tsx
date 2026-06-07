@@ -27,7 +27,7 @@ export default function RegisterPage() {
       <div className="relative z-10 w-full max-w-md">
         {/* Logo mark */}
         <div className="mb-10 text-center">
-          <Link href="/" className="inline-flex flex-col items-center gap-2">
+          <Link href="/" prefetch={false} className="inline-flex flex-col items-center gap-2">
             <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-[var(--rv-cyan)] to-[var(--rv-accent)] flex items-center justify-center rv-glow-cyan">
               <span className="rv-display text-2xl text-[var(--rv-text-primary)]">R</span>
             </div>
@@ -155,16 +155,16 @@ export default function RegisterPage() {
 
           <p className="text-center text-sm text-[var(--rv-text-muted)] font-[var(--font-body)]">
             Já tem uma conta?{" "}
-            <Link href="/login" className="text-[var(--rv-accent)] hover:underline font-semibold">
+            <Link href="/login" prefetch={false} className="text-[var(--rv-accent)] hover:underline font-semibold">
               Entrar
             </Link>
           </p>
 
           <p className="mt-4 text-center rv-label text-[9px] text-[var(--rv-text-dim)]">
             Ao criar sua conta você concorda com os{" "}
-            <Link href="/termos" className="hover:text-[var(--rv-accent)] transition-colors">Termos de Uso</Link>
+            <Link href="/termos" prefetch={false} className="hover:text-[var(--rv-accent)] transition-colors">Termos de Uso</Link>
             {" "}e a{" "}
-            <Link href="/privacidade" className="hover:text-[var(--rv-accent)] transition-colors">Política de Privacidade</Link>.
+            <Link href="/privacidade" prefetch={false} className="hover:text-[var(--rv-accent)] transition-colors">Política de Privacidade</Link>.
           </p>
         </div>
       </div>

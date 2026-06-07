@@ -38,7 +38,9 @@ import {
     Type,
     FileText,
     Save,
-    Trash2
+    Trash2,
+    Link2,
+    Play
 } from 'lucide-react'
 import { MediaDialog } from "@/features/media/media-dialog"
 import { Toggle } from '@/components/ui/toggle'
@@ -156,7 +158,7 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
         Table.configure({
             resizable: true,
             HTMLAttributes: {
-                class: 'rv-editor-table border-collapse table-fixed w-full my-4',
+                class: 'rv-editor-table border-collapse my-4 w-max min-w-full',
             },
         }),
         TableRow,
@@ -272,6 +274,21 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
     const clearCallout = () => {
         if (!editor.isActive('blockquote')) return
         editor.chain().focus().updateAttributes('blockquote', { callout: null }).run()
+    }
+
+    const insertEmbedLink = (label: string) => {
+        const raw = window.prompt(`Cole o link do ${label}:`)
+        const url = (raw || "").trim()
+        if (!url) return
+        if (!/^https?:\/\//i.test(url)) {
+            notify.error("Link inválido", "Use um link http(s).")
+            return
+        }
+        editor
+            .chain()
+            .focus()
+            .insertContent(`<p><a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></p>`)
+            .run()
     }
 
     return (
@@ -423,6 +440,31 @@ export function RichEditor({ content, onChange, placeholder, className, id }: Ri
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={clearCallout}>
                                 Remover callout
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <Separator orientation="vertical" className="h-6 mx-1 bg-border/60" />
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="h-8 px-2 flex items-center gap-1.5 text-xs font-medium hover:bg-muted rounded transition-colors">
+                                <Play className="h-4 w-4" />
+                                Embed
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                            <DropdownMenuItem onClick={() => insertEmbedLink("YouTube")}>
+                                <Link2 className="h-4 w-4 mr-2" /> YouTube
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => insertEmbedLink("Vimeo")}>
+                                <Link2 className="h-4 w-4 mr-2" /> Vimeo
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => insertEmbedLink("Loom")}>
+                                <Link2 className="h-4 w-4 mr-2" /> Loom
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => insertEmbedLink("vídeo (.mp4/.webm)")}>
+                                <Link2 className="h-4 w-4 mr-2" /> Vídeo (mp4/webm)
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>

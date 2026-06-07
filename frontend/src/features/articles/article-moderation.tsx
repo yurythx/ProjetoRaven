@@ -69,7 +69,7 @@ export function ArticleModeration() {
   const [rejectOpen, setRejectOpen] = React.useState(false)
   const [rejectReason, setRejectReason] = React.useState("")
   const [rejectTargets, setRejectTargets] = React.useState<ArticleLite[]>([])
-  const [status, setStatus] = React.useState<"pending" | "published" | "rejected" | "all">("pending")
+  const [status, setStatus] = React.useState<"pending" | "draft" | "published" | "rejected" | "all">("pending")
   const [categoryId, setCategoryId] = React.useState<string>("all")
   const [ordering, setOrdering] = React.useState<string>("-updated_at")
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set())
@@ -89,7 +89,7 @@ export function ArticleModeration() {
   const countsQuery = useQuery({
     queryKey: ["articles-moderation-counts", categoryId, debounced],
     queryFn: async ({ signal }) => {
-      const fetchCount = async (s?: "pending" | "published" | "rejected") => {
+      const fetchCount = async (s?: "pending" | "draft" | "published" | "rejected") => {
         const params: Record<string, string> = { page_size: "1" }
         if (s) params.status = s
         if (categoryId !== "all") params.category = categoryId
@@ -101,13 +101,14 @@ export function ArticleModeration() {
         return Number.isFinite(Number(data?.count)) ? Number(data.count) : 0
       }
 
-      const [pending, published, rejected, all] = await Promise.all([
+      const [pending, draft, published, rejected, all] = await Promise.all([
         fetchCount("pending"),
+        fetchCount("draft"),
         fetchCount("published"),
         fetchCount("rejected"),
         fetchCount(undefined),
       ])
-      return { pending, published, rejected, all }
+      return { pending, draft, published, rejected, all }
     },
     enabled: canModerate,
     staleTime: 20_000,
@@ -122,8 +123,8 @@ export function ArticleModeration() {
     const cat = searchParams.get("category") ?? ""
     const ord = (searchParams.get("ordering") || "").trim()
 
-    const allowedStatus = new Set(["pending", "published", "rejected", "all"])
-    if (allowedStatus.has(s)) setStatus(s as "pending" | "published" | "rejected" | "all")
+    const allowedStatus = new Set(["pending", "draft", "published", "rejected", "all"])
+    if (allowedStatus.has(s)) setStatus(s as "pending" | "draft" | "published" | "rejected" | "all")
     if (q) setQuery(q)
     if (cat) setCategoryId(cat)
     if (ord) setOrdering(ord)
@@ -243,7 +244,7 @@ export function ArticleModeration() {
 
   const approveMutation = useMutation({
     mutationFn: async (slug: string) => {
-      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/publish/`, { method: 'POST' })
+      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/publish`, { method: "POST" })
       if (!res.ok) throw new Error(`Erro ${res.status}`)
     },
     onSuccess: async () => {
@@ -259,9 +260,9 @@ export function ArticleModeration() {
 
   const rejectMutation = useMutation({
     mutationFn: async ({ slug, reason }: { slug: string; reason: string }) => {
-      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/reject/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/reject`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reason }),
       })
       if (!res.ok) throw new Error(`Erro ${res.status}`)
@@ -277,12 +278,28 @@ export function ArticleModeration() {
     },
   })
 
+  const submitMutation = useMutation({
+    mutationFn: async (slug: string) => {
+      const res = await fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/submit`, { method: "POST" })
+      if (!res.ok) throw new Error(`Erro ${res.status}`)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["articles-moderation"] })
+      await queryClient.invalidateQueries({ queryKey: ["articles-moderation-counts"] })
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-articles-grid"] })
+      toast.success("Post enviado para revisão")
+    },
+    onError: () => {
+      toast.error("Falha ao enviar para revisão")
+    },
+  })
+
   const bulkApproveMutation = useMutation({
     mutationFn: async (slugs: string[]) => {
       try {
-        const res = await fetch("/api/blog-admin/articles/bulk/publish/", {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/api/blog-admin/articles/bulk/publish", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ slugs }),
         })
         if (!res.ok) throw new Error(`Erro ${res.status}`)
@@ -295,7 +312,7 @@ export function ArticleModeration() {
         return { ok: approved.length, fail: failed.length, failedSlugs }
       } catch {
         const tasks = slugs.map((slug) => () =>
-          fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/publish/`, { method: 'POST' })
+          fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/publish`, { method: "POST" })
             .then((r) => { if (!r.ok) throw new Error(`Erro ${r.status}`) })
         )
         const results = await runInBatches(tasks, 3)
@@ -321,12 +338,56 @@ export function ArticleModeration() {
     },
   })
 
+  const bulkSubmitMutation = useMutation({
+    mutationFn: async (slugs: string[]) => {
+      try {
+        const res = await fetch("/api/blog-admin/articles/bulk/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slugs }),
+        })
+        if (!res.ok) throw new Error(`Erro ${res.status}`)
+        const data = await res.json() as { submitted?: string[]; failed?: unknown[] }
+        const submitted = Array.isArray(data?.submitted) ? data.submitted : []
+        const failed = Array.isArray(data?.failed) ? data.failed : []
+        const failedSlugs = failed
+          .map((f) => (typeof f === "object" && f && "slug" in f ? (f as { slug?: unknown }).slug : null))
+          .filter((s): s is string => typeof s === "string" && s.length > 0)
+        return { ok: submitted.length, fail: failed.length, failedSlugs }
+      } catch {
+        const tasks = slugs.map((slug) => () =>
+          fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/submit`, { method: "POST" })
+            .then((r) => { if (!r.ok) throw new Error(`Erro ${r.status}`) })
+        )
+        const results = await runInBatches(tasks, 3)
+        const ok = results.filter((r) => r.status === "fulfilled").length
+        const fail = results.length - ok
+        return { ok, fail, failedSlugs: [] as string[] }
+      }
+    },
+    onSuccess: async ({ ok, fail, failedSlugs }) => {
+      await queryClient.invalidateQueries({ queryKey: ["articles-moderation"] })
+      await queryClient.invalidateQueries({ queryKey: ["articles-moderation-counts"] })
+      await queryClient.invalidateQueries({ queryKey: ["dashboard-articles-grid"] })
+      setSelectedIds(new Set())
+      if (fail === 0) toast.success(`${ok} posts enviados para revisão`)
+      else {
+        const sample = failedSlugs.slice(0, 3)
+        const suffix = sample.length ? ` (${sample.join(", ")})` : ""
+        toast.warning(`${ok} enviados, ${fail} falharam${suffix}`)
+      }
+    },
+    onError: () => {
+      toast.error("Falha ao enviar em lote")
+    },
+  })
+
   const bulkRejectMutation = useMutation({
     mutationFn: async ({ slugs, reason }: { slugs: string[]; reason: string }) => {
       try {
-        const res = await fetch("/api/blog-admin/articles/bulk/reject/", {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+        const res = await fetch("/api/blog-admin/articles/bulk/reject", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ slugs, reason }),
         })
         if (!res.ok) throw new Error(`Erro ${res.status}`)
@@ -339,9 +400,9 @@ export function ArticleModeration() {
         return { ok: rejected.length, fail: failed.length, failedSlugs }
       } catch {
         const tasks = slugs.map((slug) => () =>
-          fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/reject/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          fetch(`/api/blog-admin/articles/${encodeURIComponent(slug)}/reject`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ reason }),
           }).then((r) => { if (!r.ok) throw new Error(`Erro ${r.status}`) })
         )
@@ -370,8 +431,10 @@ export function ArticleModeration() {
 
   const isMutating =
     approveMutation.isPending ||
+    submitMutation.isPending ||
     rejectMutation.isPending ||
     bulkApproveMutation.isPending ||
+    bulkSubmitMutation.isPending ||
     bulkRejectMutation.isPending
 
   const openReject = (articles: ArticleLite[]) => {
@@ -427,6 +490,7 @@ export function ArticleModeration() {
             <div className="flex items-center gap-2 flex-wrap">
               {([
                 { key: "pending", label: "Pendentes", cls: "bg-amber-500/15 text-amber-400 border-amber-500/20 hover:bg-amber-500/20" },
+                { key: "draft", label: "Rascunhos", cls: "bg-violet-500/15 text-violet-300 border-violet-500/20 hover:bg-violet-500/20" },
                 { key: "published", label: "Publicados", cls: "bg-emerald-500/15 text-emerald-300 border-emerald-500/20 hover:bg-emerald-500/20" },
                 { key: "rejected", label: "Rejeitados", cls: "bg-rose-500/15 text-rose-300 border-rose-500/20 hover:bg-rose-500/20" },
                 { key: "all", label: "Todos", cls: "bg-white/5 text-foreground/80 border-white/10 hover:bg-white/10" },
@@ -545,6 +609,22 @@ export function ArticleModeration() {
                 </Button>
               </div>
             )}
+            {status === "draft" && (
+              <div className="flex items-center gap-2 sm:gap-3 relative z-10 flex-wrap">
+                <Button
+                  type="button"
+                  className="rounded-xl h-9 sm:h-11 px-4 sm:px-6 font-black uppercase tracking-widest text-[10px] sm:text-[11px] shadow-lg shadow-primary/20"
+                  disabled={selectedCount === 0 || isMutating}
+                  onClick={() => {
+                    const slugs = items.filter((a) => selectedIds.has(a.id)).map((a) => a.slug)
+                    bulkSubmitMutation.mutate(slugs)
+                  }}
+                >
+                  {bulkSubmitMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
+                  Enviar p/ Revisão (Lote)
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4" role="list" aria-label="Posts">
@@ -598,28 +678,49 @@ export function ArticleModeration() {
                   </div>
                 </div>
 
-                {(String(a.status || "").toLowerCase() === "pending" || status === "pending") && (
-                  <div className="mt-4 sm:mt-6 flex gap-2 sm:gap-3">
-                    <Button
-                      type="button"
-                      className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/10"
-                      disabled={isMutating}
-                      onClick={() => approveMutation.mutate(a.slug)}
-                    >
-                      {approveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
-                      Aprovar
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-rose-500/10"
-                      disabled={isMutating}
-                      onClick={() => openReject([a])}
-                    >
-                      <X className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" /> Rejeitar
-                    </Button>
-                  </div>
-                )}
+                {(() => {
+                  const s = String(a.status || status || "").toLowerCase()
+                  if (s === "draft") {
+                    return (
+                      <div className="mt-4 sm:mt-6 flex gap-2 sm:gap-3">
+                        <Button
+                          type="button"
+                          className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/10"
+                          disabled={isMutating}
+                          onClick={() => submitMutation.mutate(a.slug)}
+                        >
+                          {submitMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
+                          Enviar p/ Revisão
+                        </Button>
+                      </div>
+                    )
+                  }
+                  if (s === "pending") {
+                    return (
+                      <div className="mt-4 sm:mt-6 flex gap-2 sm:gap-3">
+                        <Button
+                          type="button"
+                          className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-primary/10"
+                          disabled={isMutating}
+                          onClick={() => approveMutation.mutate(a.slug)}
+                        >
+                          {approveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Check className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" />}
+                          Aprovar
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          className="flex-1 rounded-xl h-9 sm:h-11 font-black uppercase tracking-widest text-[10px] shadow-lg shadow-rose-500/10"
+                          disabled={isMutating}
+                          onClick={() => openReject([a])}
+                        >
+                          <X className="h-4 w-4 mr-1 sm:mr-2" aria-hidden="true" /> Rejeitar
+                        </Button>
+                      </div>
+                    )
+                  }
+                  return null
+                })()}
               </div>
             ))}
           </div>
@@ -631,7 +732,7 @@ export function ArticleModeration() {
                 className="h-10 px-6 rounded-full border bg-background hover:bg-muted transition-colors disabled:opacity-50"
                 onClick={() => pendingQuery.fetchNextPage()}
                 disabled={pendingQuery.isFetchingNextPage}
-                aria-label="Carregar mais pendentes"
+                aria-label="Carregar mais"
               >
                 {pendingQuery.isFetchingNextPage ? "Carregando..." : "Carregar mais"}
               </button>

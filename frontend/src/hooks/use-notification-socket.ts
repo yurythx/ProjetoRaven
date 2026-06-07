@@ -54,13 +54,19 @@ export function useNotificationSocket(
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tokenRef = useRef<string | null>(null);
+  const reconnectAttempts = useRef(0);
 
   const connect = useCallback(() => {
     const token = tokenRef.current;
     if (!token) return;
+    if (wsRef.current) return;
 
     const ws = new WebSocket(buildWsUrl(token));
     wsRef.current = ws;
+
+    ws.onopen = () => {
+      reconnectAttempts.current = 0;
+    };
 
     ws.onmessage = (event) => {
       try {
@@ -78,15 +84,23 @@ export function useNotificationSocket(
 
     ws.onclose = (e) => {
       wsRef.current = null;
-      if (e.code === 1006) {
-        reconnectTimer.current = setTimeout(connect, 3000);
-      }
+      if (!enabled) return;
+      const shouldRetry =
+        e.code === 1006 ||
+        e.code === 1011 ||
+        e.code === 1013 ||
+        (e.code >= 4000 && e.code !== 4003);
+      if (!shouldRetry) return;
+      const delay = Math.min(1000 * Math.pow(2, reconnectAttempts.current), 60_000);
+      reconnectAttempts.current += 1;
+      reconnectTimer.current = setTimeout(() => {
+        reconnectTimer.current = null;
+        connect();
+      }, delay);
     };
 
-    ws.onerror = () => {
-      ws.close();
-    };
-  }, []);
+    ws.onerror = () => {};
+  }, [enabled]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -105,6 +119,7 @@ export function useNotificationSocket(
       cancelled = true;
       if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
       wsRef.current?.close();
+      wsRef.current = null;
     };
   }, [enabled, connect]);
 }

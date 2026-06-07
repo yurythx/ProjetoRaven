@@ -94,7 +94,10 @@ export function BlogSearchBar({ defaultValue = "", categories }: Props) {
             type="button"
             onClick={() => {
               setQuery("");
-              navigate("", "");
+              const params = new URLSearchParams(searchParams.toString());
+              ["q", "category", "tag", "sort", "author", "page"].forEach((k) => params.delete(k));
+              const s = params.toString();
+              router.push(`/blog${s ? `?${s}` : ""}`);
             }}
             className="rv-btn rv-btn-ghost w-full h-10 text-xs"
           >

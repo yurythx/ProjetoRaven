@@ -11,12 +11,12 @@ export function AppFooter() {
         </div>
 
         <nav className="flex flex-wrap justify-center gap-6 rv-label text-[10px] text-[var(--rv-text-dim)]">
-          <Link href="/blog" className="hover:text-[var(--rv-accent)] transition-colors">Blog</Link>
-          <Link href="/forum" className="hover:text-[var(--rv-accent)] transition-colors">Fórum</Link>
-          <Link href="/search" className="hover:text-[var(--rv-accent)] transition-colors">Busca</Link>
-          <Link href="/notifications" className="hover:text-[var(--rv-accent)] transition-colors">Notificações</Link>
-          <Link href="/termos" className="hover:text-[var(--rv-accent)] transition-colors">Termos</Link>
-          <Link href="/privacidade" className="hover:text-[var(--rv-accent)] transition-colors">Privacidade</Link>
+          <Link href="/blog" prefetch={false} className="hover:text-[var(--rv-accent)] transition-colors">Blog</Link>
+          <Link href="/forum" prefetch={false} className="hover:text-[var(--rv-accent)] transition-colors">Fórum</Link>
+          <Link href="/search" prefetch={false} className="hover:text-[var(--rv-accent)] transition-colors">Busca</Link>
+          <Link href="/notifications" prefetch={false} className="hover:text-[var(--rv-accent)] transition-colors">Notificações</Link>
+          <Link href="/termos" prefetch={false} className="hover:text-[var(--rv-accent)] transition-colors">Termos</Link>
+          <Link href="/privacidade" prefetch={false} className="hover:text-[var(--rv-accent)] transition-colors">Privacidade</Link>
           <a href="/api/blog/rss" className="hover:text-[var(--rv-accent)] transition-colors flex items-center gap-1" target="_blank" rel="noopener noreferrer">
             RSS
           </a>

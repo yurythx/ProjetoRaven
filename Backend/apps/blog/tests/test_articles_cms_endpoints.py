@@ -161,3 +161,20 @@ class ArticlesCmsEndpointsTestCase(TestCase):
         slugs_published = [r["slug"] for r in res_published.json().get("results", [])]
         self.assertIn("publicado-1", slugs_published)
         self.assertNotIn("pendente-1", slugs_published)
+
+    def test_bulk_submit_moves_draft_to_pending(self):
+        self.client.force_authenticate(user=self.editor)
+
+        p = Post.objects.create(
+            title="Draft to submit",
+            slug="draft-to-submit",
+            excerpt="e",
+            content="c",
+            author=self.editor,
+            status=Post.Status.DRAFT,
+            is_public=True,
+        )
+        res = self.client.post("/api/v1/blog/articles/bulk/submit/", {"slugs": [p.slug]}, format="json")
+        self.assertEqual(res.status_code, 200)
+        p.refresh_from_db()
+        self.assertEqual(p.status, Post.Status.PENDING)

@@ -112,7 +112,7 @@ export default async function Home() {
     ),
     backendFetch<unknown>("/api/v1/blog/public/categories/?page=1&page_size=12", { method: "GET", next: { revalidate: 300 } }),
     backendFetch<unknown>("/api/v1/blog/public/tags/?page=1&page_size=18", { method: "GET", next: { revalidate: 300 } }),
-    backendFetch<HealthDetailed>("/api/health/detailed/", { method: "GET", next: { revalidate: 60 } }),
+    backendFetch<HealthDetailed>("/api/health/detailed/", { method: "GET", cache: "no-store" }),
   ]);
 
   const posts: BlogPostListItem[] =
@@ -248,7 +248,7 @@ export default async function Home() {
             { title: "Explorar blog", desc: "Leia os últimos artigos e séries.", href: "/blog", badge: "Blog", badgeClass: "rv-badge-purple", icon: "✦" },
             { title: "Ir ao fórum", desc: "Crie tópicos e interaja com a comunidade.", href: "/forum", badge: "Fórum", badgeClass: "rv-badge-cyan", icon: "◈" },
           ].map((c) => (
-            <Link key={c.title} href={c.href} className="rv-card group p-7 flex flex-col gap-3 hover:scale-[1.01] transition-transform duration-200">
+            <Link key={c.title} href={c.href} prefetch={false} className="rv-card group p-7 flex flex-col gap-3 hover:scale-[1.01] transition-transform duration-200">
               <div className="flex items-start justify-between">
                 <div className="h-12 w-12 rounded-2xl bg-[var(--rv-surface-2)] border border-[var(--rv-border)] flex items-center justify-center text-xl">
                   {c.icon}
@@ -283,6 +283,7 @@ export default async function Home() {
             <Link
               key={f.title}
               href={f.href}
+              prefetch={false}
               className="rv-card group p-8 flex flex-col gap-4 hover:scale-[1.01] transition-transform duration-200"
             >
               <div className="flex items-start justify-between">
@@ -313,7 +314,7 @@ export default async function Home() {
               <span className="rv-badge rv-badge-purple mb-3 inline-flex">✦ Blog</span>
               <h2 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Últimos Artigos</h2>
             </div>
-            <Link href="/blog" className="rv-btn rv-btn-ghost text-xs px-5 h-9">
+            <Link href="/blog" prefetch={false} className="rv-btn rv-btn-ghost text-xs px-5 h-9">
               Ver todos →
             </Link>
           </div>
@@ -325,6 +326,7 @@ export default async function Home() {
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
+                  prefetch={false}
                   className="rv-card group flex flex-col overflow-hidden hover:scale-[1.01] transition-transform duration-200"
                 >
                   {imgSrc ? (
@@ -366,7 +368,7 @@ export default async function Home() {
               <span className="rv-badge rv-badge-gold mb-3 inline-flex">⭐ Destaques</span>
               <h2 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Mais lidos</h2>
             </div>
-            <Link href="/blog?sort=popular" className="rv-btn rv-btn-ghost text-xs px-5 h-9">
+            <Link href="/blog?sort=popular" prefetch={false} className="rv-btn rv-btn-ghost text-xs px-5 h-9">
               Ver ranking →
             </Link>
           </div>
@@ -378,6 +380,7 @@ export default async function Home() {
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
+                  prefetch={false}
                   className="rv-card group flex flex-col overflow-hidden hover:scale-[1.01] transition-transform duration-200"
                 >
                   {imgSrc ? (
@@ -439,7 +442,7 @@ export default async function Home() {
                 Categorias e tags para navegar mais rápido pelo conteúdo.
               </p>
             </div>
-            <Link href="/blog" className="rv-btn rv-btn-ghost text-xs px-5 h-9 self-start sm:self-auto">
+            <Link href="/blog" prefetch={false} className="rv-btn rv-btn-ghost text-xs px-5 h-9 self-start sm:self-auto">
               Ver blog →
             </Link>
           </div>
@@ -455,6 +458,7 @@ export default async function Home() {
                   <Link
                     key={c.id}
                     href={`/blog?category=${encodeURIComponent(c.slug)}`}
+                    prefetch={false}
                     className="rv-badge rv-badge-purple text-[8px] hover:opacity-90 transition-opacity"
                   >
                     {c.name}
@@ -473,6 +477,7 @@ export default async function Home() {
                   <Link
                     key={t.id}
                     href={`/blog?tag=${encodeURIComponent(t.slug)}`}
+                    prefetch={false}
                     className="rv-badge rv-badge-cyan text-[8px] hover:opacity-90 transition-opacity"
                   >
                     {t.name}
@@ -492,7 +497,7 @@ export default async function Home() {
               <span className="rv-badge rv-badge-cyan mb-3 inline-flex">◈ Fórum</span>
               <h2 className="rv-display text-2xl sm:text-3xl text-[var(--rv-text-primary)]">Tópicos Ativos</h2>
             </div>
-            <Link href="/forum" className="rv-btn rv-btn-ghost text-xs px-5 h-9">
+            <Link href="/forum" prefetch={false} className="rv-btn rv-btn-ghost text-xs px-5 h-9">
               Ver todos →
             </Link>
           </div>
@@ -502,6 +507,7 @@ export default async function Home() {
               <Link
                 key={topic.id}
                 href={`/forum/t/${topic.slug}`}
+                prefetch={false}
                 className="rv-card group flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-5 gap-3 hover:scale-[1.005] transition-all duration-200"
               >
                 <div className="flex flex-col gap-1.5 flex-1 min-w-0">
@@ -542,13 +548,13 @@ export default async function Home() {
             Leia o blog, participe do fórum e acompanhe os destaques. Quando quiser, entre para comentar e publicar.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/blog" className="rv-btn rv-btn-primary px-12 h-14">
+            <Link href="/blog" prefetch={false} className="rv-btn rv-btn-primary px-12 h-14">
               Explorar Blog
             </Link>
-            <Link href="/forum" className="rv-btn rv-btn-ghost px-10 h-14">
+            <Link href="/forum" prefetch={false} className="rv-btn rv-btn-ghost px-10 h-14">
               Ir ao Fórum
             </Link>
-            <Link href="/register" className="rv-btn rv-btn-ghost px-10 h-14">
+            <Link href="/register" prefetch={false} className="rv-btn rv-btn-ghost px-10 h-14">
               Criar Conta
             </Link>
           </div>

@@ -145,8 +145,8 @@ function SearchContent() {
               Tente termos diferentes ou explore o conteúdo abaixo.
             </p>
             <div className="flex justify-center gap-4">
-              <Link href="/blog" className="rv-btn rv-btn-ghost px-6 h-10 text-xs">Ver Blog</Link>
-              <Link href="/forum" className="rv-btn rv-btn-primary px-6 h-10 text-xs">Ver Fórum</Link>
+              <Link href="/blog" prefetch={false} className="rv-btn rv-btn-ghost px-6 h-10 text-xs">Ver Blog</Link>
+              <Link href="/forum" prefetch={false} className="rv-btn rv-btn-primary px-6 h-10 text-xs">Ver Fórum</Link>
             </div>
           </div>
         )}
@@ -169,6 +169,7 @@ function SearchContent() {
                     <Link
                       key={p.slug}
                       href={p.url}
+                      prefetch={false}
                       className="rv-card p-5 flex gap-4 hover:border-[var(--rv-accent)]/40 hover:bg-[var(--rv-surface-2)] transition-all group"
                     >
                       {p.image && (
@@ -203,7 +204,7 @@ function SearchContent() {
                   ))}
                 </div>
                 <div className="mt-3 text-right">
-                  <Link href={`/blog?q=${encodeURIComponent(data.query)}`} className="text-xs text-[var(--rv-accent)] hover:underline rv-label">
+                  <Link href={`/blog?q=${encodeURIComponent(data.query)}`} prefetch={false} className="text-xs text-[var(--rv-accent)] hover:underline rv-label">
                     Ver todos no Blog →
                   </Link>
                 </div>
@@ -237,6 +238,7 @@ function SearchContent() {
                         <div className="flex items-center gap-3 mt-2 text-[10px] text-[var(--rv-text-dim)] rv-label tracking-wide flex-wrap">
                           <Link
                             href={`/forum/c/${t.category_slug}`}
+                            prefetch={false}
                             onClick={(e) => e.stopPropagation()}
                             className="rv-badge rv-badge-cyan text-[9px] hover:opacity-80 transition-opacity"
                           >
@@ -256,7 +258,7 @@ function SearchContent() {
                   ))}
                 </div>
                 <div className="mt-3 text-right">
-                  <Link href={`/forum?q=${encodeURIComponent(data.query)}`} className="text-xs text-[var(--rv-cyan)] hover:underline rv-label">
+                  <Link href={`/forum?q=${encodeURIComponent(data.query)}`} prefetch={false} className="text-xs text-[var(--rv-cyan)] hover:underline rv-label">
                     Ver todos no Fórum →
                   </Link>
                 </div>

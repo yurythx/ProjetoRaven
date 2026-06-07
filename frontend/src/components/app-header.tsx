@@ -72,7 +72,7 @@ export function AppHeader() {
         <div className="mx-auto flex h-16 sm:h-20 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
           {/* ── Logo ── */}
-          <Link href="/" className="group flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <Link href="/" prefetch={false} className="group flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <div className="relative h-8 w-8 sm:h-9 sm:w-9">
               <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] opacity-80 group-hover:opacity-100 transition-opacity rv-glow-purple" />
               <div className="absolute inset-[2px] rounded-[5px] bg-[var(--rv-black)] flex items-center justify-center">
@@ -97,6 +97,7 @@ export function AppHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch={false}
                   className={`group flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 rv-label text-xs ${
                     active
                       ? "bg-[var(--rv-accent-glow)] text-[var(--rv-accent)] border border-[var(--rv-border-hover)]"
@@ -119,6 +120,7 @@ export function AppHeader() {
             {canSeeDashboard && (
               <Link
                 href="/dashboard"
+                prefetch={false}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl rv-label text-xs text-[var(--rv-cyan)] hover:bg-[var(--rv-cyan-glow)] transition-all border border-transparent hover:border-[var(--rv-cyan)]/20"
               >
                 <span>⬡</span>
@@ -139,6 +141,7 @@ export function AppHeader() {
                 {/* Entrar — explicit colors to stay visible on any bg */}
                 <Link
                   href="/login"
+                  prefetch={false}
                   className={`rv-btn text-xs px-5 h-10 transition-all duration-200 ${
                     headerDark
                       ? "bg-transparent border border-white/25 text-white/90 hover:border-white/55 hover:bg-white/10 hover:text-white"
@@ -147,7 +150,7 @@ export function AppHeader() {
                 >
                   Entrar
                 </Link>
-                <Link href="/register" className="rv-btn rv-btn-primary text-xs px-5 h-10">
+                <Link href="/register" prefetch={false} className="rv-btn rv-btn-primary text-xs px-5 h-10">
                   Criar Conta
                 </Link>
               </>
@@ -156,6 +159,7 @@ export function AppHeader() {
                 {/* Notification bell */}
                 <Link
                   href="/notifications"
+                  prefetch={false}
                   className={`relative h-9 w-9 rounded-xl border flex items-center justify-center transition-all ${iconBtnBase}`}
                   title="Notificações"
                   aria-label={unreadCount > 0 ? `${unreadCount} notificações não lidas` : "Notificações"}
@@ -171,6 +175,7 @@ export function AppHeader() {
                 {/* User pill */}
                 <Link
                   href="/me"
+                  prefetch={false}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all ${
                     headerDark
                       ? "bg-white/8 border-white/15 hover:border-white/30 hover:bg-white/12"
@@ -209,7 +214,7 @@ export function AppHeader() {
           {/* ── Mobile: right side ── */}
           <div className="flex md:hidden items-center gap-2">
             {!isLoading && !user && (
-              <Link href="/login" className="rv-btn rv-btn-primary text-xs px-4 h-9">
+              <Link href="/login" prefetch={false} className="rv-btn rv-btn-primary text-xs px-4 h-9">
                 Entrar
               </Link>
             )}
@@ -218,6 +223,7 @@ export function AppHeader() {
                 {/* Notification bell */}
                 <Link
                   href="/notifications"
+                  prefetch={false}
                   className={`relative h-9 w-9 rounded-xl border flex items-center justify-center transition-all ${iconBtnBase}`}
                   aria-label={unreadCount > 0 ? `${unreadCount} notificações não lidas` : "Notificações"}
                 >
@@ -228,7 +234,7 @@ export function AppHeader() {
                     </span>
                   )}
                 </Link>
-                <Link href="/me" className="relative h-9 w-9 flex-shrink-0">
+                <Link href="/me" prefetch={false} className="relative h-9 w-9 flex-shrink-0">
                   <div className="h-9 w-9 rounded-full bg-gradient-to-br from-[var(--rv-accent)] to-[var(--rv-cyan)] flex items-center justify-center text-white font-black text-sm">
                     {heroName[0].toUpperCase()}
                   </div>
@@ -262,6 +268,7 @@ export function AppHeader() {
                 <Link
                   key={link.href}
                   href={link.href}
+                  prefetch={false}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all rv-label text-xs ${
                     active
                       ? "bg-[var(--rv-accent-glow)] text-[var(--rv-accent)] border border-[var(--rv-border-hover)]"
@@ -277,6 +284,7 @@ export function AppHeader() {
             {canSeeDashboard && (
               <Link
                 href="/dashboard"
+                prefetch={false}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl rv-label text-xs text-[var(--rv-cyan)] hover:bg-[var(--rv-cyan-glow)] transition-all border border-transparent"
               >
                 <span>⬡</span>
@@ -287,6 +295,7 @@ export function AppHeader() {
             {isLoggedIn && (
               <Link
                 href="/notifications"
+                prefetch={false}
                 className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl rv-label text-xs text-white/65 hover:text-white hover:bg-white/8 border border-transparent transition-all"
               >
                 <span className="flex items-center gap-3">
@@ -312,7 +321,7 @@ export function AppHeader() {
             )}
 
             {!isLoading && !user && (
-              <Link href="/register" className="rv-btn rv-btn-primary w-full h-11 mt-2 text-xs">
+              <Link href="/register" prefetch={false} className="rv-btn rv-btn-primary w-full h-11 mt-2 text-xs">
                 Criar Conta Grátis
               </Link>
             )}
