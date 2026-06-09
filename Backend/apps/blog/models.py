@@ -85,6 +85,21 @@ class Post(UUIDModel):
         related_name="posts"
     )
 
+    previous_post = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="next_posts",
+    )
+    next_post = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="previous_posts",
+    )
+
     status = models.CharField(
         max_length=20,
         choices=Status.choices,

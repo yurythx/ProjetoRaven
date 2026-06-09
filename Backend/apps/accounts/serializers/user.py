@@ -224,6 +224,10 @@ class UserAdminCreateSerializer(serializers.Serializer):
             user.is_staff = True
             user.save(update_fields=["is_staff"])
 
+        request = self.context.get("request")
+        if request and request.user:
+            user.verify_admin(verified_by=request.user)
+
         if groups is not None:
             UserManagementService().change_user_groups(
                 user,

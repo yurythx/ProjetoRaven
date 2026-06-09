@@ -11,7 +11,10 @@ class HealthLiveView(APIView):
     permission_classes = [AllowAny]
     
     def get(self, request):
-        return Response({"status": "ok"})
+        res = Response({"status": "ok"})
+        res["Cache-Control"] = "no-store, no-cache, max-age=0, must-revalidate"
+        res["Pragma"] = "no-cache"
+        return res
 
 
 class HealthReadyView(APIView):
@@ -28,7 +31,7 @@ class HealthReadyView(APIView):
         all_ok = all(checks.values())
         status_code = 200 if all_ok else 503
 
-        return Response(
+        res = Response(
             {
                 "status": "ok" if all_ok else "degraded",
                 "checks": checks,
@@ -36,6 +39,9 @@ class HealthReadyView(APIView):
             },
             status=status_code,
         )
+        res["Cache-Control"] = "no-store, no-cache, max-age=0, must-revalidate"
+        res["Pragma"] = "no-cache"
+        return res
 
     def _check_database(self) -> bool:
         try:
@@ -97,7 +103,7 @@ class HealthDetailedView(APIView):
         
         all_ok = all(checks.values())
         
-        return Response(
+        res = Response(
             {
                 "status": "ok" if all_ok else "degraded",
                 "checks": checks,
@@ -106,8 +112,11 @@ class HealthDetailedView(APIView):
                 "version": getattr(settings, "APP_VERSION", "unknown"),
                 "environment": getattr(settings, "ENVIRONMENT", "production"),
             },
-            status=200 if all_ok else 503,
+            status=200,
         )
+        res["Cache-Control"] = "no-store, no-cache, max-age=0, must-revalidate"
+        res["Pragma"] = "no-cache"
+        return res
     
     def _check_database(self) -> bool:
         try:

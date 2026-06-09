@@ -7,6 +7,8 @@ import { getSiteBaseUrl } from "@/lib/env";
 import { backendFetch } from "@/lib/backend";
 import { fixImageUrl } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Projeto Raven — Blog & Fórum",
   description: "Seu espaço central para explorar artigos técnicos, participar de fóruns de discussão e interagir com uma comunidade apaixonada por tecnologia.",

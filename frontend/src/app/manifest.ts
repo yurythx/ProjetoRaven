@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
+  const v = "r1";
   return {
     name: "Projeto Raven",
     short_name: "Raven",
@@ -15,25 +16,25 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: ["news", "social"],
     icons: [
       {
-        src: "/icons/icon-192.png",
+        src: `/icons/icon-192.png?v=${v}`,
         sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/icon-192.png",
+        src: `/icons/icon-192.png?v=${v}`,
         sizes: "192x192",
         type: "image/png",
         purpose: "maskable",
       },
       {
-        src: "/icons/icon-512.png",
+        src: `/icons/icon-512.png?v=${v}`,
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/icons/icon-512.png",
+        src: `/icons/icon-512.png?v=${v}`,
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
@@ -44,13 +45,13 @@ export default function manifest(): MetadataRoute.Manifest {
         name: "Blog",
         short_name: "Blog",
         url: "/blog",
-        icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+        icons: [{ src: `/icons/icon-192.png?v=${v}`, sizes: "192x192" }],
       },
       {
         name: "Fórum",
         short_name: "Fórum",
         url: "/forum",
-        icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
+        icons: [{ src: `/icons/icon-192.png?v=${v}`, sizes: "192x192" }],
       },
     ],
   };

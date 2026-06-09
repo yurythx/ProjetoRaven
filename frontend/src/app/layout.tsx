@@ -85,7 +85,9 @@ export default async function RootLayout({
     >
       <head>
         <link rel="alternate" type="application/rss+xml" title="Projeto Raven — Blog RSS" href="/api/blog/rss" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" href="/favicon.ico?v=r1" sizes="any" />
+        <link rel="icon" type="image/svg+xml" href="/icon.svg?v=r1" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=r1" />
         {nonce ? (
           <script
             nonce={nonce}

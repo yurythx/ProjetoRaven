@@ -97,7 +97,7 @@ class UserLoginSerializer(serializers.Serializer):
         if candidate and candidate.check_password(raw_password):
             if candidate.is_banned:
                 raise serializers.ValidationError("Sua conta está banida.")
-            if not candidate.is_verified and not candidate.is_staff and not candidate.is_superuser:
+            if not candidate.is_verified and not candidate.is_admin_verified and not candidate.is_staff and not candidate.is_superuser:
                 raise serializers.ValidationError("Confirme seu e-mail antes de entrar.")
             if not candidate.is_active:
                 raise serializers.ValidationError("Sua conta está desativada.")
