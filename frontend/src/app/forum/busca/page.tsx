@@ -24,8 +24,10 @@ type PaginatedTopics = { count: number; next: string | null; results: TopicResul
 
 async function fetchTopics(q: string, page: number): Promise<PaginatedTopics> {
   const params = new URLSearchParams({ q, page: String(page), page_size: "20" });
-  const res = await fetch(`/api/forum/topics/?${params}`);
-  if (!res.ok) return { count: 0, next: null, results: [] };
+  const res = await fetch(`/api/forum/topics?${params}`);
+  if (!res.ok) {
+    throw new Error("Falha ao carregar resultados do fórum.");
+  }
   const body = await res.json() as PaginatedTopics | TopicResult[];
   if (Array.isArray(body)) return { count: body.length, next: null, results: body };
   return body;
@@ -46,12 +48,29 @@ export default function ForumBuscaPage() {
   }, [debouncedInput]);
 
   useEffect(() => {
+    setInputValue(initialQ);
+  }, [initialQ]);
+
+  useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
   const query = debouncedInput.trim();
 
-  const { data, isLoading, isFetching } = useQuery({
+  useEffect(() => {
+    if (query === initialQ.trim()) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (query) {
+      params.set("q", query);
+    } else {
+      params.delete("q");
+    }
+    params.delete("page");
+    const qs = params.toString();
+    router.replace(`/forum/busca${qs ? `?${qs}` : ""}`, { scroll: false });
+  }, [initialQ, query, router, searchParams]);
+
+  const { data, isLoading, isFetching, isError, error } = useQuery({
     queryKey: ["forum-busca", query, page],
     queryFn: () => fetchTopics(query, page),
     enabled: query.length >= 2,
@@ -95,7 +114,7 @@ export default function ForumBuscaPage() {
         </div>
 
         {/* Results header */}
-        {query.length >= 2 && data && (
+        {query.length >= 2 && data && !isError && (
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-[var(--rv-text-dim)]">
               {data.count > 0
@@ -118,7 +137,7 @@ export default function ForumBuscaPage() {
           </div>
         )}
 
-        {!isLoading && data?.results && data.results.length > 0 && (
+        {!isLoading && !isError && data?.results && data.results.length > 0 && (
           <ul className="space-y-3">
             {data.results.map((topic) => (
               <li key={topic.id}>
@@ -150,13 +169,27 @@ export default function ForumBuscaPage() {
           </ul>
         )}
 
-        {!isLoading && data?.results?.length === 0 && query.length >= 2 && (
+        {!isLoading && !isError && data?.results?.length === 0 && query.length >= 2 && (
           <div className="rv-card p-12 flex flex-col items-center text-center gap-4">
             <Search className="h-12 w-12 text-[var(--rv-text-dim)] opacity-30" />
             <p className="text-[var(--rv-text-dim)]">Nenhum tópico encontrado para &ldquo;{query}&rdquo;.</p>
             <Link href="/forum" className="rv-btn rv-btn-ghost h-9 px-6 text-xs">
               Ver todos os tópicos
             </Link>
+          </div>
+        )}
+
+        {!isLoading && isError && query.length >= 2 && (
+          <div className="rv-card p-12 flex flex-col items-center text-center gap-4">
+            <Search className="h-12 w-12 text-red-400 opacity-60" />
+            <p className="text-red-400">{error instanceof Error ? error.message : "Falha ao buscar tópicos."}</p>
+            <button
+              type="button"
+              onClick={() => router.refresh()}
+              className="rv-btn rv-btn-ghost h-9 px-6 text-xs"
+            >
+              Tentar novamente
+            </button>
           </div>
         )}
 

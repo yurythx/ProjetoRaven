@@ -30,7 +30,7 @@ export function BlogPostActions({ slug, status, authorId }: Props) {
   const searchParams = useSearchParams();
   const u = (user ?? null) as Record<string, unknown> | null;
 
-  const isEditor = Boolean(u?.is_admin || u?.is_blog_editor) && !isLoading;
+  const isEditor = Boolean(u?.is_admin || u?.is_blog_editor || u?.is_staff || u?.is_superuser) && !isLoading;
   const myId = typeof u?.id === "string" ? u.id : null;
   const isAuthor = Boolean(authorId && myId && authorId === myId);
   const canEdit = isEditor || isAuthor;

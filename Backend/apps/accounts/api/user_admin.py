@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from ..services.management import UserManagementService
 from ..serializers.user import UserAdminSerializer, UserListSerializer, UserAdminCreateSerializer
 from ..serializers.admin import BanUserSerializer, ResetPasswordSerializer
-from ..permissions import IsSuperUser
+from ..permissions.account_permissions import IsAdmin
 from apps.common.utils import get_ip_and_ua
 
 User = get_user_model()
@@ -38,10 +38,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserAdminSerializer
 
     def get_permissions(self):
-        superuser_actions = ["list", "retrieve", "ban", "unban", "reset_password", "activate", "deactivate", "verify_admin"]
-        if self.action in superuser_actions:
-            return [IsSuperUser()]
-        return [permissions.IsAdminUser()]
+        return [IsAdmin()]
 
     def _apply_filters(self, qs):
         params = self.request.query_params

@@ -3,6 +3,14 @@ from apps.blog.models import Post, Category
 from .tag import TagSerializer
 from .category import CategorySerializer
 
+
+class PostLinkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = ["id", "title", "slug"]
+        read_only_fields = fields
+
+
 class PostListSerializer(serializers.ModelSerializer):
     """Serializer for post list (lightweight)."""
 
@@ -101,6 +109,8 @@ class PostDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     image = serializers.SerializerMethodField()
+    previous_post = PostLinkSerializer(read_only=True)
+    next_post = PostLinkSerializer(read_only=True)
 
     class Meta:
         model = Post
@@ -124,6 +134,8 @@ class PostDetailSerializer(serializers.ModelSerializer):
             "view_count",
             "read_time_minutes",
             "image",
+            "previous_post",
+            "next_post",
             "meta_title",
             "meta_description",
             "meta_keywords",
@@ -159,6 +171,8 @@ class PublicPostDetailSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     image = serializers.SerializerMethodField()
+    previous_post = serializers.SerializerMethodField()
+    next_post = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -182,6 +196,8 @@ class PublicPostDetailSerializer(serializers.ModelSerializer):
             "view_count",
             "read_time_minutes",
             "image",
+            "previous_post",
+            "next_post",
             "meta_title",
             "meta_description",
             "meta_keywords",
@@ -203,6 +219,19 @@ class PublicPostDetailSerializer(serializers.ModelSerializer):
         relative = f"{settings.MEDIA_URL}{obj.image.name}"
         return build_media_url(relative, self.context.get("request"))
 
+    def _get_public_link(self, linked_post):
+        if not linked_post:
+            return None
+        if linked_post.status != Post.Status.PUBLISHED or not linked_post.is_public:
+            return None
+        return PostLinkSerializer(linked_post, context=self.context).data
+
+    def get_previous_post(self, obj):
+        return self._get_public_link(obj.previous_post)
+
+    def get_next_post(self, obj):
+        return self._get_public_link(obj.next_post)
+
 
 class PostCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating posts."""
@@ -218,6 +247,8 @@ class PostCreateSerializer(serializers.ModelSerializer):
     )
     category_id = serializers.UUIDField(required=False, write_only=True)
     image = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    previous_post_id = serializers.UUIDField(required=False, allow_null=True, write_only=True)
+    next_post_id = serializers.UUIDField(required=False, allow_null=True, write_only=True)
 
     class Meta:
         model = Post
@@ -234,6 +265,8 @@ class PostCreateSerializer(serializers.ModelSerializer):
             "rejection_reason",
             "is_featured",
             "image",
+            "previous_post_id",
+            "next_post_id",
             "meta_title",
             "meta_description",
             "meta_keywords",
@@ -271,6 +304,24 @@ class PostCreateSerializer(serializers.ModelSerializer):
         if value and not Category.objects.filter(id=value).exists():
             raise serializers.ValidationError("Category not found.")
         return value
+
+    def validate_previous_post_id(self, value):
+        if value and not Post.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Previous post not found.")
+        return value
+
+    def validate_next_post_id(self, value):
+        if value and not Post.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Next post not found.")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        previous_post_id = attrs.get("previous_post_id")
+        next_post_id = attrs.get("next_post_id")
+        if previous_post_id and next_post_id and previous_post_id == next_post_id:
+            raise serializers.ValidationError("Previous and next posts must be different.")
+        return attrs
 
     def create(self, validated_data):
         from apps.blog.services.post import PostService
@@ -313,6 +364,8 @@ class PostUpdateSerializer(serializers.ModelSerializer):
     category_id = serializers.UUIDField(required=False, write_only=True)
     status = serializers.ChoiceField(choices=Post.Status.choices, required=False)
     image = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    previous_post_id = serializers.UUIDField(required=False, allow_null=True, write_only=True)
+    next_post_id = serializers.UUIDField(required=False, allow_null=True, write_only=True)
 
     class Meta:
         model = Post
@@ -329,6 +382,8 @@ class PostUpdateSerializer(serializers.ModelSerializer):
             "rejection_reason",
             "is_featured",
             "image",
+            "previous_post_id",
+            "next_post_id",
             "meta_title",
             "meta_description",
             "meta_keywords",
@@ -364,6 +419,28 @@ class PostUpdateSerializer(serializers.ModelSerializer):
         if value and not Category.objects.filter(id=value).exists():
             raise serializers.ValidationError("Category not found.")
         return value
+
+    def validate_previous_post_id(self, value):
+        if value and not Post.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Previous post not found.")
+        if value and self.instance and str(self.instance.id) == str(value):
+            raise serializers.ValidationError("A post cannot link to itself as previous.")
+        return value
+
+    def validate_next_post_id(self, value):
+        if value and not Post.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Next post not found.")
+        if value and self.instance and str(self.instance.id) == str(value):
+            raise serializers.ValidationError("A post cannot link to itself as next.")
+        return value
+
+    def validate(self, attrs):
+        attrs = super().validate(attrs)
+        previous_post_id = attrs.get("previous_post_id")
+        next_post_id = attrs.get("next_post_id")
+        if previous_post_id and next_post_id and previous_post_id == next_post_id:
+            raise serializers.ValidationError("Previous and next posts must be different.")
+        return attrs
 
     def update(self, instance, validated_data):
         from apps.blog.services.post import PostService

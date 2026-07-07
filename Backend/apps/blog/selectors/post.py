@@ -5,6 +5,7 @@ These functions encapsulate all read-path query logic so views stay thin
 and the same queries can be reused across views, management commands, and tests.
 Write operations belong in PostService / PostRepository.
 """
+from django.db import connection
 from django.db.models import Q, QuerySet
 from typing import Optional
 
@@ -64,6 +65,16 @@ class PostSelector:
         if not query:
             return qs
 
+        if connection.vendor != "postgresql":
+            return (
+                qs.filter(
+                    Q(title__icontains=query)
+                    | Q(excerpt__icontains=query)
+                    | Q(content__icontains=query)
+                )
+                .order_by("-published_at", "-created_at")
+            )
+
         try:
             from django.contrib.postgres.search import SearchQuery, SearchRank
             # config='portuguese' deve bater com o trigger da migração
@@ -75,11 +86,13 @@ class PostSelector:
             )
         except Exception:
             # Fallback for non-postgres or if search_vector is not yet populated
-            from django.db.models import Q
-            return qs.filter(
-                Q(title__icontains=query) | 
-                Q(excerpt__icontains=query) | 
-                Q(content__icontains=query)
+            return (
+                qs.filter(
+                    Q(title__icontains=query)
+                    | Q(excerpt__icontains=query)
+                    | Q(content__icontains=query)
+                )
+                .order_by("-published_at", "-created_at")
             )
 
     @staticmethod

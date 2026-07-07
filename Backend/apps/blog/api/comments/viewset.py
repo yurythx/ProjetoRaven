@@ -1,12 +1,11 @@
 from django.db.models import Q
 from rest_framework import viewsets, response, status, permissions
 from rest_framework.decorators import action
-from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from ...services.comment import CommentService
 from ...repositories.comment import DjangoCommentRepository
 from ...serializers.comment import CommentListSerializer, CommentCreateSerializer, ModerationCommentSerializer
 from ...permissions.blog_permissions import IsBlogEditor
-from apps.common.throttling import CommentThrottle
+from apps.common.throttling import CommentThrottle, ResilientAnonRateThrottle, ResilientUserRateThrottle
 
 _EDITOR_ACTIONS = {
     "approve", "disapprove", "destroy", "list_pending",
@@ -15,6 +14,7 @@ _EDITOR_ACTIONS = {
     "approve_thread", "disapprove_thread", "delete_thread",
     "replies",
 }
+_ORDERING_ALLOWLIST = {"created_at", "updated_at", "is_approved"}
 
 
 class CommentViewSet(viewsets.GenericViewSet):
@@ -22,7 +22,7 @@ class CommentViewSet(viewsets.GenericViewSet):
 
     repository = DjangoCommentRepository()
     service = CommentService(repository)
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+    throttle_classes = [ResilientAnonRateThrottle, ResilientUserRateThrottle]
 
     def get_permissions(self):
         if self.action in _EDITOR_ACTIONS:
@@ -33,6 +33,12 @@ class CommentViewSet(viewsets.GenericViewSet):
         if self.action == "create":
             return [CommentThrottle()]
         return super().get_throttles()
+
+    @staticmethod
+    def _safe_ordering(raw_ordering: str | None, default: str = "-created_at") -> list[str]:
+        candidates = [p.strip() for p in str(raw_ordering or "").split(",") if p.strip()]
+        safe_fields = [field for field in candidates if field.lstrip("-") in _ORDERING_ALLOWLIST]
+        return safe_fields or [default]
 
     # ── Create ──────────────────────────────────────────────────────────────
 
@@ -98,13 +104,14 @@ class CommentViewSet(viewsets.GenericViewSet):
         if created_lte:
             filters["created_at__lte"] = created_lte
 
-        ordering = request.query_params.get("ordering", "-created_at")
-        qs = Comment.objects.filter(**filters).select_related("post", "author").order_by(ordering)
+        qs = Comment.objects.filter(**filters).select_related("post", "author")
 
         # Full-text search
-        search = request.query_params.get("search", "").strip()
+        search = (request.query_params.get("search") or request.query_params.get("q") or "").strip()
         if search:
             qs = qs.filter(Q(content__icontains=search) | Q(name__icontains=search) | Q(email__icontains=search))
+
+        qs = qs.order_by(*self._safe_ordering(request.query_params.get("ordering")))
 
         page = self.paginate_queryset(qs)
         if page is not None:
@@ -146,7 +153,9 @@ class CommentViewSet(viewsets.GenericViewSet):
         parent = self.repository.get_by_id(pk)
         if not parent:
             return response.Response({"detail": "Not found"}, status=status.HTTP_404_NOT_FOUND)
-        qs = Comment.objects.filter(parent=parent).select_related("post", "author").order_by("created_at")
+        qs = Comment.objects.filter(parent=parent).select_related("post", "author").order_by(
+            *self._safe_ordering(request.query_params.get("ordering"), default="created_at")
+        )
         page = self.paginate_queryset(qs)
         if page is not None:
             return self.get_paginated_response(CommentListSerializer(page, many=True).data)

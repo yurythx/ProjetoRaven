@@ -10,6 +10,7 @@ import { ConfirmDialog } from "@/components/rv-confirm-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useDebounce } from "@/hooks/use-debounce";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -91,7 +92,7 @@ export function BlogCommentModeration() {
   const [threadToDelete, setThreadToDelete] = React.useState<ModerationItem | null>(null);
   const [repliesByParent, setRepliesByParent] = React.useState<RepliesState>({});
 
-  const debounced = React.useMemo(() => query.trim(), [query]);
+  const debounced = useDebounce(query.trim(), 350);
 
   const postsQuery = useQuery({
     queryKey: ["blog-posts-lite"],

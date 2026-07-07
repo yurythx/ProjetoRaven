@@ -8,7 +8,7 @@ import { BlogCommentModeration } from "@/features/blog/comment-moderation";
 function Guard({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const u = (user ?? null) as Record<string, unknown> | null;
-  const isEditor = Boolean(u?.is_admin || u?.is_blog_editor);
+  const isEditor = Boolean(u?.is_admin || u?.is_blog_editor || u?.is_staff || u?.is_superuser);
 
   if (isLoading) {
     return (

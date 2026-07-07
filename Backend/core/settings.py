@@ -397,24 +397,38 @@ _CHANNEL_LAYER_SOCKET_TIMEOUT = float(os.environ.get("CHANNEL_LAYER_SOCKET_TIMEO
 _CHANNEL_LAYER_HEALTHCHECK_INTERVAL = int(os.environ.get("CHANNEL_LAYER_HEALTHCHECK_INTERVAL", "30"))
 _CHANNEL_LAYER_CAPACITY = int(os.environ.get("CHANNEL_LAYER_CAPACITY", "1000"))
 _CHANNEL_LAYER_EXPIRY = int(os.environ.get("CHANNEL_LAYER_EXPIRY", "60"))
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [
-                {
-                    "address": _channel_layer_host,
-                    "socket_connect_timeout": _CHANNEL_LAYER_SOCKET_CONNECT_TIMEOUT,
-                    "socket_timeout": _CHANNEL_LAYER_SOCKET_TIMEOUT,
-                    "retry_on_timeout": True,
-                    "health_check_interval": _CHANNEL_LAYER_HEALTHCHECK_INTERVAL,
-                }
-            ],
-            "capacity": _CHANNEL_LAYER_CAPACITY,
-            "expiry": _CHANNEL_LAYER_EXPIRY,
-        },
+_USE_IN_MEMORY_CHANNEL_LAYER = os.environ.get("USE_IN_MEMORY_CHANNEL_LAYER", "").strip().lower() in {"1", "true", "yes"}
+_USE_REDIS_CHANNEL_LAYER = bool(REDIS_URL) or not (DEBUG and USE_SQLITE)
+
+if _USE_IN_MEMORY_CHANNEL_LAYER or not _USE_REDIS_CHANNEL_LAYER:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+            "CONFIG": {
+                "capacity": _CHANNEL_LAYER_CAPACITY,
+                "expiry": _CHANNEL_LAYER_EXPIRY,
+            },
+        }
     }
-}
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [
+                    {
+                        "address": _channel_layer_host,
+                        "socket_connect_timeout": _CHANNEL_LAYER_SOCKET_CONNECT_TIMEOUT,
+                        "socket_timeout": _CHANNEL_LAYER_SOCKET_TIMEOUT,
+                        "retry_on_timeout": True,
+                        "health_check_interval": _CHANNEL_LAYER_HEALTHCHECK_INTERVAL,
+                    }
+                ],
+                "capacity": _CHANNEL_LAYER_CAPACITY,
+                "expiry": _CHANNEL_LAYER_EXPIRY,
+            },
+        }
+    }
 
 # ---------------------------------------------------------------------------
 # Sentry

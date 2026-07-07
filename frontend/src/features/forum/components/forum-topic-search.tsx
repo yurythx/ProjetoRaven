@@ -15,8 +15,10 @@ type TopicResult = {
 };
 
 async function searchTopics(q: string): Promise<TopicResult[]> {
-  const res = await fetch(`/api/forum/topics/?q=${encodeURIComponent(q)}&page_size=8`);
-  if (!res.ok) return [];
+  const res = await fetch(`/api/forum/topics?q=${encodeURIComponent(q)}&page_size=8`);
+  if (!res.ok) {
+    throw new Error("Falha ao buscar tópicos.");
+  }
   const body = await res.json() as { results?: TopicResult[] } | TopicResult[];
   return Array.isArray(body) ? body : (body.results ?? []);
 }
@@ -26,7 +28,7 @@ export function ForumTopicSearch() {
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
 
-  const { data: results = [], isFetching } = useQuery({
+  const { data: results = [], isFetching, isError } = useQuery({
     queryKey: ["forum-search", debouncedQuery],
     queryFn: () => searchTopics(debouncedQuery),
     enabled: debouncedQuery.length >= 2,
@@ -63,7 +65,7 @@ export function ForumTopicSearch() {
         </span>
       </div>
 
-      {showResults && results.length > 0 && (
+      {showResults && !isError && results.length > 0 && (
         <ul className="absolute z-50 mt-1 w-full rounded-md border border-[var(--rv-border)] bg-[var(--rv-surface)] shadow-lg overflow-hidden">
           {results.map((topic) => (
             <li key={topic.id}>
@@ -91,9 +93,15 @@ export function ForumTopicSearch() {
         </ul>
       )}
 
-      {showResults && results.length === 0 && !isFetching && (
+      {showResults && !isError && results.length === 0 && !isFetching && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-[var(--rv-border)] bg-[var(--rv-surface)] px-4 py-3 text-sm text-[var(--rv-text-dim)] shadow-lg">
           Nenhum tópico encontrado para &ldquo;{debouncedQuery}&rdquo;.
+        </div>
+      )}
+
+      {showResults && isError && !isFetching && (
+        <div className="absolute z-50 mt-1 w-full rounded-md border border-red-500/30 bg-[var(--rv-surface)] px-4 py-3 text-sm text-red-400 shadow-lg">
+          Não foi possível buscar os tópicos agora.
         </div>
       )}
     </div>

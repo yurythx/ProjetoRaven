@@ -3,8 +3,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
-from apps.common.throttling import ForumPostThrottle
+from apps.common.throttling import (
+    ForumPostThrottle,
+    ResilientAnonRateThrottle,
+    ResilientUserRateThrottle,
+)
 
 from ..models import Topic, Reply
 from ..services.topic import TopicService
@@ -27,13 +30,13 @@ class TopicViewSet(viewsets.ModelViewSet):
     """ViewSet for forum topics."""
     queryset = Topic.objects.all()
     permission_classes = [permissions.IsAuthenticated]
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+    throttle_classes = [ResilientAnonRateThrottle, ResilientUserRateThrottle]
     serializer_class = TopicListSerializer
     lookup_field = "slug"
 
     def get_throttles(self):
         if self.action == "create":
-            return [AnonRateThrottle(), ForumPostThrottle()]
+            return [ResilientAnonRateThrottle(), ForumPostThrottle()]
         return super().get_throttles()
 
     def get_serializer_class(self):
@@ -62,6 +65,8 @@ class TopicViewSet(viewsets.ModelViewSet):
             queryset = queryset.select_related("author", "category", "last_reply_by")
         if self.action == "list":
             queryset = queryset.filter(category__is_active=True)
+            if "/public/" in self.request.path or not getattr(self.request.user, "is_authenticated", False):
+                queryset = queryset.filter(status__in=[Topic.Status.OPEN, Topic.Status.CLOSED])
             category_param = self.request.query_params.get("category")
             if category_param:
                 import uuid
@@ -75,7 +80,7 @@ class TopicViewSet(viewsets.ModelViewSet):
             if author_param:
                 queryset = queryset.filter(author__username=author_param)
 
-            q = self.request.query_params.get("q", "").strip()
+            q = (self.request.query_params.get("q") or self.request.query_params.get("search") or "").strip()
             if q:
                 # _apply_search applies its own order_by when using full-text search
                 return self._apply_search(queryset, q)
@@ -87,18 +92,18 @@ class TopicViewSet(viewsets.ModelViewSet):
     def _apply_search(qs, q: str):
         from django.db import connection
         if connection.vendor != "postgresql":
-            return qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
+            return qs.filter(Q(title__icontains=q) | Q(content__icontains=q)).order_by("-is_pinned", "-last_reply_at", "-created_at")
 
         try:
             from django.contrib.postgres.search import SearchQuery, SearchRank
-            query = SearchQuery(q, config="portuguese")
+            query = SearchQuery(q, config="portuguese", search_type="websearch")
             return (
                 qs.filter(search_vector=query)
                 .annotate(rank=SearchRank("search_vector", query))
-                .order_by("-rank")
+                .order_by("-rank", "-is_pinned", "-last_reply_at", "-created_at")
             )
         except Exception:
-            return qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
+            return qs.filter(Q(title__icontains=q) | Q(content__icontains=q)).order_by("-is_pinned", "-last_reply_at", "-created_at")
 
     def create(self, request):
         serializer = TopicCreateSerializer(data=request.data)

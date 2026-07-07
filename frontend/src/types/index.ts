@@ -12,6 +12,12 @@ export type Tag = {
   slug: string;
 };
 
+export type ArticleLink = {
+  id: UUID;
+  title: string;
+  slug: string;
+};
+
 export type Article = {
   id: UUID;
   title: string;
@@ -29,6 +35,8 @@ export type Article = {
   meta_description?: string | null;
   meta_keywords?: string | null;
   tags?: UUID[];
+  previous_post?: ArticleLink | null;
+  next_post?: ArticleLink | null;
   published_at?: string | null;
   created_at?: string;
   updated_at?: string;

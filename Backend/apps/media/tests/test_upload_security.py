@@ -51,14 +51,28 @@ class MediaUploadPermissionTestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.editor_group, _ = Group.objects.get_or_create(name="editors")
+        self.blog_editor_group, _ = Group.objects.get_or_create(name="blog_editors")
         self.editor = _make_user("editor")
         self.editor.groups.add(self.editor_group)
+        self.blog_editor = _make_user("blog_editor")
+        self.blog_editor.groups.add(self.blog_editor_group)
         self.regular = _make_user("regular")
         self.staff = _make_user("staff", is_staff=True)
 
     @patch("apps.media.models.MediaFile.save", MagicMock())
     def test_editor_can_upload(self):
         self.client.force_authenticate(user=self.editor)
+        img = _fake_image()
+        res = self.client.post(
+            "/api/v1/media/files/",
+            {"image": img},
+            format="multipart",
+        )
+        self.assertIn(res.status_code, [200, 201])
+
+    @patch("apps.media.models.MediaFile.save", MagicMock())
+    def test_blog_editor_can_upload(self):
+        self.client.force_authenticate(user=self.blog_editor)
         img = _fake_image()
         res = self.client.post(
             "/api/v1/media/files/",

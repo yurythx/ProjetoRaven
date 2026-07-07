@@ -4,9 +4,27 @@ import { getApiBaseUrl, isProd } from "@/lib/env";
 
 type MeResponse = {
   is_admin?: boolean;
+  is_staff?: boolean;
+  is_superuser?: boolean;
   is_blog_editor?: boolean;
   is_forum_moderator?: boolean;
 };
+
+function isAdminUser(me: MeResponse | null): boolean {
+  return Boolean(me?.is_admin || me?.is_staff || me?.is_superuser);
+}
+
+function canAccessBlogEditor(me: MeResponse | null): boolean {
+  return isAdminUser(me) || Boolean(me?.is_blog_editor);
+}
+
+function canAccessForumArea(me: MeResponse | null): boolean {
+  return isAdminUser(me) || Boolean(me?.is_forum_moderator);
+}
+
+function canAccessDashboard(me: MeResponse | null): boolean {
+  return canAccessBlogEditor(me) || canAccessForumArea(me);
+}
 
 function toWsProtocol(proto: string): string {
   return proto === "https:" ? "wss:" : proto === "http:" ? "ws:" : proto;
@@ -179,13 +197,13 @@ export async function middleware(req: NextRequest) {
       if (!meRes2.ok) return redirect(new URL("/blog", req.url));
       me = (await meRes2.json().catch(() => null)) as MeResponse | null;
 
-      if (!me?.is_admin && !me?.is_blog_editor) return redirect(new URL("/blog", req.url));
+      if (!canAccessBlogEditor(me)) return redirect(new URL("/blog", req.url));
       const res = next();
       res.cookies.set("raven_access", newAccess, { httpOnly: true, secure: computeCookieSecure(), sameSite: "lax", path: "/" });
       return res;
     }
 
-    if (!me?.is_admin && !me?.is_blog_editor) return redirect(new URL("/blog", req.url));
+    if (!canAccessBlogEditor(me)) return redirect(new URL("/blog", req.url));
     return next();
   }
 
@@ -230,14 +248,14 @@ export async function middleware(req: NextRequest) {
     const isForumArea = path.startsWith("/dashboard/forum");
 
     const allowed = needsStrictAdmin
-      ? Boolean(me?.is_admin)
+      ? isAdminUser(me)
       : isBlogArea
-        ? Boolean(me?.is_admin || me?.is_blog_editor)
+        ? canAccessBlogEditor(me)
         : isForumArea
-          ? Boolean(me?.is_admin || me?.is_forum_moderator)
+          ? canAccessForumArea(me)
           : isDashboardRoot
-            ? Boolean(me?.is_admin || me?.is_blog_editor || me?.is_forum_moderator)
-            : Boolean(me?.is_admin);
+            ? canAccessDashboard(me)
+            : isAdminUser(me);
     const res = allowed ? next() : redirect(new URL("/blog", req.url));
     res.cookies.set("raven_access", newAccess, {
       httpOnly: true,
@@ -252,11 +270,11 @@ export async function middleware(req: NextRequest) {
   const isDashboardRoot = path === "/dashboard";
   const isBlogArea = path.startsWith("/dashboard/blog");
   const isForumArea = path.startsWith("/dashboard/forum");
-  if (needsStrictAdmin && !me.is_admin) return redirect(new URL("/blog", req.url));
-  if (isBlogArea && !me.is_admin && !me.is_blog_editor) return redirect(new URL("/blog", req.url));
-  if (isForumArea && !me.is_admin && !me.is_forum_moderator) return redirect(new URL("/blog", req.url));
-  if (isDashboardRoot && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return redirect(new URL("/blog", req.url));
-  if (needsAdmin && !me.is_admin && !me.is_blog_editor && !me.is_forum_moderator) return redirect(new URL("/blog", req.url));
+  if (needsStrictAdmin && !isAdminUser(me)) return redirect(new URL("/blog", req.url));
+  if (isBlogArea && !canAccessBlogEditor(me)) return redirect(new URL("/blog", req.url));
+  if (isForumArea && !canAccessForumArea(me)) return redirect(new URL("/blog", req.url));
+  if (isDashboardRoot && !canAccessDashboard(me)) return redirect(new URL("/blog", req.url));
+  if (needsAdmin && !canAccessDashboard(me)) return redirect(new URL("/blog", req.url));
   return next();
 }
 

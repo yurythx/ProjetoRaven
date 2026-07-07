@@ -5,6 +5,36 @@ import { getAccessToken, getRefreshToken, setAuthCookies } from "@/lib/auth-cook
 import { backendFetch } from "@/lib/backend";
 import { getApiBaseUrl } from "@/lib/env";
 
+type LinkedPostPayload = {
+  slug?: string | null;
+};
+
+type PostMutationPayload = {
+  slug?: string | null;
+  previous_post?: LinkedPostPayload | null;
+  next_post?: LinkedPostPayload | null;
+};
+
+async function revalidateLinkedPostTags(baseUrl: string, accessToken: string, slug: string) {
+  const detailRes = await fetch(`${baseUrl}/api/v1/blog/posts/${encodeURIComponent(slug)}/`, {
+    method: "GET",
+    headers: new Headers({ Accept: "application/json", Authorization: `Bearer ${accessToken}` }),
+    cache: "no-store",
+  });
+  if (!detailRes.ok) return;
+
+  const detail = (await detailRes.json().catch(() => null)) as PostMutationPayload | null;
+  const relatedSlugs = [
+    detail?.slug,
+    detail?.previous_post?.slug,
+    detail?.next_post?.slug,
+  ].filter((value): value is string => Boolean(value));
+
+  for (const relatedSlug of new Set(relatedSlugs)) {
+    revalidateTag(`blog:post:${relatedSlug}`);
+  }
+}
+
 async function proxy(req: Request, segments: string[]) {
   let access = await getAccessToken();
   if (!access) {
@@ -102,14 +132,24 @@ async function proxy(req: Request, segments: string[]) {
 
   const contentType = res.headers.get("content-type") ?? "application/json";
   const text = await res.text();
+  const payload = contentType.includes("application/json")
+    ? ((JSON.parse(text || "null")) as PostMutationPayload | null)
+    : null;
 
   const isMutation = req.method !== "GET" && req.method !== "HEAD";
   if (isMutation && res.ok) {
     const root = segments[0] ?? "";
     if (root === "posts" || root === "articles") {
       revalidateTag("blog:posts");
-      const maybeSlug = segments[1];
-      if (maybeSlug) revalidateTag(`blog:post:${maybeSlug}`);
+      const routeSlug = segments[1];
+      if (routeSlug) revalidateTag(`blog:post:${routeSlug}`);
+      const payloadSlug = payload?.slug?.trim();
+      if (payloadSlug) {
+        revalidateTag(`blog:post:${payloadSlug}`);
+        if (access) {
+          await revalidateLinkedPostTags(baseUrl, access, payloadSlug);
+        }
+      }
     }
     if (root === "categories") {
       revalidateTag("blog:taxonomies");
@@ -148,4 +188,3 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ path:
   const { path } = await params;
   return proxy(req, path);
 }
-

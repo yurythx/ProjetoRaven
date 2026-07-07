@@ -10,6 +10,14 @@ import random
 class Command(BaseCommand):
     help = 'Seeds the database with development data'
 
+    def _safe_cache_delete(self, key: str) -> None:
+        from django.core.cache import cache
+
+        try:
+            cache.delete(key)
+        except Exception:
+            self.stdout.write(self.style.WARNING(f'Cache indisponivel ao limpar {key}; seguindo seed local.'))
+
     def handle(self, *args, **kwargs):
         self.stdout.write('Seeding data...')
 
@@ -38,8 +46,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS('Admin updated: admin@raven.gg / admin123'))
 
         # Clear login lockout for admin (accumulated from E2E test failures)
-        from django.core.cache import cache
-        cache.delete('login_failures:admin@raven.gg')
+        self._safe_cache_delete('login_failures:admin@raven.gg')
 
         # Ensure groups exist (used across permissions/UI flags)
         for name in ["members", "blog_editors", "forum_moderators"]:
@@ -72,7 +79,7 @@ class Command(BaseCommand):
                 player.groups.add(members_group)
             self.stdout.write(self.style.SUCCESS('Player updated: player@raven.gg / player123'))
 
-        cache.delete('login_failures:player@raven.gg')
+        self._safe_cache_delete('login_failures:player@raven.gg')
 
         # 2. Create Blog Categories
         blog_cats_data = [

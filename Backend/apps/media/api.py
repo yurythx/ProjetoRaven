@@ -29,12 +29,20 @@ class MediaInUse(APIException):
 
 
 class IsEditorOrAdmin(permissions.BasePermission):
-    """Allows access only to staff users or members of the 'editors' group."""
+    """Allows access to staff/superusers and blog editors.
+
+    Keep the legacy `editors` group as a fallback while environments are
+    standardized on `blog_editors`.
+    """
 
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
             return False
-        return request.user.is_staff or request.user.groups.filter(name="editors").exists()
+        return (
+            request.user.is_staff
+            or request.user.is_superuser
+            or request.user.groups.filter(name__in=["blog_editors", "editors"]).exists()
+        )
 
 
 class MediaFileViewSet(viewsets.ModelViewSet):

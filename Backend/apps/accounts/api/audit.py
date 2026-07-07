@@ -1,4 +1,5 @@
 from django.db.models import Q
+import uuid
 from rest_framework import viewsets, permissions
 from rest_framework.pagination import PageNumberPagination
 
@@ -17,6 +18,22 @@ class AdminAuditEventViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AdminAuditEventSerializer
     pagination_class = StandardPagination
 
+    @staticmethod
+    def _apply_user_filter(qs, relation: str, raw_value: str):
+        value = (raw_value or "").strip()
+        if not value:
+            return qs
+
+        try:
+            parsed = uuid.UUID(value)
+            return qs.filter(**{f"{relation}_id": parsed})
+        except ValueError:
+            return qs.filter(
+                Q(**{f"{relation}__email__icontains": value})
+                | Q(**{f"{relation}__username__icontains": value})
+                | Q(**{f"{relation}__display_name__icontains": value})
+            )
+
     def get_queryset(self):
         qs = super().get_queryset()
         params = self.request.query_params
@@ -28,10 +45,17 @@ class AdminAuditEventViewSet(viewsets.ReadOnlyModelViewSet):
                 | Q(target__email__icontains=query) | Q(target__username__icontains=query)
             )
 
-        for field, param in [("target_id", "target"), ("actor_id", "actor"), ("action", "action")]:
-            val = params.get(param)
-            if val:
-                qs = qs.filter(**{field: val})
+        target = params.get("target")
+        if target:
+            qs = self._apply_user_filter(qs, "target", target)
+
+        actor = params.get("actor")
+        if actor:
+            qs = self._apply_user_filter(qs, "actor", actor)
+
+        action = params.get("action")
+        if action:
+            qs = qs.filter(action=action)
 
         action_prefix = (params.get("action_prefix") or "").strip()
         if action_prefix:

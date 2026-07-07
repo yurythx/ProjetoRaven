@@ -71,6 +71,15 @@ class PublicPostViewSetTest(TestCase):
         slugs = [p["slug"] for p in response.data["results"]]
         self.assertIn("pub-post", slugs)
 
+    def test_public_list_does_not_expose_internal_status_fields(self):
+        response = self.client.get("/api/v1/blog/public/posts/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        item = response.data["results"][0]
+        self.assertNotIn("status", item)
+        self.assertNotIn("is_public", item)
+        self.assertNotIn("author_username", item)
+
     def test_draft_not_in_public_list(self):
         response = self.client.get("/api/v1/blog/public/posts/")
         slugs = [p["slug"] for p in response.data["results"]]
@@ -91,6 +100,44 @@ class PublicPostViewSetTest(TestCase):
         self.client.get(f"/api/v1/blog/public/posts/{self.published_post.slug}/")
         self.published_post.refresh_from_db()
         self.assertEqual(self.published_post.view_count, initial_views + 1)
+
+    def test_retrieve_exposes_continuation_links(self):
+        previous_post = make_post(self.user, self.category, slug="parte-1", title="Parte 1")
+        next_post = make_post(self.user, self.category, slug="parte-3", title="Parte 3")
+        self.published_post.previous_post = previous_post
+        self.published_post.next_post = next_post
+        self.published_post.save(update_fields=["previous_post", "next_post"])
+
+        response = self.client.get(f"/api/v1/blog/public/posts/{self.published_post.slug}/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["previous_post"]["slug"], "parte-1")
+        self.assertEqual(response.data["next_post"]["slug"], "parte-3")
+
+    def test_retrieve_hides_non_public_continuation_links(self):
+        previous_post = make_post(
+            self.user,
+            self.category,
+            slug="parte-1-privada",
+            title="Parte 1 Privada",
+            is_public=False,
+        )
+        next_post = make_post(
+            self.user,
+            self.category,
+            slug="parte-3-rascunho",
+            title="Parte 3 Rascunho",
+            status=Post.Status.DRAFT,
+        )
+        self.published_post.previous_post = previous_post
+        self.published_post.next_post = next_post
+        self.published_post.save(update_fields=["previous_post", "next_post"])
+
+        response = self.client.get(f"/api/v1/blog/public/posts/{self.published_post.slug}/")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIsNone(response.data["previous_post"])
+        self.assertIsNone(response.data["next_post"])
 
     def test_retrieve_draft_returns_404(self):
         response = self.client.get(f"/api/v1/blog/public/posts/{self.draft_post.slug}/")
@@ -158,12 +205,54 @@ class PostViewSetEditorTest(TestCase):
         post.refresh_from_db()
         self.assertEqual(post.status, Post.Status.PUBLISHED)
 
+    def test_editor_can_set_continuation_links(self):
+        previous_post = make_post(self.editor, self.category, slug="parte-1", title="Parte 1")
+        next_post = make_post(self.editor, self.category, slug="parte-3", title="Parte 3")
+
+        response = self.client.post("/api/v1/blog/posts/", {
+            "title": "Parte 2",
+            "slug": "parte-2",
+            "content": "Conteudo suficiente para criar o post de continuacao.",
+            "excerpt": "Resumo da parte 2",
+            "previous_post_id": str(previous_post.id),
+            "next_post_id": str(next_post.id),
+        }, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        post = Post.objects.get(slug="parte-2")
+        self.assertEqual(post.previous_post_id, previous_post.id)
+        self.assertEqual(post.next_post_id, next_post.id)
+
+    def test_editor_cannot_link_post_to_itself(self):
+        post = make_post(self.editor, self.category, slug="parte-unica", title="Parte unica")
+
+        response = self.client.patch(
+            f"/api/v1/blog/posts/{post.slug}/",
+            {"previous_post_id": str(post.id)},
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("previous_post_id", response.data)
+
     def test_editor_can_archive_post(self):
         post = make_post(self.editor, self.category, slug="to-archive", status=Post.Status.PUBLISHED)
         response = self.client.post(f"/api/v1/blog/posts/{post.slug}/archive/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         post.refresh_from_db()
         self.assertEqual(post.status, Post.Status.ARCHIVED)
+
+    def test_editor_can_filter_posts_by_hyphenated_category_slug(self):
+        hyphen_category = make_category(name="Long Form", slug="long-form")
+        matching = make_post(self.editor, hyphen_category, slug="match-hyphen")
+        make_post(self.editor, self.category, slug="other-category-post")
+
+        response = self.client.get("/api/v1/blog/posts/", {"category": "long-form"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        slugs = [item["slug"] for item in response.data["results"]]
+        self.assertIn(matching.slug, slugs)
+        self.assertNotIn("other-category-post", slugs)
 
     def test_editor_can_reject_post(self):
         post = make_post(self.editor, self.category, slug="to-reject", status=Post.Status.PENDING)
@@ -299,3 +388,24 @@ class CommentViewSetTest(TestCase):
         response = self.client.delete(f"/api/v1/blog/comments/{comment.id}/")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(Comment.objects.filter(id=comment.id).exists())
+
+    def test_editor_comment_search_accepts_q_alias(self):
+        self.client.force_authenticate(user=self.editor)
+        Comment.objects.create(post=self.post, author=self.user, content="Alpha moderation comment", is_approved=False)
+        Comment.objects.create(post=self.post, author=self.user, content="Beta moderation comment", is_approved=False)
+
+        response = self.client.get("/api/v1/blog/comments/", {"q": "Alpha", "post": str(self.post.id)})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        payload = response.data["results"] if isinstance(response.data, dict) else response.data
+        contents = [item["content"] for item in payload]
+        self.assertIn("Alpha moderation comment", contents)
+        self.assertNotIn("Beta moderation comment", contents)
+
+    def test_editor_comment_list_rejects_unsafe_ordering(self):
+        self.client.force_authenticate(user=self.editor)
+        Comment.objects.create(post=self.post, author=self.user, content="Safe ordering comment", is_approved=False)
+
+        response = self.client.get("/api/v1/blog/comments/", {"post": str(self.post.id), "ordering": "nonexistent_field"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)

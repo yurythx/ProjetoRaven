@@ -14,6 +14,11 @@ export function BlogSearchBar({ defaultValue = "", categories }: Props) {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(defaultValue);
   const debouncedQuery = useDebounce(query, 300);
+  const currentQuery = (searchParams.get("q") ?? "").trim();
+
+  useEffect(() => {
+    setQuery(defaultValue);
+  }, [defaultValue]);
 
   const navigate = useCallback(
     (q: string, category?: string) => {
@@ -31,17 +36,21 @@ export function BlogSearchBar({ defaultValue = "", categories }: Props) {
         }
       }
       params.delete("page");
-      router.push(`/blog?${params.toString()}`);
+      const qs = params.toString();
+      const nextUrl = `/blog${qs ? `?${qs}` : ""}`;
+      const currentUrl = `/blog${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+      if (nextUrl !== currentUrl) {
+        router.replace(nextUrl);
+      }
     },
     [router, searchParams],
   );
 
   useEffect(() => {
-    if (debouncedQuery !== defaultValue) {
+    if (debouncedQuery.trim() !== currentQuery) {
       navigate(debouncedQuery);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQuery]);
+  }, [currentQuery, debouncedQuery, navigate]);
 
   const currentCategory = searchParams.get("category") ?? "";
 

@@ -2,7 +2,7 @@ from rest_framework import viewsets, permissions, response
 from rest_framework.decorators import action
 
 from ...selectors.post import PostSelector
-from ...serializers.post import PostListSerializer, PublicPostDetailSerializer
+from ...serializers.post import PublicPostListSerializer, PublicPostDetailSerializer
 
 
 class PublicPostViewSet(viewsets.ReadOnlyModelViewSet):
@@ -15,7 +15,7 @@ class PublicPostViewSet(viewsets.ReadOnlyModelViewSet):
 
     def get_serializer_class(self):
         if self.action in ["list", "featured", "search"]:
-            return PostListSerializer
+            return PublicPostListSerializer
         return PublicPostDetailSerializer
 
     def retrieve(self, request, *args, **kwargs):

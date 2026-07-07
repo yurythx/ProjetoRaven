@@ -1,9 +1,8 @@
 from rest_framework import viewsets, response, status
 from rest_framework.decorators import action
-from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from django.utils import timezone
 from django.db.models import Q
-from apps.common.throttling import BlogPostThrottle
+from apps.common.throttling import BlogPostThrottle, ResilientAnonRateThrottle, ResilientUserRateThrottle
 
 from ...services.post import PostService
 from ...repositories.post import DjangoPostRepository
@@ -19,12 +18,12 @@ class PostViewSet(viewsets.ModelViewSet):
     Following SRP (Delegates logic to PostService).
     """
     permission_classes = [IsBlogEditorOrReadOnly]
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+    throttle_classes = [ResilientAnonRateThrottle, ResilientUserRateThrottle]
     lookup_field = "slug"
 
     def get_throttles(self):
         if self.action in ("create", "update", "partial_update"):
-            return [AnonRateThrottle(), BlogPostThrottle()]
+            return [ResilientAnonRateThrottle(), BlogPostThrottle()]
         return super().get_throttles()
 
     def __init__(self, *args, **kwargs):
@@ -61,6 +60,8 @@ class PostViewSet(viewsets.ModelViewSet):
         return PostSelector.get_published()
 
     def _apply_admin_filters(self, qs):
+        import uuid
+
         params = self.request.query_params
 
         status_param = (params.get("status") or "").strip().lower()
@@ -71,9 +72,10 @@ class PostViewSet(viewsets.ModelViewSet):
 
         category_param = (params.get("category") or "").strip()
         if category_param:
-            if "-" in category_param:
+            try:
+                uuid.UUID(category_param)
                 qs = qs.filter(category_id=category_param)
-            else:
+            except ValueError:
                 qs = qs.filter(category__slug=category_param)
 
         search = (params.get("search") or "").strip()

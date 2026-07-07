@@ -38,6 +38,16 @@ class MeView(APIView):
                 "id": str(request.user.id),
                 "email": request.user.email,
                 "username": request.user.username,
+                "is_active": bool(getattr(request.user, "is_active", False)),
+                "is_banned": bool(getattr(request.user, "is_banned", False)),
+                "is_verified": bool(getattr(request.user, "is_verified", False)),
+                "is_admin_verified": bool(getattr(request.user, "is_admin_verified", False)),
+                "is_admin": bool(getattr(request.user, "is_admin", False)),
+                "is_staff": bool(getattr(request.user, "is_staff", False)),
+                "is_superuser": bool(getattr(request.user, "is_superuser", False)),
+                "is_member": bool(getattr(request.user, "is_member", False)),
+                "is_blog_editor": bool(getattr(request.user, "is_blog_editor", False)),
+                "is_forum_moderator": bool(getattr(request.user, "is_forum_moderator", False)),
                 "error": str(e)
             }, status=status.HTTP_200_OK)
 

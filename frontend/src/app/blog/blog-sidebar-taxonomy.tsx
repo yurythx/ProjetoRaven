@@ -16,7 +16,7 @@ function slugify(str: string) {
 function useIsAdmin() {
   const { user, isLoading } = useAuth();
   const u = (user ?? null) as Record<string, unknown> | null;
-  return Boolean(u?.is_admin || u?.is_blog_editor) && !isLoading;
+  return Boolean(u?.is_admin || u?.is_blog_editor || u?.is_staff || u?.is_superuser) && !isLoading;
 }
 
 // ── Category CRUD section ──────────────────────────────────────────────────────

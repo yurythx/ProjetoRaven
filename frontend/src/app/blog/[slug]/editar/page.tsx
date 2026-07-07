@@ -26,7 +26,7 @@ export default function BlogEditarPage() {
 
   const { user, isLoading: isAuthLoading } = useAuth();
   const u = (user ?? null) as Record<string, unknown> | null;
-  const canEdit = Boolean(u?.is_admin || u?.is_blog_editor) && !isAuthLoading;
+  const canEdit = Boolean(u?.is_admin || u?.is_blog_editor || u?.is_staff || u?.is_superuser) && !isAuthLoading;
 
   const { data: article, isLoading: isArticleLoading, isError } = useQuery({
     queryKey: ["blog-article-edit", slug],

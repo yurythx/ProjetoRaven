@@ -63,7 +63,7 @@ const ACTION_LABELS: Record<string, string> = {
   reset_password: "Resetar senha",
   change_groups: "Trocar grupos",
   update_user: "Atualizar usuário",
-  verify_admin: "Verificar (admin)",
+  admin_verified: "Verificar (admin)",
 };
 
 const ACTION_BADGE: Record<string, string> = {
@@ -76,7 +76,7 @@ const ACTION_BADGE: Record<string, string> = {
   create_user: "rv-badge-purple",
   register_user: "rv-badge-cyan",
   email_verified: "rv-badge-cyan",
-  verify_admin: "rv-badge-gold",
+  admin_verified: "rv-badge-gold",
 };
 
 function formatWhen(value: string): string {
@@ -198,7 +198,7 @@ export function AuditEventsPanel() {
           <input
             value={targetId}
             onChange={(e) => { setPage(1); setTargetId(e.target.value); }}
-            placeholder="Alvo (UUID)..."
+            placeholder="Alvo (UUID, e-mail ou usuário)..."
             className="rv-input h-9 text-xs w-48"
           />
           {(q || action || targetId) && (

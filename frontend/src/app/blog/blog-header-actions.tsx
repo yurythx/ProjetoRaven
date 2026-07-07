@@ -6,7 +6,7 @@ import { useAuth } from "@/components/auth-provider";
 export function BlogHeaderActions() {
   const { user, isLoading } = useAuth();
   const u = (user ?? null) as Record<string, unknown> | null;
-  const canEdit = Boolean(u?.is_admin || u?.is_blog_editor) && !isLoading;
+  const canEdit = Boolean(u?.is_admin || u?.is_blog_editor || u?.is_staff || u?.is_superuser) && !isLoading;
 
   if (!canEdit) return null;
 

@@ -23,6 +23,48 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 describe("blog-admin proxy", () => {
+  it("revalida post atual e relacionados apos atualizar artigo", async () => {
+    const authCookies = await import("@/lib/auth-cookies");
+    const route = await import("./route");
+    const cache = await import("next/cache");
+
+    vi.mocked(authCookies.getAccessToken).mockResolvedValue("valid-access");
+    vi.mocked(authCookies.getRefreshToken).mockResolvedValue(null);
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.includes("/api/v1/blog/articles/post-atual/")) {
+        expect(init?.method).toBe("PUT");
+        return jsonResponse({ slug: "post-renomeado" }, 200);
+      }
+      if (url.includes("/api/v1/blog/posts/post-renomeado/")) {
+        expect((init?.headers as Headers).get("Authorization")).toBe("Bearer valid-access");
+        return jsonResponse({
+          slug: "post-renomeado",
+          previous_post: { slug: "parte-1" },
+          next_post: { slug: "parte-3" },
+        }, 200);
+      }
+      throw new Error(`unexpected fetch: ${url}`);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const req = new Request("http://localhost/api/blog-admin/articles/post-atual", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ title: "Novo titulo" }),
+    });
+    const res = await route.PUT(req, { params: Promise.resolve({ path: ["articles", "post-atual"] }) });
+
+    expect(res.status).toBe(200);
+    expect(cache.revalidateTag).toHaveBeenCalledWith("blog:posts");
+    expect(cache.revalidateTag).toHaveBeenCalledWith("blog:post:post-atual");
+    expect(cache.revalidateTag).toHaveBeenCalledWith("blog:post:post-renomeado");
+    expect(cache.revalidateTag).toHaveBeenCalledWith("blog:post:parte-1");
+    expect(cache.revalidateTag).toHaveBeenCalledWith("blog:post:parte-3");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("faz refresh quando access cookie está ausente", async () => {
     const authCookies = await import("@/lib/auth-cookies");
     const backend = await import("@/lib/backend");
@@ -75,4 +117,3 @@ describe("blog-admin proxy", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });
-

@@ -2,7 +2,7 @@ from django.db.models import Q, Value, CharField
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from rest_framework.throttling import AnonRateThrottle
+from apps.common.throttling import ResilientAnonRateThrottle
 from apps.common.utils import build_media_url
 
 
@@ -14,19 +14,27 @@ class GlobalSearchView(APIView):
     sorted by relevance (simple icontains fallback; full-text on Postgres).
     """
     permission_classes = [AllowAny]
-    throttle_classes = [AnonRateThrottle]
+    throttle_classes = [ResilientAnonRateThrottle]
 
     def get(self, request):
-        q = request.query_params.get("q", "").strip()
+        q = (request.query_params.get("q") or request.query_params.get("search") or "").strip()
         if not q or len(q) < 2:
             return Response({"posts": [], "topics": [], "query": q})
 
-        limit = min(int(request.query_params.get("limit", 10)), 20)
+        limit = self._parse_limit(request.query_params.get("limit"))
 
         posts = self._search_posts(q, limit)
         topics = self._search_topics(q, limit)
 
         return Response({"query": q, "posts": posts, "topics": topics})
+
+    @staticmethod
+    def _parse_limit(raw_limit) -> int:
+        try:
+            limit = int(raw_limit or 10)
+        except (TypeError, ValueError):
+            limit = 10
+        return max(1, min(limit, 20))
 
     def _search_posts(self, q: str, limit: int) -> list:
         from apps.blog.models import Post
@@ -87,27 +95,34 @@ class GlobalSearchView(APIView):
 
         qs = Topic.objects.filter(
             category__is_active=True,
-            status__in=["open", "closed"],
+            status__in=[Topic.Status.OPEN, Topic.Status.CLOSED],
         ).select_related("author", "category").only(
             "slug", "title", "created_at", "reply_count",
             "author__username", "author__display_name",
             "category__name", "category__slug",
+            "is_pinned", "last_reply_at",
         )
 
         # Full-text on Postgres, icontains fallback
         if connection.vendor == "postgresql":
             try:
                 from django.contrib.postgres.search import SearchQuery, SearchRank
-                sq = SearchQuery(q, config="portuguese")
+                sq = SearchQuery(q, config="portuguese", search_type="websearch")
                 qs = (
                     qs.filter(search_vector=sq)
                     .annotate(rank=SearchRank("search_vector", sq))
-                    .order_by("-rank")[:limit]
+                    .order_by("-rank", "-is_pinned", "-last_reply_at", "-created_at")[:limit]
                 )
             except Exception:
-                qs = qs.filter(Q(title__icontains=q) | Q(content__icontains=q)).order_by("-created_at")[:limit]
+                qs = (
+                    qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
+                    .order_by("-is_pinned", "-last_reply_at", "-created_at")[:limit]
+                )
         else:
-            qs = qs.filter(Q(title__icontains=q) | Q(content__icontains=q)).order_by("-created_at")[:limit]
+            qs = (
+                qs.filter(Q(title__icontains=q) | Q(content__icontains=q))
+                .order_by("-is_pinned", "-last_reply_at", "-created_at")[:limit]
+            )
 
         return [
             {

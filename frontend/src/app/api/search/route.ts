@@ -8,10 +8,12 @@ type SearchResult = {
 };
 
 export async function GET(request: NextRequest) {
-  const q = request.nextUrl.searchParams.get("q") ?? "";
-  const limit = request.nextUrl.searchParams.get("limit") ?? "10";
+  const q = (request.nextUrl.searchParams.get("q") ?? request.nextUrl.searchParams.get("search") ?? "").trim();
+  const rawLimit = request.nextUrl.searchParams.get("limit") ?? "10";
+  const parsedLimit = Number.parseInt(rawLimit, 10);
+  const limit = Number.isFinite(parsedLimit) ? String(Math.min(Math.max(parsedLimit, 1), 20)) : "10";
 
-  if (!q.trim()) {
+  if (!q) {
     return NextResponse.json({ query: "", posts: [], topics: [] });
   }
 

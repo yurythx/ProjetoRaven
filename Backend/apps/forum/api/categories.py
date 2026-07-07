@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from apps.common.throttling import ResilientAnonRateThrottle, ResilientUserRateThrottle
 
 from ..models import ForumCategory
 from ..services.category import ForumCategoryService
@@ -16,7 +16,7 @@ class ForumCategoryViewSet(viewsets.ModelViewSet):
     """ViewSet for forum categories (Admin/Moderator)."""
     queryset = ForumCategory.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+    throttle_classes = [ResilientAnonRateThrottle, ResilientUserRateThrottle]
     serializer_class = ForumCategoryListSerializer
     lookup_field = "slug"
 
@@ -64,7 +64,7 @@ class PublicForumCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.AllowAny]
     serializer_class = ForumCategoryListSerializer
     lookup_field = "slug"
-    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+    throttle_classes = [ResilientAnonRateThrottle, ResilientUserRateThrottle]
     pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):

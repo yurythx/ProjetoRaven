@@ -20,7 +20,7 @@ export default function BlogNovoPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const u = (user ?? null) as Record<string, unknown> | null;
-  const canEdit = Boolean(u?.is_admin || u?.is_blog_editor);
+  const canEdit = Boolean(u?.is_admin || u?.is_blog_editor || u?.is_staff || u?.is_superuser);
 
   if (isLoading) {
     return (

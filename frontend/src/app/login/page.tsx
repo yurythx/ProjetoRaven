@@ -1,13 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/components/auth-provider";
 import { OAuthButtons } from "@/components/oauth-buttons";
 
+function getSafeRedirectTarget(next: string | null): string {
+  if (!next || !next.startsWith("/") || next.startsWith("//")) {
+    return "/me";
+  }
+  return next;
+}
+
 export default function LoginPage() {
   const router = useRouter();
+  const params = useSearchParams();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,17 +57,23 @@ export default function LoginPage() {
               e.preventDefault();
               setError(null);
               setIsSubmitting(true);
-              const result = await login({ email, password });
-              setIsSubmitting(false);
-              if (!result.ok) {
-                setError("Credenciais inválidas. Verifique e-mail e senha.");
-                return;
+              try {
+                const result = await login({ email, password });
+                if (!result.ok) {
+                  setError("Credenciais inválidas. Verifique e-mail e senha.");
+                  return;
+                }
+                if ("totp_required" in result && result.totp_required) {
+                  router.replace(`/auth/2fa?token=${encodeURIComponent(result.totp_token)}`);
+                  return;
+                }
+                const destination = getSafeRedirectTarget(params.get("next"));
+                window.location.assign(destination);
+              } catch {
+                setError("Nao foi possivel concluir o login agora. Tente novamente.");
+              } finally {
+                setIsSubmitting(false);
               }
-              if ("totp_required" in result && result.totp_required) {
-                router.push(`/auth/2fa?token=${encodeURIComponent(result.totp_token)}`);
-                return;
-              }
-              router.push("/me");
             }}
           >
             <div>

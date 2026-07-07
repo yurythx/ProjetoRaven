@@ -12,6 +12,8 @@ from apps.blog.serializers.post import (
     PostListSerializer,
     PostDetailSerializer,
     PublicPostDetailSerializer,
+    PostCreateSerializer,
+    PostUpdateSerializer,
 )
 from apps.blog.serializers.comment import CommentListSerializer
 
@@ -141,6 +143,18 @@ class PostDetailSerializerTest(TestCase):
         data = PostDetailSerializer(self.post, context={"request": request}).data
         self.assertNotIn("author_email", data)
 
+    def test_contains_continuation_links(self):
+        previous_post = make_post(self.user, self.category, slug="parte-1", title="Parte 1")
+        next_post = make_post(self.user, self.category, slug="parte-3", title="Parte 3")
+        self.post.previous_post = previous_post
+        self.post.next_post = next_post
+        self.post.save(update_fields=["previous_post", "next_post"])
+
+        data = PostDetailSerializer(self.post).data
+
+        self.assertEqual(data["previous_post"]["slug"], "parte-1")
+        self.assertEqual(data["next_post"]["slug"], "parte-3")
+
 
 class PublicPostDetailSerializerTest(TestCase):
     def setUp(self):
@@ -156,6 +170,81 @@ class PublicPostDetailSerializerTest(TestCase):
         self.user.save()
         data = PublicPostDetailSerializer(self.post).data
         self.assertEqual(data["author_username"], "publicuser")
+
+    def test_contains_continuation_links(self):
+        previous_post = make_post(self.user, make_category(name="Infra", slug="infra"), slug="parte-1", title="Parte 1")
+        next_post = make_post(self.user, make_category(name="Ops", slug="ops"), slug="parte-3", title="Parte 3")
+        self.post.previous_post = previous_post
+        self.post.next_post = next_post
+        self.post.save(update_fields=["previous_post", "next_post"])
+
+        data = PublicPostDetailSerializer(self.post).data
+
+        self.assertEqual(data["previous_post"]["title"], "Parte 1")
+        self.assertEqual(data["next_post"]["title"], "Parte 3")
+
+    def test_hides_non_public_continuation_links(self):
+        previous_post = make_post(
+            self.user,
+            make_category(name="Infra", slug="infra"),
+            slug="parte-1-privada",
+            title="Parte 1 Privada",
+            is_public=False,
+        )
+        next_post = make_post(
+            self.user,
+            make_category(name="Ops", slug="ops"),
+            slug="parte-3-rascunho",
+            title="Parte 3 Rascunho",
+            status=Post.Status.DRAFT,
+        )
+        self.post.previous_post = previous_post
+        self.post.next_post = next_post
+        self.post.save(update_fields=["previous_post", "next_post"])
+
+        data = PublicPostDetailSerializer(self.post).data
+
+        self.assertIsNone(data["previous_post"])
+        self.assertIsNone(data["next_post"])
+
+
+class PostLinkValidationSerializerTest(TestCase):
+    def setUp(self):
+        self.user = make_user()
+        self.category = make_category()
+        self.post = make_post(self.user, self.category)
+        self.other_post = make_post(self.user, self.category, slug="continua", title="Continua")
+        self.factory = RequestFactory()
+
+    def test_create_serializer_accepts_continuation_links(self):
+        request = self.factory.post("/")
+        request.user = self.user
+        serializer = PostCreateSerializer(
+            data={
+                "title": "Parte 2",
+                "slug": "parte-2",
+                "excerpt": "Resumo",
+                "content": "Conteudo suficiente para passar na validacao.",
+                "previous_post_id": str(self.post.id),
+                "next_post_id": str(self.other_post.id),
+            },
+            context={"request": request},
+        )
+
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+    def test_update_serializer_rejects_self_link(self):
+        request = self.factory.patch("/")
+        request.user = self.user
+        serializer = PostUpdateSerializer(
+            instance=self.post,
+            data={"previous_post_id": str(self.post.id)},
+            partial=True,
+            context={"request": request},
+        )
+
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("previous_post_id", serializer.errors)
 
 
 class CommentListSerializerTest(TestCase):

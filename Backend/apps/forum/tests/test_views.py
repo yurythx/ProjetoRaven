@@ -2,7 +2,7 @@
 Tests for forum views and permissions.
 """
 from django.contrib.auth.models import Group
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
@@ -15,6 +15,13 @@ from apps.forum.views import (
     ReplyViewSet,
     TopicViewSet,
 )
+
+TEST_CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "forum-search-tests",
+    }
+}
 
 
 class ForumViewsTestCase(TestCase):
@@ -279,6 +286,7 @@ class ForumViewsTestCase(TestCase):
         self.assertTrue(TopicViewSet.throttle_classes)
         self.assertTrue(ReplyViewSet.throttle_classes)
 
+    @override_settings(CACHES=TEST_CACHES)
     def test_public_topics_supports_search_and_ordering_allowlist(self):
         res_search = self.client.get("/api/v1/forum/public/topics/?q=Welcome&page=1&page_size=50")
         self.assertEqual(res_search.status_code, 200)
@@ -287,8 +295,40 @@ class ForumViewsTestCase(TestCase):
         slugs = [item["slug"] for item in results]
         self.assertIn(self.topic.slug, slugs)
 
+        res_search_alias = self.client.get("/api/v1/forum/public/topics/?search=Welcome&page=1&page_size=50")
+        self.assertEqual(res_search_alias.status_code, 200)
+        alias_payload = res_search_alias.json()
+        alias_results = alias_payload.get("results", alias_payload)
+        alias_slugs = [item["slug"] for item in alias_results]
+        self.assertIn(self.topic.slug, alias_slugs)
+
         res_order = self.client.get("/api/v1/forum/public/topics/?ordering=-view_count&page=1&page_size=50")
         self.assertEqual(res_order.status_code, 200)
 
         res_bad = self.client.get("/api/v1/forum/public/topics/?ordering=-__class__&page=1&page_size=50")
         self.assertEqual(res_bad.status_code, 200)
+
+    @override_settings(CACHES=TEST_CACHES)
+    def test_public_topics_excludes_archived_topics_from_list_and_search(self):
+        archived = Topic.objects.create(
+            title="Welcome Archived",
+            slug="welcome-archived",
+            content="Archived content",
+            author=self.player,
+            category=self.active_category,
+            status=Topic.Status.ARCHIVED,
+        )
+
+        res_list = self.client.get("/api/v1/forum/public/topics/?page=1&page_size=50")
+        self.assertEqual(res_list.status_code, 200)
+        list_payload = res_list.json()
+        list_results = list_payload.get("results", list_payload)
+        list_slugs = [item["slug"] for item in list_results]
+        self.assertNotIn(archived.slug, list_slugs)
+
+        res_search = self.client.get("/api/v1/forum/public/topics/?q=Archived&page=1&page_size=50")
+        self.assertEqual(res_search.status_code, 200)
+        search_payload = res_search.json()
+        search_results = search_payload.get("results", search_payload)
+        search_slugs = [item["slug"] for item in search_results]
+        self.assertNotIn(archived.slug, search_slugs)

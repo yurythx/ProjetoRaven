@@ -31,6 +31,8 @@ type BlogPostDetail = {
   image: string | null;
   tags: { id: string; name: string; slug: string }[];
   category: { id: string; name: string; slug: string };
+  previous_post?: { id: string; title: string; slug: string } | null;
+  next_post?: { id: string; title: string; slug: string } | null;
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -240,6 +242,39 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               prose-hr:border-[var(--rv-border)]"
           />
         </article>
+
+        {(post.previous_post || post.next_post) && (
+          <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+            {post.previous_post ? (
+              <Link
+                href={`/blog/${encodeURIComponent(post.previous_post.slug)}`}
+                prefetch={false}
+                className="rv-card p-5 hover:border-[var(--rv-accent)]/40 transition-colors"
+              >
+                <div className="rv-label text-[9px] text-[var(--rv-text-dim)] mb-2">Parte anterior</div>
+                <div className="text-sm font-semibold text-[var(--rv-text-primary)] hover:text-[var(--rv-accent)] transition-colors">
+                  ← {post.previous_post.title}
+                </div>
+              </Link>
+            ) : (
+              <div className="hidden sm:block" />
+            )}
+            {post.next_post ? (
+              <Link
+                href={`/blog/${encodeURIComponent(post.next_post.slug)}`}
+                prefetch={false}
+                className="rv-card p-5 hover:border-[var(--rv-accent)]/40 transition-colors text-left sm:text-right"
+              >
+                <div className="rv-label text-[9px] text-[var(--rv-text-dim)] mb-2">Continuação</div>
+                <div className="text-sm font-semibold text-[var(--rv-text-primary)] hover:text-[var(--rv-accent)] transition-colors">
+                  {post.next_post.title} →
+                </div>
+              </Link>
+            ) : (
+              <div className="hidden sm:block" />
+            )}
+          </section>
+        )}
 
         {/* ── Author card ── */}
         {post.author_username && (

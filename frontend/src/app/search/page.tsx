@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, FileText, MessageSquare, Clock, ChevronRight, Loader2 } from "lucide-react";
+import { useDebounce } from "@/hooks/use-debounce";
 import { fixImageUrl } from "@/lib/utils";
 
 type PostResult = {
@@ -38,52 +39,81 @@ type SearchData = {
 
 function formatDate(iso: string | null) {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(iso));
 }
 
 function SearchContent() {
   const params = useSearchParams();
   const router = useRouter();
-  const initialQ = params.get("q") ?? "";
+  const currentQuery = (params.get("q") ?? "").trim();
 
-  const [query, setQuery] = useState(initialQ);
+  const [query, setQuery] = useState(currentQuery);
   const [data, setData] = useState<SearchData | null>(null);
-  const [loading, setLoading] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [loading, setLoading] = useState(currentQuery.length >= 2);
+  const [error, setError] = useState<string | null>(null);
+  const debouncedQuery = useDebounce(query, 350);
 
   useEffect(() => {
-    if (!initialQ.trim()) return;
-    void doSearch(initialQ);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    setQuery(currentQuery);
+  }, [currentQuery]);
 
-  async function doSearch(q: string) {
-    if (q.trim().length < 2) { setData(null); return; }
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=10`);
-      const json = await res.json() as SearchData;
-      setData(json);
-    } catch {
+  useEffect(() => {
+    const normalized = debouncedQuery.trim();
+    if (normalized === currentQuery) return;
+    const url = normalized ? `/search?q=${encodeURIComponent(normalized)}` : "/search";
+    router.replace(url, { scroll: false });
+  }, [currentQuery, debouncedQuery, router]);
+
+  useEffect(() => {
+    const normalized = debouncedQuery.trim();
+    if (normalized.length < 2) {
       setData(null);
-    } finally {
+      setError(null);
       setLoading(false);
+      return;
     }
-  }
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const v = e.target.value;
-    setQuery(v);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      const url = v.trim() ? `/search?q=${encodeURIComponent(v.trim())}` : "/search";
-      router.replace(url, { scroll: false });
-      void doSearch(v.trim());
-    }, 350);
-  }
+    const controller = new AbortController();
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(normalized)}&limit=10`, {
+          signal: controller.signal,
+        });
+        if (!res.ok) {
+          throw new Error("Falha ao buscar resultados.");
+        }
+        const json = await res.json() as SearchData;
+        if (!controller.signal.aborted) {
+          setData(json);
+        }
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        setData(null);
+        setError(err instanceof Error ? err.message : "Falha ao buscar resultados.");
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => controller.abort();
+  }, [debouncedQuery]);
 
   const hasResults = data && (data.posts.length > 0 || data.topics.length > 0);
-  const searched = !!data;
+  const normalizedQuery = debouncedQuery.trim();
+  const searched = normalizedQuery.length >= 2;
   const total = (data?.posts.length ?? 0) + (data?.topics.length ?? 0);
+  const showSearchStatus = searched && !loading && (Boolean(data) || Boolean(error));
+  const showNoResults = searched && !loading && !error && Boolean(data) && !hasResults;
 
   return (
     <div className="relative min-h-screen">
@@ -108,7 +138,7 @@ function SearchContent() {
           <input
             type="search"
             value={query}
-            onChange={handleChange}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Buscar artigos, tópicos..."
             autoFocus
             className="rv-input pl-12 pr-4 h-14 text-base w-full rounded-2xl"
@@ -120,11 +150,11 @@ function SearchContent() {
         </div>
 
         {/* Status */}
-        {searched && !loading && (
+        {showSearchStatus && (
           <p className="text-xs text-[var(--rv-text-dim)] mb-6 rv-label tracking-wider">
             {hasResults
-              ? `${total} resultado${total !== 1 ? "s" : ""} para "${data.query}"`
-              : `Nenhum resultado para "${data?.query}"`}
+              ? `${total} resultado${total !== 1 ? "s" : ""} para "${data?.query ?? normalizedQuery}"`
+              : `Nenhum resultado para "${data?.query ?? normalizedQuery}"`}
           </p>
         )}
 
@@ -138,8 +168,21 @@ function SearchContent() {
           </div>
         )}
 
+        {error && !loading && (
+          <div className="rv-card p-8 text-center">
+            <p className="text-sm text-red-400 mb-4">{error}</p>
+            <button
+              type="button"
+              onClick={() => router.refresh()}
+              className="rv-btn rv-btn-ghost px-6 h-10 text-xs"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        )}
+
         {/* No results */}
-        {searched && !loading && !hasResults && query.trim() && (
+        {showNoResults && query.trim() && (
           <div className="text-center py-20">
             <p className="text-[var(--rv-text-muted)] text-sm mb-6 font-[var(--font-body)]">
               Tente termos diferentes ou explore o conteúdo abaixo.
@@ -152,7 +195,7 @@ function SearchContent() {
         )}
 
         {/* Results */}
-        {hasResults && (
+        {hasResults && !error && (
           <div className="space-y-10">
             {/* Blog posts */}
             {data.posts.length > 0 && (
@@ -258,7 +301,7 @@ function SearchContent() {
                   ))}
                 </div>
                 <div className="mt-3 text-right">
-                  <Link href={`/forum?q=${encodeURIComponent(data.query)}`} prefetch={false} className="text-xs text-[var(--rv-cyan)] hover:underline rv-label">
+                  <Link href={`/forum/busca?q=${encodeURIComponent(data.query)}`} prefetch={false} className="text-xs text-[var(--rv-cyan)] hover:underline rv-label">
                     Ver todos no Fórum →
                   </Link>
                 </div>

@@ -734,7 +734,7 @@ export function UserAdminPanel() {
   const { user, isLoading: authLoading } = useAuth();
   const u = (user ?? null) as Record<string, unknown> | null;
   const isSuperuser = Boolean(u?.is_superuser) && !authLoading;
-  const isAdmin = isSuperuser;
+  const isAdmin = Boolean(u?.is_admin || u?.is_staff || u?.is_superuser) && !authLoading;
   const currentUserId = React.useMemo(() => {
     const v = u?.id;
     return typeof v === "string" || typeof v === "number" ? String(v) : null;
@@ -809,11 +809,22 @@ export function UserAdminPanel() {
   const canNext = Boolean(usersData?.next);
   const totalCount = usersData?.count ?? 0;
 
-  if (!authLoading && !isAdmin) {
+  if (authLoading) {
+    return (
+      <div className="rv-card p-10">
+        <div className="flex items-center justify-center gap-3">
+          <Spinner />
+          <span className="text-sm text-[var(--rv-text-dim)]">Carregando sessão administrativa...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
     return (
       <div className="rv-card p-10 text-center">
         <ShieldOff className="h-10 w-10 text-[var(--rv-text-dim)] mx-auto mb-3 opacity-40" />
-        <p className="text-sm text-[var(--rv-text-muted)]">Acesso restrito a superusuários.</p>
+        <p className="text-sm text-[var(--rv-text-muted)]">Acesso restrito a administradores.</p>
       </div>
     );
   }

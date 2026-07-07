@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ConfirmDialog } from "@/components/rv-confirm-dialog"
+import { useDebounce } from "@/hooks/use-debounce"
 import { toast } from "@/hooks/use-toast"
 import { Check, Link2, Loader2, Search, Trash2, X } from "lucide-react"
 
@@ -82,7 +83,7 @@ export function CommentModeration() {
   const initializedRef = React.useRef(false)
   const [repliesByParent, setRepliesByParent] = React.useState<Record<string, { items: ModerationItem[]; next: string | null; isLoading: boolean }>>({})
 
-  const debounced = React.useMemo(() => query.trim(), [query])
+  const debounced = useDebounce(query.trim(), 350)
 
   const copyToClipboard = async (text: string) => {
     try {

@@ -89,6 +89,8 @@ const formSchema = z.object({
   excerpt: z.string().max(500, "O resumo deve ter no máximo 500 caracteres.").optional(),
   category: z.string().optional(),
   image: z.string().optional(),
+  previous_post_id: z.string().optional().nullable(),
+  next_post_id: z.string().optional().nullable(),
   meta_title: z.string().max(70, "O título SEO deve ter menos de 70 caracteres.").optional(),
   meta_description: z.string().max(160, "A descrição SEO deve ter menos de 160 caracteres.").optional(),
   meta_keywords: z.string().optional(),
@@ -140,6 +142,18 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
     staleTime: 1000 * 60 * 10,
   })
 
+  const { data: articleOptions } = useQuery<Article[]>({
+    queryKey: ['article-link-options', initialData?.id],
+    queryFn: async () => {
+      const res = await fetch('/api/blog-admin/articles?page_size=200')
+      if (!res.ok) throw new Error(`Erro ${res.status}`)
+      const json = await res.json() as Article[] | { results: Article[] }
+      const data = Array.isArray(json) ? json : json.results || []
+      return (Array.isArray(data) ? data : []).filter((article) => article.id !== initialData?.id)
+    },
+    staleTime: 1000 * 60 * 5,
+  })
+
   // false = slug auto-gerado do título (read-only); true = editável manualmente
   // Novos posts começam em modo automático; edição começa em modo manual (slug já existe)
   const [slugManual, setSlugManual] = useState(Boolean(initialData))
@@ -171,6 +185,8 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
         ? (typeof initialData.category === 'object' ? (initialData.category as { id: string }).id : String(initialData.category))
         : undefined,
       image: fixImageUrl(initialData?.image) ?? "",
+      previous_post_id: initialData?.previous_post?.id ?? null,
+      next_post_id: initialData?.next_post?.id ?? null,
       meta_title: initialData?.meta_title ?? "",
       meta_description: initialData?.meta_description ?? "",
       meta_keywords: initialData?.meta_keywords ?? "",
@@ -235,7 +251,12 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
 
   const mutation = useMutation({
     mutationFn: async (values: FormValues) => {
-      const payload = { ...values, category: values.category ? String(values.category) : null }
+      const payload = {
+        ...values,
+        category: values.category ? String(values.category) : null,
+        previous_post_id: values.previous_post_id ? String(values.previous_post_id) : null,
+        next_post_id: values.next_post_id ? String(values.next_post_id) : null,
+      }
       if (!payload.image) delete (payload as { image?: unknown }).image
       if (!payload.published_at) delete (payload as { published_at?: unknown }).published_at
 
@@ -1002,6 +1023,66 @@ export function ArticleForm({ initialData, onSuccess, onCancel }: ArticleFormPro
                 </div>
               )}
             />
+
+            <div className="grid grid-cols-1 gap-4">
+              <Controller
+                control={form.control}
+                name="previous_post_id"
+                render={({ field, fieldState }) => (
+                  <div>
+                    <label htmlFor="af-previous-post" className="rv-label-field">Post anterior</label>
+                    <div className="relative">
+                      <select
+                        id="af-previous-post"
+                        className="rv-input bg-[var(--rv-surface-2)] appearance-none pr-10"
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                        onBlur={field.onBlur}
+                      >
+                        <option value="">Nenhum</option>
+                        {articleOptions?.map((article) => (
+                          <option key={article.id} value={article.id}>
+                            {article.title}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--rv-text-dim)]">▾</div>
+                    </div>
+                    <FieldHint>Use para apontar para a parte anterior da sequência.</FieldHint>
+                    <FieldError message={fieldState.error?.message} />
+                  </div>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="next_post_id"
+                render={({ field, fieldState }) => (
+                  <div>
+                    <label htmlFor="af-next-post" className="rv-label-field">Próximo post</label>
+                    <div className="relative">
+                      <select
+                        id="af-next-post"
+                        className="rv-input bg-[var(--rv-surface-2)] appearance-none pr-10"
+                        value={field.value ?? ''}
+                        onChange={(e) => field.onChange(e.target.value || null)}
+                        onBlur={field.onBlur}
+                      >
+                        <option value="">Nenhum</option>
+                        {articleOptions?.map((article) => (
+                          <option key={article.id} value={article.id}>
+                            {article.title}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--rv-text-dim)]">▾</div>
+                    </div>
+                    <FieldHint>Use para apontar para a continuação desta postagem.</FieldHint>
+                    <FieldError message={fieldState.error?.message} />
+                  </div>
+                )}
+              />
+            </div>
 
             {/* Tags */}
             <div role="group" aria-labelledby="af-tags-label" className="space-y-3">

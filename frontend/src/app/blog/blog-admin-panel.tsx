@@ -54,7 +54,7 @@ async function deletePost(slug: string) {
 export function BlogAdminPanel() {
   const { user, isLoading } = useAuth();
   const u = (user ?? null) as Record<string, unknown> | null;
-  const isEditor = Boolean(u?.is_admin || u?.is_blog_editor) && !isLoading;
+  const isEditor = Boolean(u?.is_admin || u?.is_blog_editor || u?.is_staff || u?.is_superuser) && !isLoading;
 
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");

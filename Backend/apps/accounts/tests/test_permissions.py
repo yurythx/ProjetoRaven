@@ -66,6 +66,17 @@ class TestPermissionLogic:
         assert player_user.is_admin_verified is True
         assert player_user.is_active is True
 
+    def test_me_view_exposes_admin_flags_for_superuser(self, api_client, admin_user):
+        """MeView must expose explicit admin flags used by frontend middleware."""
+        api_client.force_authenticate(user=admin_user)
+
+        response = api_client.get(reverse("v1:accounts:me"))
+
+        assert response.status_code == status.HTTP_200_OK
+        assert response.data["is_admin"] is True
+        assert response.data["is_staff"] is True
+        assert response.data["is_superuser"] is True
+
     def test_editor_cannot_manage_users(self, api_client, editor_user, player_user):
         """Test that an editor (is_staff=False usually, but has group) cannot manage users."""
         api_client.force_authenticate(user=editor_user)

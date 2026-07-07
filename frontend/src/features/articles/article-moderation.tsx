@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/hooks/use-auth"
+import { useDebounce } from "@/hooks/use-debounce"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -65,7 +66,7 @@ export function ArticleModeration() {
   const canModerate = Boolean(u?.is_admin || u?.is_blog_editor || u?.is_staff || u?.is_superuser)
 
   const [query, setQuery] = React.useState("")
-  const debounced = React.useMemo(() => query.trim(), [query])
+  const debounced = useDebounce(query.trim(), 350)
   const [rejectOpen, setRejectOpen] = React.useState(false)
   const [rejectReason, setRejectReason] = React.useState("")
   const [rejectTargets, setRejectTargets] = React.useState<ArticleLite[]>([])

@@ -3,7 +3,6 @@ import logging
 from rest_framework import status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import TokenError
 
@@ -18,12 +17,18 @@ from ..serializers.auth import (
 )
 from ..serializers.user import UserProfileSerializer
 from apps.common.utils import get_ip_and_ua
-from apps.common.throttling import LoginThrottle, RegistrationThrottle, EmailVerificationThrottle
+from apps.common.throttling import (
+    EmailVerificationThrottle,
+    LoginThrottle,
+    RegistrationThrottle,
+    ResilientAnonRateThrottle,
+    ResilientUserRateThrottle,
+)
 
 
 class RegisterView(APIView):
     permission_classes = [permissions.AllowAny]
-    throttle_classes = [AnonRateThrottle, RegistrationThrottle]
+    throttle_classes = [ResilientAnonRateThrottle, RegistrationThrottle]
 
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data, context={"request": request})
@@ -41,7 +46,7 @@ class RegisterView(APIView):
 
 class VerifyEmailView(APIView):
     permission_classes = [permissions.AllowAny]
-    throttle_classes = [AnonRateThrottle, EmailVerificationThrottle]
+    throttle_classes = [ResilientAnonRateThrottle, EmailVerificationThrottle]
 
     def post(self, request):
         serializer = EmailVerifySerializer(data=request.data)
@@ -67,7 +72,7 @@ class VerifyEmailView(APIView):
 
 class ResendEmailVerificationView(APIView):
     permission_classes = [permissions.AllowAny]
-    throttle_classes = [AnonRateThrottle, EmailVerificationThrottle]
+    throttle_classes = [ResilientAnonRateThrottle, EmailVerificationThrottle]
 
     def post(self, request):
         serializer = EmailResendSerializer(data=request.data)
@@ -87,7 +92,7 @@ class ResendEmailVerificationView(APIView):
 
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
-    throttle_classes = [AnonRateThrottle, LoginThrottle]
+    throttle_classes = [ResilientAnonRateThrottle, LoginThrottle]
 
     def post(self, request):
         ip_address, _ = get_ip_and_ua(request)
