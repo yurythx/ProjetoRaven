@@ -65,7 +65,7 @@ jobs:
         working-directory: Backend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-python@v5
         with:
@@ -101,7 +101,7 @@ jobs:
         working-directory: frontend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
@@ -140,7 +140,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build backend image
         run: docker build --target production -t projetoraven-backend:ci ./Backend
@@ -193,7 +193,7 @@ jobs:
     if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Start services
         run: docker compose up -d --wait postgres redis django
