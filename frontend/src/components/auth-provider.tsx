@@ -28,8 +28,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshSession = useCallback(async () => {
-    const result = await jsonFetch<{ user: AuthUser } | null>("/api/auth/session", { method: "GET" });
-    setUser(result.data?.user ?? null);
+    try {
+      const result = await jsonFetch<{ user: AuthUser } | null>("/api/auth/session", { method: "GET" });
+      setUser(result.data?.user ?? null);
+    } catch {
+      // Network error (fetch threw) — not a definitive "unauthenticated" response.
+      // Keep the current session state; a transient blip shouldn't log the user out.
+    }
   }, []);
 
   useEffect(() => {
@@ -95,4 +100,3 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
 }
-

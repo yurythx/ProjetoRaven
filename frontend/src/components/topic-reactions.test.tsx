@@ -32,8 +32,10 @@ describe("TopicReactions", () => {
     });
 
     render(<TopicReactions topicId="t1" summary={{ like: 2, wow: 1 }} />);
-    expect(screen.getByRole("button", { name: /Like · 2/i })).toBeDisabled();
-    expect(screen.getByRole("button", { name: /Wow · 1/i })).toBeDisabled();
+    expect(screen.getByTitle("Curtir")).toBeDisabled();
+    expect(screen.getByTitle("Curtir")).toHaveTextContent("2");
+    expect(screen.getByTitle("Uau")).toBeDisabled();
+    expect(screen.getByTitle("Uau")).toHaveTextContent("1");
   });
 
   it("envia reação quando autenticado e chama refresh", async () => {
@@ -53,7 +55,7 @@ describe("TopicReactions", () => {
     const user = userEvent.setup();
     render(<TopicReactions topicId="t1" summary={{ like: 0 }} />);
 
-    await user.click(screen.getByRole("button", { name: /^Like\s*·\s*0$/i }));
+    await user.click(screen.getByTitle("Curtir"));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(fetchMock).toHaveBeenCalledWith(

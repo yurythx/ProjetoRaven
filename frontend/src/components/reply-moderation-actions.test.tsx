@@ -52,7 +52,7 @@ describe("ReplyModerationActions", () => {
     const user = userEvent.setup();
     render(<ReplyModerationActions replyId="r1" isSolution={false} isHidden={false} />);
 
-    await user.click(screen.getByRole("button", { name: "Marcar solução" }));
+    await user.click(screen.getByRole("button", { name: /Marcar solução/i }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(fetchMock).toHaveBeenCalledWith(

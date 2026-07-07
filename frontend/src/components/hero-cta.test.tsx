@@ -36,10 +36,10 @@ describe("HeroCta", () => {
     expect(screen.queryByRole("link")).toBeNull();
   });
 
-  it("mostra links de registro e fórum quando não logado", () => {
+  it("mostra links de blog e fórum quando não logado", () => {
     mockAuth({ user: null, isLoading: false });
     render(<HeroCta />);
-    expect(screen.getByText(/Criar Conta/i)).toBeInTheDocument();
+    expect(screen.getByText(/Explorar Blog/i)).toBeInTheDocument();
     expect(screen.getByText(/Explorar Fórum/i)).toBeInTheDocument();
   });
 

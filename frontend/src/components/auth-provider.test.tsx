@@ -6,7 +6,7 @@ import { vi } from "vitest";
 import { AuthProvider, useAuth } from "@/components/auth-provider";
 
 function Consumer() {
-  const { user, isLoading, login, logout } = useAuth();
+  const { user, isLoading, login, logout, refreshSession } = useAuth();
   return (
     <div>
       <div data-testid="loading">{String(isLoading)}</div>
@@ -26,6 +26,9 @@ function Consumer() {
         }}
       >
         logout
+      </button>
+      <button type="button" onClick={() => refreshSession()}>
+        refresh
       </button>
     </div>
   );
@@ -86,6 +89,36 @@ describe("AuthProvider", () => {
 
     await user.click(screen.getByRole("button", { name: "logout" }));
     await waitFor(() => expect(screen.getByTestId("user")).toHaveTextContent("no"));
+  });
+
+  it("mantém a sessão ao falhar refreshSession por erro de rede transitório", async () => {
+    const user = userEvent.setup();
+    let sessionCalls = 0;
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      const method = init?.method ?? "GET";
+      if (url === "/api/auth/session" && method === "GET") {
+        sessionCalls += 1;
+        if (sessionCalls === 1) return jsonResponse({ user: { id: "u1" } }, 200);
+        throw new TypeError("Failed to fetch");
+      }
+      return jsonResponse({ error: "unexpected" }, 500);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <AuthProvider>
+        <Consumer />
+      </AuthProvider>
+    );
+
+    await waitFor(() => expect(screen.getByTestId("loading")).toHaveTextContent("false"));
+    expect(screen.getByTestId("user")).toHaveTextContent("yes");
+
+    await user.click(screen.getByRole("button", { name: "refresh" }));
+    await waitFor(() => expect(sessionCalls).toBe(2));
+
+    expect(screen.getByTestId("user")).toHaveTextContent("yes");
   });
 });
 

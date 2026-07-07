@@ -52,8 +52,8 @@ describe("BlogComments", () => {
 
     await waitFor(() => expect(screen.getByText("Oi")).toBeInTheDocument());
 
-    await user.type(screen.getByLabelText("Comentário"), "Comentário novo");
-    await user.click(screen.getByRole("button", { name: "Enviar" }));
+    await user.type(screen.getByLabelText("Seu comentário"), "Comentário novo");
+    await user.click(screen.getByRole("button", { name: "Enviar Comentário" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/blog/comments", expect.anything()));
   });

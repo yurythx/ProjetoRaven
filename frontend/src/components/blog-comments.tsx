@@ -151,7 +151,7 @@ export function BlogComments({ postId, postSlug }: { postId: string; postSlug: s
             await load();
           }}
         >
-          <div className="text-xs text-[var(--rv-text-dim)] uppercase tracking-wider mb-1">Seu comentário</div>
+          <label htmlFor="blog-comment" className="text-xs text-[var(--rv-text-dim)] uppercase tracking-wider mb-1">Seu comentário</label>
           <textarea
             id="blog-comment"
             name="content"

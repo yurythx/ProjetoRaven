@@ -39,7 +39,7 @@ describe("TopicModerationActions", () => {
 
     render(<TopicModerationActions slug="t1" isPinned={false} isLocked={false} status="open" />);
     expect(screen.getByText("Moderação")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Fixar" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Fixar/i })).toBeInTheDocument();
   });
 });
 

@@ -32,7 +32,8 @@ describe("ReplyReactions", () => {
     });
 
     render(<ReplyReactions replyId="r1" summary={{ like: 1 }} />);
-    expect(screen.getByRole("button", { name: /Like · 1/i })).toBeDisabled();
+    expect(screen.getByTitle("Curtir")).toBeDisabled();
+    expect(screen.getByTitle("Curtir")).toHaveTextContent("1");
   });
 
   it("envia reação quando autenticado e chama refresh", async () => {
@@ -51,7 +52,7 @@ describe("ReplyReactions", () => {
 
     const user = userEvent.setup();
     render(<ReplyReactions replyId="r1" summary={{ like: 0 }} />);
-    await user.click(screen.getByRole("button", { name: /^Like\s*·\s*0$/i }));
+    await user.click(screen.getByTitle("Curtir"));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     expect(fetchMock).toHaveBeenCalledWith(
