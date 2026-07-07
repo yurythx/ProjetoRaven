@@ -43,3 +43,29 @@ updates:
     labels:
       - dependencies
       - ci
+
+  # Docker base images (backend)
+  - package-ecosystem: docker
+    directory: /Backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    labels:
+      - dependencies
+      - backend
+      - docker
+
+  # Docker base images (frontend)
+  - package-ecosystem: docker
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    labels:
+      - dependencies
+      - frontend
+      - docker

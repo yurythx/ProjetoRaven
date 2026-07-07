@@ -374,6 +374,15 @@ else
   stop_spin "ok"
 
   chmod 600 "$PRIV_KEY"
+  # O container Django roda como appuser (uid/gid 1000, não-root) e lê private.pem
+  # via bind mount. Alinha a ownership para que a leitura funcione mesmo que este
+  # script rode como root ou como um usuário com uid diferente de 1000.
+  if chown 1000:1000 "$KEYS_DIR" "$PRIV_KEY" "$PUB_KEY" 2>/dev/null; then
+    info "Ownership de $KEYS_DIR/ alinhada ao uid/gid 1000 (usuário do container)"
+  else
+    warn "Não foi possível ajustar a ownership de $KEYS_DIR/ para uid 1000."
+    warn "Se o deploy falhar ao ler as chaves JWT, rode manualmente: sudo chown -R 1000:1000 $KEYS_DIR"
+  fi
   ok "Chaves geradas em $KEYS_DIR/"
   printf "${DG}    private.pem: %s bytes${RS}\n" "$(wc -c < "$PRIV_KEY" | tr -d ' ')"
   printf "${DG}    public.pem:  %s bytes${RS}\n" "$(wc -c < "$PUB_KEY" | tr -d ' ')"

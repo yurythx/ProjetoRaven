@@ -29,7 +29,7 @@ name: projetoraven
 services:
   # ── Data layer (somente rede interna) ────────────────────────────────────────
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16.13-alpine
     restart: unless-stopped
     env_file: ./Backend/.env.prod
     environment:
@@ -42,9 +42,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
   redis:
-    image: redis:7-alpine
+    image: redis:7.4.8-alpine
     restart: unless-stopped
     env_file: ./Backend/.env.prod
     command: >
@@ -56,6 +61,11 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 320M
 
   # ── Backend ───────────────────────────────────────────────────────────────────
   django:
@@ -91,6 +101,11 @@ services:
              openssl rsa -in /app/keys/private.pem -pubout -out /app/keys/public.pem)) &&
              python manage.py bootstrap_prod &&
              daphne -b 0.0.0.0 -p 8000 core.asgi:application"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 768M
 
   celery_worker:
     build:
@@ -112,6 +127,11 @@ services:
       redis:
         condition: service_healthy
     command: celery -A core worker -l info
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
   # ── Frontend (exposto ao cloudflared via host) ────────────────────────────────
   frontend:
@@ -143,6 +163,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
 volumes:
   postgres_data:

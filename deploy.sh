@@ -291,6 +291,14 @@ else
   printf "${DG}    public.pem:  %s bytes${RS}\n" "$(wc -c < "$PUB_KEY" | tr -d ' ')"
 fi
 
+# O container Django roda como appuser (uid/gid 1000, não-root) e lê private.pem via
+# bind mount — a leitura falha em runtime se a ownership do host não permitir isso.
+if chown 1000:1000 "$KEYS_DIR" "$PRIV_KEY" "$PUB_KEY" 2>/dev/null; then
+  ok "Ownership de $KEYS_DIR/ alinhada ao uid/gid 1000 (usuário do container)"
+else
+  warn "Não foi possível ajustar a ownership de $KEYS_DIR/ para uid 1000 (rode este script como root/sudo se o deploy falhar ao ler as chaves)."
+fi
+
 # ─────────────────────────────────────────────────────────────────────────────
 #  SEÇÃO 4 — BUILD & DEPLOY
 # ─────────────────────────────────────────────────────────────────────────────

@@ -21,7 +21,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16-alpine
+        image: postgres:16.13-alpine
         env:
           POSTGRES_DB: test_projeto_raven
           POSTGRES_USER: postgres
@@ -35,7 +35,7 @@ jobs:
           --health-retries 5
 
       redis:
-        image: redis:7-alpine
+        image: redis:7.4.8-alpine
         ports:
           - 6379:6379
         options: >-
@@ -76,6 +76,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Audit dependencies
+        run: pip install pip-audit && pip-audit -r requirements.txt
+
+      - name: Lint (report-only)
+        # Codebase has pre-existing findings (mostly unused imports) never gated before.
+        # Non-blocking until that backlog is cleaned up; still surfaces new issues in PR diffs.
+        continue-on-error: true
+        run: pip install ruff && ruff check .
+
       - name: Run migrations
         run: python manage.py migrate --noinput
 
@@ -103,8 +112,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit dependencies (production)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Lint
+        run: npm run lint
+
       - name: Type check
         run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npx vitest run
 
       - name: Build
         env:
@@ -112,12 +130,67 @@ jobs:
           SKIP_ENV_VALIDATION: "true"
         run: npm run build
 
-  # ── E2E: Playwright (manual/main only) ────────────────────────────────────────
+  # ── Docker: build + vulnerability/secret scan (report-only) ────────────────────
+  # Non-blocking: current findings are all upstream (unfixed Debian/kernel CVEs,
+  # Next.js's internally-vendored deps) with no actionable fix on our side yet.
+  # Still worth running — this exact scan is what caught a real JWT private key
+  # baked into the backend image, which the audit-only checks above could not.
+  docker-scan:
+    name: Docker Image Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build --target production -t projetoraven-backend:ci ./Backend
+
+      - name: Build frontend image
+        run: |
+          docker build --target runner -t projetoraven-frontend:ci \
+            --build-arg NEXT_PUBLIC_API_BASE_URL=http://localhost:8006 \
+            --build-arg NEXT_PUBLIC_SITE_URL=http://localhost:3006 \
+            --build-arg NEXT_PUBLIC_WS_BASE_URL=ws://localhost:8006 \
+            ./frontend
+
+      - name: Scan backend image
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: projetoraven-backend:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Scan frontend image
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: projetoraven-frontend:ci
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Scan backend image for leaked secrets (blocking)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: projetoraven-backend:ci
+          scanners: secret
+          exit-code: "1"
+
+      - name: Scan frontend image for leaked secrets (blocking)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: projetoraven-frontend:ci
+          scanners: secret
+          exit-code: "1"
+
+  # ── E2E: Playwright ─────────────────────────────────────────────────────────────
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
     needs: [backend, frontend]
-    if: (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
+    if: github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && github.event_name == 'push') || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule'
 
     steps:
       - uses: actions/checkout@v4
