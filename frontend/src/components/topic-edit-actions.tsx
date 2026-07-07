@@ -2,14 +2,22 @@
 
 import React, { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 
 import { useAuth } from "@/components/auth-provider";
-import { ForumRichEditor } from "@/components/forum-rich-editor";
 import { ConfirmDialog } from "@/components/rv-confirm-dialog";
 import { RvModal } from "@/components/rv-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { stripHtml } from "@/lib/utils";
+
+const ForumRichEditor = dynamic(
+  () => import("@/components/forum-rich-editor").then((m) => m.ForumRichEditor),
+  {
+    ssr: false,
+    loading: () => <div className="min-h-[140px] rounded-xl border border-foreground/15 bg-background animate-pulse" />,
+  }
+);
 
 export function TopicEditActions({
   slug,

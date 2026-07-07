@@ -1,12 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import React from "react";
 import { useState } from "react";
 
 import { useAuth } from "@/components/auth-provider";
-import { ForumRichEditor } from "@/components/forum-rich-editor";
 import { stripHtml } from "@/lib/utils";
+
+const ForumRichEditor = dynamic(
+  () => import("@/components/forum-rich-editor").then((m) => m.ForumRichEditor),
+  {
+    ssr: false,
+    loading: () => <div className="min-h-[140px] rounded-xl border border-foreground/15 bg-background animate-pulse" />,
+  }
+);
 
 export function ReplyComposer({ topicId, disabled }: { topicId: string; disabled: boolean }) {
   const router = useRouter();

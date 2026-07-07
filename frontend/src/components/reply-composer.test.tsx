@@ -37,8 +37,8 @@ describe("ReplyComposer", () => {
     const user = userEvent.setup();
     render(<ReplyComposer topicId="t1" disabled={false} />);
 
-    await user.type(screen.getByRole("textbox"), "Olá mundo");
-    await user.click(screen.getByRole("button", { name: "Enviar" }));
+    await user.type(await screen.findByRole("textbox"), "Olá mundo");
+    await user.click(screen.getByRole("button", { name: "Enviar Resposta" }));
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(mockRefresh).toHaveBeenCalledTimes(1));
