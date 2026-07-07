@@ -1,5 +1,5 @@
 # Multi-stage build para Django Backend
-FROM python:3.12.13-slim as base
+FROM python:3.14.6-slim as base
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
