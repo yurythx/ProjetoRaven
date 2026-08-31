@@ -1,4 +1,4 @@
-FROM node:22.23.1 AS deps
+FROM node:26.8.1 AS deps
 WORKDIR /app
 
 # Copiar apenas o package.json para ignorar restrições do lockfile de outra plataforma
@@ -6,7 +6,7 @@ ARG CACHE_BUST=1
 COPY package.json ./
 RUN npm install
 
-FROM node:22.23.1 AS builder
+FROM node:26.8.1 AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY package.json ./
@@ -29,7 +29,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Standalone runner — usa apenas os arquivos gerados pelo Next.js (sem node_modules completo)
-FROM node:22.23.1 AS runner
+FROM node:26.8.1 AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
